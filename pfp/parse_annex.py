@@ -18,7 +18,7 @@ import numpy as np
 import openpyxl
 import pandas as pd
 
-from .config import CITY_PROVINCE, N_CITIES, N_ITEMS, PARSER_VERSION, ROWS_PER_WEEK
+from .config import ROOT, CITY_PROVINCE, N_CITIES, N_ITEMS, PARSER_VERSION, ROWS_PER_WEEK
 
 CITY_RE = re.compile(r"^\s*([A-Za-z][A-Za-z\-\s\.]*?)\s*\((\d{2})\)\s*$")
 DATE_RE = re.compile(r"PRICES\s+ON\s+(\d{1,2})[-./](\d{1,2})[-./](\d{4})", re.I)
@@ -38,6 +38,12 @@ NATIONAL_COLS = [
     "pct_chg_prev_week", "pct_chg_same_week_last_year",
     "yearly_avg_recent", "yearly_avg_prior", "yearly_avg_diff", "yearly_avg_pct_chg",
 ]
+
+
+def relpath(path: Path) -> str:
+    """Repo-relative POSIX path, so outputs do not depend on where the repo is cloned."""
+    p = Path(path).resolve()
+    return p.relative_to(ROOT).as_posix() if p.is_relative_to(ROOT) else p.as_posix()
 
 
 def sha256_file(path: Path) -> str:
@@ -132,7 +138,7 @@ def parse_workbook(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     panel = pd.DataFrame(records)
     nat = pd.DataFrame(national)
     meta = {
-        "source_file": path.as_posix(), "sha256": sha256_file(path), "week_end": week_end,
+        "source_file": relpath(path), "sha256": sha256_file(path), "week_end": week_end,
         "filename_date": fname_date, "filename_date_matches": fname_date == week_end,
         "n_blocks": len(header_idx), "parser_version": PARSER_VERSION,
     }
@@ -204,33 +210,33 @@ def load_panel(dirs: list[Path], cutoff: date) -> tuple[pd.DataFrame, pd.DataFra
     for f in files:
         fdate = date_from_filename(f)
         if fdate is not None and fdate > cutoff:
-            inventory.append({"source_file": f.as_posix(), "status": "skipped_after_cutoff_by_filename"})
+            inventory.append({"source_file": relpath(f), "status": "skipped_after_cutoff_by_filename"})
             continue
         h = sha256_file(f)
         if h in seen_hash:
-            inventory.append({"source_file": f.as_posix(), "sha256": h, "status": "duplicate_hash",
+            inventory.append({"source_file": relpath(f), "sha256": h, "status": "duplicate_hash",
                               "duplicate_of": seen_hash[h]})
             continue
         panel, nat, meta = parse_workbook(f)
         wk = meta["week_end"]
         if wk > cutoff:
-            inventory.append({"source_file": f.as_posix(), "sha256": h, "week_end": wk, "status": "skipped_after_cutoff"})
+            inventory.append({"source_file": relpath(f), "sha256": h, "week_end": wk, "status": "skipped_after_cutoff"})
             continue
         if wk in kept_panels:
             prev = kept_panels[wk]
             cols = ["city", "item_id", "price_min", "price_avg", "price_max"]
             same = prev[cols].sort_values(cols[:2]).reset_index(drop=True).equals(
                 panel[cols].sort_values(cols[:2]).reset_index(drop=True))
-            inventory.append({"source_file": f.as_posix(), "sha256": h, "week_end": wk,
+            inventory.append({"source_file": relpath(f), "sha256": h, "week_end": wk,
                               "status": "duplicate_content" if same else "CONFLICT_same_week_different_content",
                               "duplicate_of": prev["source_file"].iat[0]})
             if not same:
                 raise AssertionError(f"Two different workbooks claim week {wk}: {f} vs {prev['source_file'].iat[0]}")
             continue
-        seen_hash[h] = f.as_posix()
+        seen_hash[h] = relpath(f)
         checks.append(validate_week(panel, nat, meta))
         kept_panels[wk], kept_nat[wk] = panel, nat
-        inventory.append({"source_file": f.as_posix(), "sha256": h, "week_end": wk, "status": "kept",
+        inventory.append({"source_file": relpath(f), "sha256": h, "week_end": wk, "status": "kept",
                           "filename_date": meta["filename_date"], "filename_date_matches": meta["filename_date_matches"]})
 
     panel = pd.concat([kept_panels[k] for k in sorted(kept_panels)], ignore_index=True)

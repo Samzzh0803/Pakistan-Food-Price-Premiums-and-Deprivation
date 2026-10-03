@@ -179,7 +179,6 @@ def build_master(panel: pd.DataFrame, items: pd.DataFrame, city: pd.DataFrame, c
              "deprivation_composite", "deprivation_composite_nowater", "cpi_urban_food", "real_price_avg",
              "block", "source_file", "sha256", "parser_version"]
     df = df[order].sort_values(["week_end", "city_code", "item_id"]).reset_index(drop=True)
-    df["source_file"] = df["source_file"].str.replace(ROOT.as_posix() + "/", "", regex=False)
     return df
 
 
@@ -209,9 +208,7 @@ def build_all(write: bool = True) -> dict:
         master.to_csv(PROCESSED / "master_city_item_week.csv", index=False)
         master.to_parquet(PROCESSED / "master_city_item_week.parquet", index=False)
         nat.to_csv(PROCESSED / "pbs_national_reference.csv", index=False)
-        rel = lambda c: c.str.replace(ROOT.as_posix() + "/", "", regex=False) if c.dtype == object else c
-        inv.assign(source_file=rel(inv["source_file"]), duplicate_of=rel(inv.get("duplicate_of", pd.Series(dtype=object)))
-                   ).to_csv(PROCESSED / "annex_file_inventory.csv", index=False)
+        inv.to_csv(PROCESSED / "annex_file_inventory.csv", index=False)
         checks.to_csv(PROCESSED / "acceptance_checks_by_week.csv", index=False)
         city.to_csv(PROCESSED / "city_table.csv", index=False)
         city.to_parquet(PROCESSED / "city_table.parquet", index=False)
