@@ -1,0 +1,73 @@
+week_end,sheet_name,city_raw,city_canonical,city_order,source_file,notes
+2025-10-30,Appendix-A,Islamabad (01),Islamabad,1,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Rawalpindi (02),Rawalpindi,2,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Gujranwala (03),Gujranwala,3,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Sialkot (04),Sialkot,4,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Lahore (05),Lahore,5,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Faisalabad (06),Faisalabad,6,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-A,Sargodha (07),Sargodha,7,data/raw/verification/pbs_annex_2025-10-30.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2025-10-30,Appendix-B,Rawal-pindi,Rawalpindi,2,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Gujran-wala,Gujranwala,3,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Lahore,Lahore,5,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Faisal-abad,Faisalabad,6,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Sar-godha,Sargodha,7,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Multan,Multan,8,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Baha-walpur,Bahawalpur,9,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Hyder-abad,Hyderabad,11,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Sukkur,Sukkur,12,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Larkana,Larkana,13,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Pesha-war,Peshawar,14,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Bannu,Bannu,15,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Quetta,Quetta,16,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Islam-abad,Islamabad,1,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Sialkot,Sialkot,4,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Karachi,Karachi,10,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2025-10-30,Appendix-B,Khuz-dar,Khuzdar,17,data/raw/verification/pbs_annex_2025-10-30.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-A,Islamabad (01),Islamabad,1,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Rawalpindi (02),Rawalpindi,2,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Gujranwala (03),Gujranwala,3,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Sialkot (04),Sialkot,4,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Lahore (05),Lahore,5,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Faisalabad (06),Faisalabad,6,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-A,Sargodha (07),Sargodha,7,data/raw/verification/pbs_annex_2026-05-21.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-05-21,Appendix-B,Rawal-pindi,Rawalpindi,2,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Gujran-wala,Gujranwala,3,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Lahore,Lahore,5,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Faisal-abad,Faisalabad,6,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Sar-godha,Sargodha,7,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Multan,Multan,8,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Baha-walpur,Bahawalpur,9,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Hyder-abad,Hyderabad,11,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Sukkur,Sukkur,12,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Larkana,Larkana,13,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Pesha-war,Peshawar,14,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Bannu,Bannu,15,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Quetta,Quetta,16,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Islam-abad,Islamabad,1,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Sialkot,Sialkot,4,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Karachi,Karachi,10,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-05-21,Appendix-B,Khuz-dar,Khuzdar,17,data/raw/verification/pbs_annex_2026-05-21.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-A,Islamabad (01),Islamabad,1,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Rawalpindi (02),Rawalpindi,2,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Gujranwala (03),Gujranwala,3,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Sialkot (04),Sialkot,4,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Lahore (05),Lahore,5,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Faisalabad (06),Faisalabad,6,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-A,Sargodha (07),Sargodha,7,data/raw/verification/pbs_annex_2026-08-27.xlsx,Consumer prices of essential items; city-item MIN/AVG/MAX table.
+2026-08-27,Appendix-B,Rawal-pindi,Rawalpindi,2,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Gujran-wala,Gujranwala,3,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Lahore,Lahore,5,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Faisal-abad,Faisalabad,6,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Sar-godha,Sargodha,7,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Multan,Multan,8,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Baha-walpur,Bahawalpur,9,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Hyder-abad,Hyderabad,11,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Sukkur,Sukkur,12,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Larkana,Larkana,13,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Pesha-war,Peshawar,14,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Bannu,Bannu,15,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Quetta,Quetta,16,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Islam-abad,Islamabad,1,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Sialkot,Sialkot,4,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Karachi,Karachi,10,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."
+2026-08-27,Appendix-B,Khuz-dar,Khuzdar,17,data/raw/verification/pbs_annex_2026-08-27.xlsx,"Separate fertilizer, cement, CNG, wage-rate, and wheat-rate tables; not a continuation of Appendix-A essential items."

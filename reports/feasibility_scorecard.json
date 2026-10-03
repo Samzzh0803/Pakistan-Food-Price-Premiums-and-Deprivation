@@ -1,0 +1,31 @@
+{
+  "decision": "PBS-ONLY FALLBACK",
+  "dimensions": {
+    "PBS accessibility": "GREEN",
+    "PBS historical depth": "RED",
+    "PBS schema stability": "YELLOW",
+    "AMIS accessibility": "RED",
+    "AMIS historical depth": "RED",
+    "Commodity comparability": "RED",
+    "City overlap": "RED",
+    "Temporal alignment": "RED",
+    "Dataset size": "RED",
+    "Missingness": "RED",
+    "Reproducibility": "YELLOW",
+    "Week-14 extensibility": "YELLOW",
+    "Overall": "RED for PBS x AMIS"
+  },
+  "verified": {
+    "pbs_earliest_week": "2026-08-27",
+    "amis_earliest_date": null,
+    "matched_rows": 0,
+    "direct_commodity_matches": 0,
+    "overlapping_cities": 0,
+    "candidate_alignment_rate_percent": 0.0
+  },
+  "fallback": {
+    "decision": "YELLOW",
+    "design": "PBS city x commodity x week retail price, weekly changes, lagged changes, rolling volatility, and relative price gaps",
+    "reason": "One real weekly Annexure was parsed structurally, but historical depth remains unverified."
+  }
+}

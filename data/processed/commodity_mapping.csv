@@ -1,0 +1,4 @@
+pbs_commodity_raw,amis_commodity_raw,canonical_commodity,pbs_unit,amis_unit,conversion_possible,conversion_formula,semantic_match,confidence,notes
+Tomato,Tomato,tomato,1 Kg,unknown,False,,UNKNOWN,LOW,AMIS records were not retrievable through a reproducible HTTPS data query.
+Potato,Potato,potato,1 Kg,unknown,False,,UNKNOWN,LOW,AMIS records were not retrievable through a reproducible HTTPS data query.
+Onion,Onion,onion,1 Kg,unknown,False,,UNKNOWN,LOW,AMIS records were not retrievable through a reproducible HTTPS data query.

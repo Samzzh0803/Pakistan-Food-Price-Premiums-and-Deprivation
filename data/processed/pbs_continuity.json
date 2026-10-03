@@ -1,0 +1,13 @@
+{
+  "expected_weekly_releases": 1,
+  "discovered_official_artifacts": 1,
+  "downloaded_artifacts": 1,
+  "parsed_artifacts": 1,
+  "discovered_unique_weeks": 1,
+  "parsed_unique_weeks": 1,
+  "discovery_rate_percent": 100.0,
+  "download_success_rate_percent": 100.0,
+  "parser_success_rate_percent": 100.0,
+  "calendar_coverage_rate_percent": 100.0,
+  "missing_weeks": []
+}

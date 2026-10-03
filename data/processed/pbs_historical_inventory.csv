@@ -1,0 +1,2 @@
+week_end,year,source_url,artifact_type,http_status,download_success,city_item_table_present,parser_success,item_count,city_count,notes
+2026-08-27,2026,https://www.pbs.gov.pk/wp-content/uploads/2020/07/Annex_27.08.2026.xlsx,xlsx,200,True,True,True,51,7,Official workbook preserved by Phase 1; network clean rerun was blocked by remote disconnect.

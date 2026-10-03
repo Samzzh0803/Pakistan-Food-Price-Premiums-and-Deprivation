@@ -1,0 +1,52 @@
+commodity_raw,commodity_canonical,unit_raw,unit_canonical,first_seen,last_seen,weeks_observed,definition_stable,unit_stable,include_recommended,notes
+Bananas (Kela) Local,bananas_kela_local,1 Dozen,1 dozen,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Beef with Bone (Average Quality),beef_with_bone_average_quality,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Bread plain (Small Size),bread_plain_small_size,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Chicken Farm Broiler (Live),chicken_farm_broiler_live,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Chilies Powder NATIONAL 200 gm Packet,chilies_powder_national_200_gm_packet,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Cigarettes Capstan 20'S Packet,cigarettes_capstan_20_s_packet,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Cooked Beef at Average Hotel,cooked_beef_at_average_hotel,Per Plate,per plate,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Cooked Daal at Average Hotel,cooked_daal_at_average_hotel,Per Plate,per plate,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",cooking_oil_dalda_or_other_similar_brand_sn_5_litre_tin,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Curd (Dahi) Loose,curd_dahi_loose,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Eggs Hen (Farm),eggs_hen_farm,1 Dozen,1 dozen,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Electricity Charges for Q1*,electricity_charges_for_q1,Per Unit,per unit,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Energy Saver Philips 14 Watt,energy_saver_philips_14_watt,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Firewood Whole,firewood_whole,40 Kg,40 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Garlic (Lehsun),garlic_lehsun,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Gas Charges for Q1,gas_charges_for_q1,MMBTU,mmbtu,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Gents Sandal Bata,gents_sandal_bata,Pair,pair,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Gents Sponge Chappal Bata,gents_sponge_chappal_bata,Pair,pair,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Georgette (Average Quality),georgette_average_quality,1 mtr,1 mtr,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Gur (Average Quality),gur_average_quality,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Hi-Speed Diesel,hi_speed_diesel,Per Litre,per litre,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+LPG 11.67 kg Cylinder,lpg_11_67_kg_cylinder,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Ladies Sandal Bata,ladies_sandal_bata,Pair,pair,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Lawn Printed Gul Ahmed/Al Karam,lawn_printed_gul_ahmed_al_karam,1 mtr,1 mtr,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+"Long Cloth 57"" Gul Ahmed/Al Karam",long_cloth_57_gul_ahmed_al_karam,1 mtr,1 mtr,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Match Box,match_box,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Milk fresh (Un-boiled),milk_fresh_un_boiled,1 Ltr,1 ltr,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Mustard Oil (Average Quality),mustard_oil_average_quality,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Mutton (Average Quality),mutton_average_quality,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Onions,onions,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Petrol Super,petrol_super,Per Litre,per litre,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Potatoes,potatoes,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Powdered Milk NIDO 390 gm Polybag,powdered_milk_nido_390_gm_polybag,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Pulse Gram,pulse_gram,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Pulse Mash (Washed),pulse_mash_washed,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Pulse Masoor (Washed),pulse_masoor_washed,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Pulse Moong (Washed),pulse_moong_washed,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Rice Basmati Broken (Average Quality),rice_basmati_broken_average_quality,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Rice IRRI-6/9 (Sindh/Punjab),rice_irri_6_9_sindh_punjab,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Salt Powdered (NATIONAL/SHAN) 800 gm Packet,salt_powdered_national_shan_800_gm_packet,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Shirting (Average Quality),shirting_average_quality,1 mtr,1 mtr,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Sufi Washing Soap 250 gm Cake,sufi_washing_soap_250_gm_cake,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Sugar Refined,sugar_refined,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Tea Lipton Yellow Label 190 gm Packet,tea_lipton_yellow_label_190_gm_packet,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Tea Prepared Ordinary,tea_prepared_ordinary,Per Cup,per cup,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Telephone Call Charges,telephone_call_charges,Per Minute,per minute,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Toilet Soap LIFEBUOY 115 gm,toilet_soap_lifebuoy_115_gm,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Tomatoes,tomatoes,1 Kg,1 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Vegetable Ghee DALDA/HABIB 2.5 kg Tin,vegetable_ghee_dalda_habib_2_5_kg_tin,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,vegetable_ghee_dalda_habib_or_other_superior_quality_1_kg_pouch,Each,each,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.
+Wheat Flour Bag,wheat_flour_bag,20 Kg,20 kg,2026-08-27,2026-08-27,1,True,True,True,Stable across all parsed weeks; verify longer history before modelling.

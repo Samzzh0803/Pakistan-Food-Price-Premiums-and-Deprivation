@@ -1,0 +1,4 @@
+year,expected_weeks,release_pages_found,annexures_found,downloaded,parsed,unique_weeks,coverage_percent
+2024,52,0,0,0,0,0,0.0
+2025,52,3,3,3,3,3,100.0
+2026,35,12,12,12,12,12,100.0

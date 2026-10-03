@@ -1,0 +1,443 @@
+{
+  "entry_url": "https://www.pbs.gov.pk/price-statistics/",
+  "retrieved_at": "2026-09-03T12:40:50.043278+00:00",
+  "discovered_link_count": 3,
+  "selected_samples": [
+    {
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/2020/07/Annex_27.08.2026.xlsx",
+      "text": "Annexure for week ended on 27-08-2026 [New]",
+      "local_path": "data/raw/pbs/sample_1.xlsx",
+      "size_bytes": 57060,
+      "sheets": [
+        {
+          "sheet": "Appendix-A",
+          "rows": 173,
+          "columns": 25,
+          "preview": [
+            [
+              "",
+              "",
+              "",
+              "APPENDIX-A",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "CONSUMER PRICES OF ESSENTIAL ITEMS",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "SL.",
+              "",
+              "",
+              "Islamabad (01)",
+              "",
+              "",
+              "Rawalpindi (02)",
+              ""
+            ],
+            [
+              "NO.",
+              "DESCRIPTION",
+              "UNIT",
+              "MIN",
+              "AVG",
+              "MAX",
+              "MIN",
+              "AVG"
+            ],
+            [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            [
+              "",
+              "",
+              "",
+              "PRICES ON 27-08-2026",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "1",
+              "Wheat Flour Bag",
+              "20 Kg",
+              "3000",
+              "3047.64",
+              "3093.33",
+              "2200",
+              "2782.24"
+            ],
+            [
+              "2",
+              "Rice Basmati Broken (Average Quality)",
+              "1 Kg",
+              "260",
+              "274.83",
+              "290",
+              "260",
+              "270.58"
+            ]
+          ]
+        },
+        {
+          "sheet": "Appendix-B",
+          "rows": 54,
+          "columns": 25,
+          "preview": [
+            [
+              "APPENDIX-B",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "A: Retail Prices of Fertilizers (50 kg/bag) for the Week Ended on 27-08-2026",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "No.",
+              "Description",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Rawal-pindi"
+            ],
+            [
+              "1",
+              "Sona Urea",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "5300"
+            ],
+            [
+              "2",
+              "Other Urea (Tara, Sarsabz, Shandar etc)",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "5150"
+            ],
+            [
+              "3",
+              "Calcium Ammonium Nitrate",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "5200"
+            ],
+            [
+              "4",
+              "S.S Phosphate, Gr. 18%",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "N.A."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/2020/07/3.-SPI-Report-27.08.2026.xlsx",
+      "text": "SPI for week ended on 27-08-2026 [New]",
+      "local_path": "data/raw/pbs/sample_2.xlsx",
+      "size_bytes": 144976,
+      "sheets": [
+        {
+          "sheet": "Page 1",
+          "rows": 47,
+          "columns": 8,
+          "preview": [
+            [
+              "Annexure-III",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "Government of Pakistan",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "Pakistan Bureau of Statistics",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        {
+          "sheet": "Page 2",
+          "rows": 64,
+          "columns": 13,
+          "preview": [
+            [
+              "5",
+              "The comparative changes in prices i.e. increase, decrease and unchanged for the week ended on 27-08-2026 over",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "previous and corresponding weeks ended on 20-08-2026 and 28-08-2025 repectively are as follows:",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "Sr.",
+              "Items",
+              "Units",
+              "Prices in Rs.\non\n27.08.26 20.08.26 28.08.25",
+              "",
+              "",
+              "%change                col. 3 over                  20.08.26 28.08.25"
+            ],
+            [
+              "",
+              "",
+              "1",
+              "2",
+              "3",
+              "4.0",
+              "5.0",
+              "6"
+            ],
+            [
+              "",
+              "i.    Average prices of the following 20 items registered INCREASE.",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            [
+              "",
+              "1",
+              "LPG 11.67 kg Cylinder",
+              "Each",
+              "4631.66",
+              "4476.7",
+              "2975.49",
+              "3.46"
+            ],
+            [
+              "",
+              "2",
+              "Hi-Speed Diesel",
+              "Per Litre",
+              "373.81",
+              "364.9",
+              "274.19",
+              "2.44"
+            ]
+          ]
+        },
+        {
+          "sheet": "Page 3",
+          "rows": 94,
+          "columns": 4,
+          "preview": [
+            [
+              "6.                   Monthly Sensitive Price Indicator (SPI).",
+              "",
+              "",
+              ""
+            ],
+            [
+              "PERIOD",
+              "SPI - Q1 \n(lowest Consumption Quintile)",
+              "Percentage change over previous month",
+              "Percentage Change over corresponding month of previous year"
+            ],
+            [
+              "2022-23",
+              "",
+              "",
+              ""
+            ],
+            [
+              "July",
+              "207.98",
+              "7.267007065862103",
+              "28.18489984591679"
+            ],
+            [
+              "August",
+              "218.89",
+              "5.245696701605922",
+              "33.967807087337036"
+            ],
+            [
+              "September",
+              "215.79",
+              "-1.4162364658047437",
+              "28.576535780253806"
+            ],
+            [
+              "October",
+              "212.62",
+              "-1.4690208072663182",
+              "24.02729977250189"
+            ],
+            [
+              "November",
+              "225.61",
+              "6.109491110902084",
+              "27.054119502168163"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "all_relevant_links": [
+    {
+      "text": "Average Monthly SPI Items Prices [Excel]",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/2020/07/SPI-Monthly-Prices-Annex-8.xlsx",
+      "year": "2020"
+    },
+    {
+      "text": "Annexure for week ended on 27-08-2026 [New]",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/2020/07/Annex_27.08.2026.xlsx",
+      "year": "2020"
+    },
+    {
+      "text": "SPI for week ended on 27-08-2026 [New]",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/2020/07/3.-SPI-Report-27.08.2026.xlsx",
+      "year": "2020"
+    }
+  ]
+}

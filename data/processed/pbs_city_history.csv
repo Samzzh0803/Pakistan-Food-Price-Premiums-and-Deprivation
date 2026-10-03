@@ -1,0 +1,8 @@
+city_raw,first_seen,last_seen,weeks_observed,canonical_city,coverage_percent,include_recommended,notes
+Faisalabad,2026-08-27,2026-08-27,1,Faisalabad,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Gujranwala,2026-08-27,2026-08-27,1,Gujranwala,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Islamabad,2026-08-27,2026-08-27,1,Islamabad,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Lahore,2026-08-27,2026-08-27,1,Lahore,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Rawalpindi,2026-08-27,2026-08-27,1,Rawalpindi,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Sargodha,2026-08-27,2026-08-27,1,Sargodha,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.
+Sialkot,2026-08-27,2026-08-27,1,Sialkot,100.0,True,Hyphenated PBS city label normalized; only seven city groups were present in sampled current workbooks.

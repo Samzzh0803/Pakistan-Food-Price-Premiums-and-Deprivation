@@ -1,0 +1,10 @@
+metric,value
+panel_rows,357.0
+unique_weeks,1.0
+unique_cities,7.0
+unique_commodities,51.0
+duplicate_city_item_week_keys,0.0
+non_positive_prices,3.0
+missing_price,0.0
+weeks_with_unusual_row_counts,0.0
+parser_success_percent,100.0

@@ -1,0 +1,4 @@
+strategy,matched_rows,candidate_rows,missing_percentage,median_days_from_week_end,notes
+same_day_nearest_earlier,0,0,100.0,,No AMIS daily observations available for alignment.
+trailing_7_day_median,0,0,100.0,,No AMIS daily observations available for alignment.
+trailing_7_day_mean,0,0,100.0,,No AMIS daily observations available for alignment.

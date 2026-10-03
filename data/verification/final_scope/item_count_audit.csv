@@ -1,0 +1,469 @@
+week_end,sheet_name,row_number,item_raw,unit_raw,is_real_item,is_duplicate,reason,canonical_item,notes
+2025-10-30,Appendix-A,5,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2025-10-30,Appendix-A,7,Wheat Flour Bag,20 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Wheat Flour Bag,Serial cell: 1
+2025-10-30,Appendix-A,8,Rice Basmati Broken (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2025-10-30,Appendix-A,9,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2025-10-30,Appendix-A,10,Bread plain (Small Size),Each,True,False,First occurrence of a real Appendix-A essential-item row.,Bread plain (Small Size),Serial cell: 4
+2025-10-30,Appendix-A,11,Beef with Bone (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Beef with Bone (Average Quality),Serial cell: 5
+2025-10-30,Appendix-A,12,Mutton (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mutton (Average Quality),Serial cell: 6
+2025-10-30,Appendix-A,13,Chicken Farm Broiler (Live),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Chicken Farm Broiler (Live),Serial cell: 7
+2025-10-30,Appendix-A,14,Milk fresh (Un-boiled),1 Ltr,True,False,First occurrence of a real Appendix-A essential-item row.,Milk fresh (Un-boiled),Serial cell: 8
+2025-10-30,Appendix-A,15,Curd (Dahi) Loose,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Curd (Dahi) Loose,Serial cell: 9
+2025-10-30,Appendix-A,16,Powdered Milk NIDO 390 gm Polybag,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2025-10-30,Appendix-A,17,Eggs Hen (Farm),1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Eggs Hen (Farm),Serial cell: 11
+2025-10-30,Appendix-A,18,Mustard Oil (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mustard Oil (Average Quality),Serial cell: 12
+2025-10-30,Appendix-A,19,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,False,First occurrence of a real Appendix-A essential-item row.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2025-10-30,Appendix-A,20,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2025-10-30,Appendix-A,21,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2025-10-30,Appendix-A,22,Baas (Kela) Local,1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Baas (Kela) Local,Serial cell: 16
+2025-10-30,Appendix-A,23,Pulse Masoor (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Masoor (Washed),Serial cell: 17
+2025-10-30,Appendix-A,24,Pulse Moong (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Moong (Washed),Serial cell: 18
+2025-10-30,Appendix-A,25,Pulse Mash (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Mash (Washed),Serial cell: 19
+2025-10-30,Appendix-A,26,Pulse Gram,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Gram,Serial cell: 20
+2025-10-30,Appendix-A,27,Potatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Potatoes,Serial cell: 21
+2025-10-30,Appendix-A,28,Onions,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Onions,Serial cell: 22
+2025-10-30,Appendix-A,29,Tomatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Tomatoes,Serial cell: 23
+2025-10-30,Appendix-A,30,Sugar Refined,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Sugar Refined,Serial cell: 24
+2025-10-30,Appendix-A,31,Gur (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Gur (Average Quality),Serial cell: 25
+2025-10-30,Appendix-A,32,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2025-10-30,Appendix-A,33,Chilies Powder NATIONAL 200 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2025-10-30,Appendix-A,34,Garlic (Lehsun),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Garlic (Lehsun),Serial cell: 28
+2025-10-30,Appendix-A,35,Tea Lipton Yellow Label 190 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2025-10-30,Appendix-A,36,Cooked Beef at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Beef at Average Hotel,Serial cell: 30
+2025-10-30,Appendix-A,37,Cooked Daal at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Daal at Average Hotel,Serial cell: 31
+2025-10-30,Appendix-A,38,Tea Prepared Ordinary,Per Cup,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Prepared Ordinary,Serial cell: 32
+2025-10-30,Appendix-A,39,Cigarettes Capstan 20'S Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2025-10-30,Appendix-A,40,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2025-10-30,Appendix-A,41,Shirting (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Shirting (Average Quality),Serial cell: 35
+2025-10-30,Appendix-A,42,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2025-10-30,Appendix-A,43,Georgette (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Georgette (Average Quality),Serial cell: 37
+2025-10-30,Appendix-A,44,Gents Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sandal Bata,Serial cell: 38
+2025-10-30,Appendix-A,45,Gents Sponge Chappal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sponge Chappal Bata,Serial cell: 39
+2025-10-30,Appendix-A,46,Ladies Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Ladies Sandal Bata,Serial cell: 40
+2025-10-30,Appendix-A,47,Electricity Charges for Q1*,Per Unit,True,False,First occurrence of a real Appendix-A essential-item row.,Electricity Charges for Q1*,Serial cell: 41
+2025-10-30,Appendix-A,48,Gas Charges for Q1,MMBTU,True,False,First occurrence of a real Appendix-A essential-item row.,Gas Charges for Q1,Serial cell: 42
+2025-10-30,Appendix-A,49,Firewood Whole,40 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Firewood Whole,Serial cell: 43
+2025-10-30,Appendix-A,50,Energy Saver Philips 14 Watt,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Energy Saver Philips 14 Watt,Serial cell: 44
+2025-10-30,Appendix-A,51,Sufi Washing Soap 250 gm Cake,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2025-10-30,Appendix-A,52,Match Box,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Match Box,Serial cell: 46
+2025-10-30,Appendix-A,53,Petrol Super,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Petrol Super,Serial cell: 47
+2025-10-30,Appendix-A,54,Hi-Speed Diesel,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Hi-Speed Diesel,Serial cell: 48
+2025-10-30,Appendix-A,55,LPG 11.67 kg Cylinder,Each,True,False,First occurrence of a real Appendix-A essential-item row.,LPG 11.67 kg Cylinder,Serial cell: 49
+2025-10-30,Appendix-A,56,Telephone Call Charges,Per Minute,True,False,First occurrence of a real Appendix-A essential-item row.,Telephone Call Charges,Serial cell: 50
+2025-10-30,Appendix-A,57,Toilet Soap LIFEBUOY 115 gm,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2025-10-30,Appendix-A,63,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2025-10-30,Appendix-A,65,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2025-10-30,Appendix-A,66,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2025-10-30,Appendix-A,67,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2025-10-30,Appendix-A,68,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2025-10-30,Appendix-A,69,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2025-10-30,Appendix-A,70,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2025-10-30,Appendix-A,71,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2025-10-30,Appendix-A,72,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2025-10-30,Appendix-A,73,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2025-10-30,Appendix-A,74,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2025-10-30,Appendix-A,75,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2025-10-30,Appendix-A,76,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2025-10-30,Appendix-A,77,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2025-10-30,Appendix-A,78,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2025-10-30,Appendix-A,79,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2025-10-30,Appendix-A,80,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2025-10-30,Appendix-A,81,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2025-10-30,Appendix-A,82,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2025-10-30,Appendix-A,83,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2025-10-30,Appendix-A,84,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2025-10-30,Appendix-A,85,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2025-10-30,Appendix-A,86,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2025-10-30,Appendix-A,87,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2025-10-30,Appendix-A,88,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2025-10-30,Appendix-A,89,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2025-10-30,Appendix-A,90,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2025-10-30,Appendix-A,91,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2025-10-30,Appendix-A,92,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2025-10-30,Appendix-A,93,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2025-10-30,Appendix-A,94,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2025-10-30,Appendix-A,95,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2025-10-30,Appendix-A,96,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2025-10-30,Appendix-A,97,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2025-10-30,Appendix-A,98,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2025-10-30,Appendix-A,99,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2025-10-30,Appendix-A,100,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2025-10-30,Appendix-A,101,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2025-10-30,Appendix-A,102,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2025-10-30,Appendix-A,103,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2025-10-30,Appendix-A,104,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2025-10-30,Appendix-A,105,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2025-10-30,Appendix-A,106,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2025-10-30,Appendix-A,107,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2025-10-30,Appendix-A,108,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2025-10-30,Appendix-A,109,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2025-10-30,Appendix-A,110,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2025-10-30,Appendix-A,111,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2025-10-30,Appendix-A,112,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2025-10-30,Appendix-A,113,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2025-10-30,Appendix-A,114,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2025-10-30,Appendix-A,115,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2025-10-30,Appendix-A,121,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2025-10-30,Appendix-A,123,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2025-10-30,Appendix-A,124,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2025-10-30,Appendix-A,125,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2025-10-30,Appendix-A,126,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2025-10-30,Appendix-A,127,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2025-10-30,Appendix-A,128,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2025-10-30,Appendix-A,129,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2025-10-30,Appendix-A,130,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2025-10-30,Appendix-A,131,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2025-10-30,Appendix-A,132,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2025-10-30,Appendix-A,133,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2025-10-30,Appendix-A,134,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2025-10-30,Appendix-A,135,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2025-10-30,Appendix-A,136,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2025-10-30,Appendix-A,137,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2025-10-30,Appendix-A,138,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2025-10-30,Appendix-A,139,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2025-10-30,Appendix-A,140,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2025-10-30,Appendix-A,141,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2025-10-30,Appendix-A,142,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2025-10-30,Appendix-A,143,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2025-10-30,Appendix-A,144,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2025-10-30,Appendix-A,145,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2025-10-30,Appendix-A,146,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2025-10-30,Appendix-A,147,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2025-10-30,Appendix-A,148,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2025-10-30,Appendix-A,149,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2025-10-30,Appendix-A,150,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2025-10-30,Appendix-A,151,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2025-10-30,Appendix-A,152,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2025-10-30,Appendix-A,153,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2025-10-30,Appendix-A,154,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2025-10-30,Appendix-A,155,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2025-10-30,Appendix-A,156,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2025-10-30,Appendix-A,157,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2025-10-30,Appendix-A,158,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2025-10-30,Appendix-A,159,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2025-10-30,Appendix-A,160,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2025-10-30,Appendix-A,161,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2025-10-30,Appendix-A,162,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2025-10-30,Appendix-A,163,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2025-10-30,Appendix-A,164,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2025-10-30,Appendix-A,165,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2025-10-30,Appendix-A,166,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2025-10-30,Appendix-A,167,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2025-10-30,Appendix-A,168,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2025-10-30,Appendix-A,169,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2025-10-30,Appendix-A,170,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2025-10-30,Appendix-A,171,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2025-10-30,Appendix-A,172,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2025-10-30,Appendix-A,173,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-05-21,Appendix-A,5,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-05-21,Appendix-A,7,Wheat Flour Bag,20 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Wheat Flour Bag,Serial cell: 1
+2026-05-21,Appendix-A,8,Rice Basmati Broken (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-05-21,Appendix-A,9,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-05-21,Appendix-A,10,Bread plain (Small Size),Each,True,False,First occurrence of a real Appendix-A essential-item row.,Bread plain (Small Size),Serial cell: 4
+2026-05-21,Appendix-A,11,Beef with Bone (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Beef with Bone (Average Quality),Serial cell: 5
+2026-05-21,Appendix-A,12,Mutton (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mutton (Average Quality),Serial cell: 6
+2026-05-21,Appendix-A,13,Chicken Farm Broiler (Live),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-05-21,Appendix-A,14,Milk fresh (Un-boiled),1 Ltr,True,False,First occurrence of a real Appendix-A essential-item row.,Milk fresh (Un-boiled),Serial cell: 8
+2026-05-21,Appendix-A,15,Curd (Dahi) Loose,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Curd (Dahi) Loose,Serial cell: 9
+2026-05-21,Appendix-A,16,Powdered Milk NIDO 390 gm Polybag,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-05-21,Appendix-A,17,Eggs Hen (Farm),1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Eggs Hen (Farm),Serial cell: 11
+2026-05-21,Appendix-A,18,Mustard Oil (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mustard Oil (Average Quality),Serial cell: 12
+2026-05-21,Appendix-A,19,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,False,First occurrence of a real Appendix-A essential-item row.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-05-21,Appendix-A,20,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-05-21,Appendix-A,21,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-05-21,Appendix-A,22,Baas (Kela) Local,1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Baas (Kela) Local,Serial cell: 16
+2026-05-21,Appendix-A,23,Pulse Masoor (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Masoor (Washed),Serial cell: 17
+2026-05-21,Appendix-A,24,Pulse Moong (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Moong (Washed),Serial cell: 18
+2026-05-21,Appendix-A,25,Pulse Mash (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Mash (Washed),Serial cell: 19
+2026-05-21,Appendix-A,26,Pulse Gram,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Gram,Serial cell: 20
+2026-05-21,Appendix-A,27,Potatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Potatoes,Serial cell: 21
+2026-05-21,Appendix-A,28,Onions,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Onions,Serial cell: 22
+2026-05-21,Appendix-A,29,Tomatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Tomatoes,Serial cell: 23
+2026-05-21,Appendix-A,30,Sugar Refined,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Sugar Refined,Serial cell: 24
+2026-05-21,Appendix-A,31,Gur (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Gur (Average Quality),Serial cell: 25
+2026-05-21,Appendix-A,32,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-05-21,Appendix-A,33,Chilies Powder NATIONAL 200 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-05-21,Appendix-A,34,Garlic (Lehsun),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Garlic (Lehsun),Serial cell: 28
+2026-05-21,Appendix-A,35,Tea Lipton Yellow Label 190 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-05-21,Appendix-A,36,Cooked Beef at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-05-21,Appendix-A,37,Cooked Daal at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-05-21,Appendix-A,38,Tea Prepared Ordinary,Per Cup,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Prepared Ordinary,Serial cell: 32
+2026-05-21,Appendix-A,39,Cigarettes Capstan 20'S Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-05-21,Appendix-A,40,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-05-21,Appendix-A,41,Shirting (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Shirting (Average Quality),Serial cell: 35
+2026-05-21,Appendix-A,42,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-05-21,Appendix-A,43,Georgette (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Georgette (Average Quality),Serial cell: 37
+2026-05-21,Appendix-A,44,Gents Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sandal Bata,Serial cell: 38
+2026-05-21,Appendix-A,45,Gents Sponge Chappal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-05-21,Appendix-A,46,Ladies Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Ladies Sandal Bata,Serial cell: 40
+2026-05-21,Appendix-A,47,Electricity Charges for Q1*,Per Unit,True,False,First occurrence of a real Appendix-A essential-item row.,Electricity Charges for Q1*,Serial cell: 41
+2026-05-21,Appendix-A,48,Gas Charges for Q1,MMBTU,True,False,First occurrence of a real Appendix-A essential-item row.,Gas Charges for Q1,Serial cell: 42
+2026-05-21,Appendix-A,49,Firewood Whole,40 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Firewood Whole,Serial cell: 43
+2026-05-21,Appendix-A,50,Energy Saver Philips 14 Watt,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-05-21,Appendix-A,51,Sufi Washing Soap 250 gm Cake,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-05-21,Appendix-A,52,Match Box,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Match Box,Serial cell: 46
+2026-05-21,Appendix-A,53,Petrol Super,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Petrol Super,Serial cell: 47
+2026-05-21,Appendix-A,54,Hi-Speed Diesel,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Hi-Speed Diesel,Serial cell: 48
+2026-05-21,Appendix-A,55,LPG 11.67 kg Cylinder,Each,True,False,First occurrence of a real Appendix-A essential-item row.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-05-21,Appendix-A,56,Telephone Call Charges,Per Minute,True,False,First occurrence of a real Appendix-A essential-item row.,Telephone Call Charges,Serial cell: 50
+2026-05-21,Appendix-A,57,Toilet Soap LIFEBUOY 115 gm,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-05-21,Appendix-A,63,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-05-21,Appendix-A,65,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2026-05-21,Appendix-A,66,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-05-21,Appendix-A,67,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-05-21,Appendix-A,68,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2026-05-21,Appendix-A,69,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2026-05-21,Appendix-A,70,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2026-05-21,Appendix-A,71,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-05-21,Appendix-A,72,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2026-05-21,Appendix-A,73,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2026-05-21,Appendix-A,74,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-05-21,Appendix-A,75,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2026-05-21,Appendix-A,76,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2026-05-21,Appendix-A,77,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-05-21,Appendix-A,78,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-05-21,Appendix-A,79,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-05-21,Appendix-A,80,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2026-05-21,Appendix-A,81,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2026-05-21,Appendix-A,82,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2026-05-21,Appendix-A,83,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2026-05-21,Appendix-A,84,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2026-05-21,Appendix-A,85,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2026-05-21,Appendix-A,86,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2026-05-21,Appendix-A,87,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2026-05-21,Appendix-A,88,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2026-05-21,Appendix-A,89,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2026-05-21,Appendix-A,90,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-05-21,Appendix-A,91,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-05-21,Appendix-A,92,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2026-05-21,Appendix-A,93,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-05-21,Appendix-A,94,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-05-21,Appendix-A,95,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-05-21,Appendix-A,96,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2026-05-21,Appendix-A,97,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-05-21,Appendix-A,98,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-05-21,Appendix-A,99,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2026-05-21,Appendix-A,100,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-05-21,Appendix-A,101,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2026-05-21,Appendix-A,102,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2026-05-21,Appendix-A,103,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-05-21,Appendix-A,104,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2026-05-21,Appendix-A,105,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2026-05-21,Appendix-A,106,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2026-05-21,Appendix-A,107,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2026-05-21,Appendix-A,108,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-05-21,Appendix-A,109,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-05-21,Appendix-A,110,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2026-05-21,Appendix-A,111,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2026-05-21,Appendix-A,112,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2026-05-21,Appendix-A,113,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-05-21,Appendix-A,114,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2026-05-21,Appendix-A,115,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-05-21,Appendix-A,121,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-05-21,Appendix-A,123,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2026-05-21,Appendix-A,124,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-05-21,Appendix-A,125,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-05-21,Appendix-A,126,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2026-05-21,Appendix-A,127,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2026-05-21,Appendix-A,128,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2026-05-21,Appendix-A,129,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-05-21,Appendix-A,130,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2026-05-21,Appendix-A,131,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2026-05-21,Appendix-A,132,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-05-21,Appendix-A,133,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2026-05-21,Appendix-A,134,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2026-05-21,Appendix-A,135,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-05-21,Appendix-A,136,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-05-21,Appendix-A,137,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-05-21,Appendix-A,138,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2026-05-21,Appendix-A,139,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2026-05-21,Appendix-A,140,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2026-05-21,Appendix-A,141,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2026-05-21,Appendix-A,142,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2026-05-21,Appendix-A,143,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2026-05-21,Appendix-A,144,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2026-05-21,Appendix-A,145,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2026-05-21,Appendix-A,146,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2026-05-21,Appendix-A,147,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2026-05-21,Appendix-A,148,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-05-21,Appendix-A,149,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-05-21,Appendix-A,150,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2026-05-21,Appendix-A,151,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-05-21,Appendix-A,152,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-05-21,Appendix-A,153,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-05-21,Appendix-A,154,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2026-05-21,Appendix-A,155,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-05-21,Appendix-A,156,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-05-21,Appendix-A,157,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2026-05-21,Appendix-A,158,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-05-21,Appendix-A,159,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2026-05-21,Appendix-A,160,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2026-05-21,Appendix-A,161,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-05-21,Appendix-A,162,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2026-05-21,Appendix-A,163,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2026-05-21,Appendix-A,164,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2026-05-21,Appendix-A,165,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2026-05-21,Appendix-A,166,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-05-21,Appendix-A,167,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-05-21,Appendix-A,168,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2026-05-21,Appendix-A,169,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2026-05-21,Appendix-A,170,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2026-05-21,Appendix-A,171,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-05-21,Appendix-A,172,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2026-05-21,Appendix-A,173,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-08-27,Appendix-A,5,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-08-27,Appendix-A,7,Wheat Flour Bag,20 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Wheat Flour Bag,Serial cell: 1
+2026-08-27,Appendix-A,8,Rice Basmati Broken (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-08-27,Appendix-A,9,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-08-27,Appendix-A,10,Bread plain (Small Size),Each,True,False,First occurrence of a real Appendix-A essential-item row.,Bread plain (Small Size),Serial cell: 4
+2026-08-27,Appendix-A,11,Beef with Bone (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Beef with Bone (Average Quality),Serial cell: 5
+2026-08-27,Appendix-A,12,Mutton (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mutton (Average Quality),Serial cell: 6
+2026-08-27,Appendix-A,13,Chicken Farm Broiler (Live),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-08-27,Appendix-A,14,Milk fresh (Un-boiled),1 Ltr,True,False,First occurrence of a real Appendix-A essential-item row.,Milk fresh (Un-boiled),Serial cell: 8
+2026-08-27,Appendix-A,15,Curd (Dahi) Loose,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Curd (Dahi) Loose,Serial cell: 9
+2026-08-27,Appendix-A,16,Powdered Milk NIDO 390 gm Polybag,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-08-27,Appendix-A,17,Eggs Hen (Farm),1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Eggs Hen (Farm),Serial cell: 11
+2026-08-27,Appendix-A,18,Mustard Oil (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Mustard Oil (Average Quality),Serial cell: 12
+2026-08-27,Appendix-A,19,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,False,First occurrence of a real Appendix-A essential-item row.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-08-27,Appendix-A,20,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-08-27,Appendix-A,21,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-08-27,Appendix-A,22,Baas (Kela) Local,1 Dozen,True,False,First occurrence of a real Appendix-A essential-item row.,Baas (Kela) Local,Serial cell: 16
+2026-08-27,Appendix-A,23,Pulse Masoor (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Masoor (Washed),Serial cell: 17
+2026-08-27,Appendix-A,24,Pulse Moong (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Moong (Washed),Serial cell: 18
+2026-08-27,Appendix-A,25,Pulse Mash (Washed),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Mash (Washed),Serial cell: 19
+2026-08-27,Appendix-A,26,Pulse Gram,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Pulse Gram,Serial cell: 20
+2026-08-27,Appendix-A,27,Potatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Potatoes,Serial cell: 21
+2026-08-27,Appendix-A,28,Onions,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Onions,Serial cell: 22
+2026-08-27,Appendix-A,29,Tomatoes,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Tomatoes,Serial cell: 23
+2026-08-27,Appendix-A,30,Sugar Refined,1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Sugar Refined,Serial cell: 24
+2026-08-27,Appendix-A,31,Gur (Average Quality),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Gur (Average Quality),Serial cell: 25
+2026-08-27,Appendix-A,32,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-08-27,Appendix-A,33,Chilies Powder NATIONAL 200 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-08-27,Appendix-A,34,Garlic (Lehsun),1 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Garlic (Lehsun),Serial cell: 28
+2026-08-27,Appendix-A,35,Tea Lipton Yellow Label 190 gm Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-08-27,Appendix-A,36,Cooked Beef at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-08-27,Appendix-A,37,Cooked Daal at Average Hotel,Per Plate,True,False,First occurrence of a real Appendix-A essential-item row.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-08-27,Appendix-A,38,Tea Prepared Ordinary,Per Cup,True,False,First occurrence of a real Appendix-A essential-item row.,Tea Prepared Ordinary,Serial cell: 32
+2026-08-27,Appendix-A,39,Cigarettes Capstan 20'S Packet,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-08-27,Appendix-A,40,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-08-27,Appendix-A,41,Shirting (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Shirting (Average Quality),Serial cell: 35
+2026-08-27,Appendix-A,42,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-08-27,Appendix-A,43,Georgette (Average Quality),1 mtr,True,False,First occurrence of a real Appendix-A essential-item row.,Georgette (Average Quality),Serial cell: 37
+2026-08-27,Appendix-A,44,Gents Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sandal Bata,Serial cell: 38
+2026-08-27,Appendix-A,45,Gents Sponge Chappal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-08-27,Appendix-A,46,Ladies Sandal Bata,Pair,True,False,First occurrence of a real Appendix-A essential-item row.,Ladies Sandal Bata,Serial cell: 40
+2026-08-27,Appendix-A,47,Electricity Charges for Q1*,Per Unit,True,False,First occurrence of a real Appendix-A essential-item row.,Electricity Charges for Q1*,Serial cell: 41
+2026-08-27,Appendix-A,48,Gas Charges for Q1,MMBTU,True,False,First occurrence of a real Appendix-A essential-item row.,Gas Charges for Q1,Serial cell: 42
+2026-08-27,Appendix-A,49,Firewood Whole,40 Kg,True,False,First occurrence of a real Appendix-A essential-item row.,Firewood Whole,Serial cell: 43
+2026-08-27,Appendix-A,50,Energy Saver Philips 14 Watt,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-08-27,Appendix-A,51,Sufi Washing Soap 250 gm Cake,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-08-27,Appendix-A,52,Match Box,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Match Box,Serial cell: 46
+2026-08-27,Appendix-A,53,Petrol Super,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Petrol Super,Serial cell: 47
+2026-08-27,Appendix-A,54,Hi-Speed Diesel,Per Litre,True,False,First occurrence of a real Appendix-A essential-item row.,Hi-Speed Diesel,Serial cell: 48
+2026-08-27,Appendix-A,55,LPG 11.67 kg Cylinder,Each,True,False,First occurrence of a real Appendix-A essential-item row.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-08-27,Appendix-A,56,Telephone Call Charges,Per Minute,True,False,First occurrence of a real Appendix-A essential-item row.,Telephone Call Charges,Serial cell: 50
+2026-08-27,Appendix-A,57,Toilet Soap LIFEBUOY 115 gm,Each,True,False,First occurrence of a real Appendix-A essential-item row.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-08-27,Appendix-A,63,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-08-27,Appendix-A,65,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2026-08-27,Appendix-A,66,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-08-27,Appendix-A,67,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-08-27,Appendix-A,68,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2026-08-27,Appendix-A,69,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2026-08-27,Appendix-A,70,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2026-08-27,Appendix-A,71,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-08-27,Appendix-A,72,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2026-08-27,Appendix-A,73,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2026-08-27,Appendix-A,74,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-08-27,Appendix-A,75,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2026-08-27,Appendix-A,76,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2026-08-27,Appendix-A,77,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-08-27,Appendix-A,78,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-08-27,Appendix-A,79,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-08-27,Appendix-A,80,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2026-08-27,Appendix-A,81,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2026-08-27,Appendix-A,82,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2026-08-27,Appendix-A,83,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2026-08-27,Appendix-A,84,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2026-08-27,Appendix-A,85,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2026-08-27,Appendix-A,86,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2026-08-27,Appendix-A,87,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2026-08-27,Appendix-A,88,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2026-08-27,Appendix-A,89,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2026-08-27,Appendix-A,90,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-08-27,Appendix-A,91,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-08-27,Appendix-A,92,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2026-08-27,Appendix-A,93,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-08-27,Appendix-A,94,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-08-27,Appendix-A,95,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-08-27,Appendix-A,96,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2026-08-27,Appendix-A,97,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-08-27,Appendix-A,98,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-08-27,Appendix-A,99,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2026-08-27,Appendix-A,100,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-08-27,Appendix-A,101,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2026-08-27,Appendix-A,102,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2026-08-27,Appendix-A,103,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-08-27,Appendix-A,104,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2026-08-27,Appendix-A,105,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2026-08-27,Appendix-A,106,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2026-08-27,Appendix-A,107,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2026-08-27,Appendix-A,108,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-08-27,Appendix-A,109,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-08-27,Appendix-A,110,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2026-08-27,Appendix-A,111,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2026-08-27,Appendix-A,112,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2026-08-27,Appendix-A,113,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-08-27,Appendix-A,114,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2026-08-27,Appendix-A,115,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51
+2026-08-27,Appendix-A,121,2,3,False,False,Column-number header row was accepted because serial and description cells are numeric.,,Serial cell: 1
+2026-08-27,Appendix-A,123,Wheat Flour Bag,20 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Wheat Flour Bag,Serial cell: 1
+2026-08-27,Appendix-A,124,Rice Basmati Broken (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice Basmati Broken (Average Quality),Serial cell: 2
+2026-08-27,Appendix-A,125,Rice IRRI-6/9 (Sindh/Punjab),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Rice IRRI-6/9 (Sindh/Punjab),Serial cell: 3
+2026-08-27,Appendix-A,126,Bread plain (Small Size),Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Bread plain (Small Size),Serial cell: 4
+2026-08-27,Appendix-A,127,Beef with Bone (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Beef with Bone (Average Quality),Serial cell: 5
+2026-08-27,Appendix-A,128,Mutton (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mutton (Average Quality),Serial cell: 6
+2026-08-27,Appendix-A,129,Chicken Farm Broiler (Live),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Chicken Farm Broiler (Live),Serial cell: 7
+2026-08-27,Appendix-A,130,Milk fresh (Un-boiled),1 Ltr,True,True,Repeated city-panel copy of the same Appendix-A item.,Milk fresh (Un-boiled),Serial cell: 8
+2026-08-27,Appendix-A,131,Curd (Dahi) Loose,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Curd (Dahi) Loose,Serial cell: 9
+2026-08-27,Appendix-A,132,Powdered Milk NIDO 390 gm Polybag,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Powdered Milk NIDO 390 gm Polybag,Serial cell: 10
+2026-08-27,Appendix-A,133,Eggs Hen (Farm),1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Eggs Hen (Farm),Serial cell: 11
+2026-08-27,Appendix-A,134,Mustard Oil (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Mustard Oil (Average Quality),Serial cell: 12
+2026-08-27,Appendix-A,135,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Each,True,True,Repeated city-panel copy of the same Appendix-A item.,"Cooking Oil DALDA or Other Similar Brand (SN), 5 Litre Tin",Serial cell: 13
+2026-08-27,Appendix-A,136,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB 2.5 kg Tin,Serial cell: 14
+2026-08-27,Appendix-A,137,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Vegetable Ghee DALDA/HABIB or Other superior Quality 1 kg Pouch,Serial cell: 15
+2026-08-27,Appendix-A,138,Baas (Kela) Local,1 Dozen,True,True,Repeated city-panel copy of the same Appendix-A item.,Baas (Kela) Local,Serial cell: 16
+2026-08-27,Appendix-A,139,Pulse Masoor (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Masoor (Washed),Serial cell: 17
+2026-08-27,Appendix-A,140,Pulse Moong (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Moong (Washed),Serial cell: 18
+2026-08-27,Appendix-A,141,Pulse Mash (Washed),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Mash (Washed),Serial cell: 19
+2026-08-27,Appendix-A,142,Pulse Gram,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Pulse Gram,Serial cell: 20
+2026-08-27,Appendix-A,143,Potatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Potatoes,Serial cell: 21
+2026-08-27,Appendix-A,144,Onions,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Onions,Serial cell: 22
+2026-08-27,Appendix-A,145,Tomatoes,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Tomatoes,Serial cell: 23
+2026-08-27,Appendix-A,146,Sugar Refined,1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Sugar Refined,Serial cell: 24
+2026-08-27,Appendix-A,147,Gur (Average Quality),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Gur (Average Quality),Serial cell: 25
+2026-08-27,Appendix-A,148,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Salt Powdered (NATIONAL/SHAN) 800 gm Packet,Serial cell: 26
+2026-08-27,Appendix-A,149,Chilies Powder NATIONAL 200 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Chilies Powder NATIONAL 200 gm Packet,Serial cell: 27
+2026-08-27,Appendix-A,150,Garlic (Lehsun),1 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Garlic (Lehsun),Serial cell: 28
+2026-08-27,Appendix-A,151,Tea Lipton Yellow Label 190 gm Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Lipton Yellow Label 190 gm Packet,Serial cell: 29
+2026-08-27,Appendix-A,152,Cooked Beef at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Beef at Average Hotel,Serial cell: 30
+2026-08-27,Appendix-A,153,Cooked Daal at Average Hotel,Per Plate,True,True,Repeated city-panel copy of the same Appendix-A item.,Cooked Daal at Average Hotel,Serial cell: 31
+2026-08-27,Appendix-A,154,Tea Prepared Ordinary,Per Cup,True,True,Repeated city-panel copy of the same Appendix-A item.,Tea Prepared Ordinary,Serial cell: 32
+2026-08-27,Appendix-A,155,Cigarettes Capstan 20'S Packet,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Cigarettes Capstan 20'S Packet,Serial cell: 33
+2026-08-27,Appendix-A,156,"Long Cloth 57"" Gul Ahmed/Al Karam",1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,"Long Cloth 57"" Gul Ahmed/Al Karam",Serial cell: 34
+2026-08-27,Appendix-A,157,Shirting (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Shirting (Average Quality),Serial cell: 35
+2026-08-27,Appendix-A,158,Lawn Printed Gul Ahmed/Al Karam,1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Lawn Printed Gul Ahmed/Al Karam,Serial cell: 36
+2026-08-27,Appendix-A,159,Georgette (Average Quality),1 mtr,True,True,Repeated city-panel copy of the same Appendix-A item.,Georgette (Average Quality),Serial cell: 37
+2026-08-27,Appendix-A,160,Gents Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sandal Bata,Serial cell: 38
+2026-08-27,Appendix-A,161,Gents Sponge Chappal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Gents Sponge Chappal Bata,Serial cell: 39
+2026-08-27,Appendix-A,162,Ladies Sandal Bata,Pair,True,True,Repeated city-panel copy of the same Appendix-A item.,Ladies Sandal Bata,Serial cell: 40
+2026-08-27,Appendix-A,163,Electricity Charges for Q1*,Per Unit,True,True,Repeated city-panel copy of the same Appendix-A item.,Electricity Charges for Q1*,Serial cell: 41
+2026-08-27,Appendix-A,164,Gas Charges for Q1,MMBTU,True,True,Repeated city-panel copy of the same Appendix-A item.,Gas Charges for Q1,Serial cell: 42
+2026-08-27,Appendix-A,165,Firewood Whole,40 Kg,True,True,Repeated city-panel copy of the same Appendix-A item.,Firewood Whole,Serial cell: 43
+2026-08-27,Appendix-A,166,Energy Saver Philips 14 Watt,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Energy Saver Philips 14 Watt,Serial cell: 44
+2026-08-27,Appendix-A,167,Sufi Washing Soap 250 gm Cake,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Sufi Washing Soap 250 gm Cake,Serial cell: 45
+2026-08-27,Appendix-A,168,Match Box,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Match Box,Serial cell: 46
+2026-08-27,Appendix-A,169,Petrol Super,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Petrol Super,Serial cell: 47
+2026-08-27,Appendix-A,170,Hi-Speed Diesel,Per Litre,True,True,Repeated city-panel copy of the same Appendix-A item.,Hi-Speed Diesel,Serial cell: 48
+2026-08-27,Appendix-A,171,LPG 11.67 kg Cylinder,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,LPG 11.67 kg Cylinder,Serial cell: 49
+2026-08-27,Appendix-A,172,Telephone Call Charges,Per Minute,True,True,Repeated city-panel copy of the same Appendix-A item.,Telephone Call Charges,Serial cell: 50
+2026-08-27,Appendix-A,173,Toilet Soap LIFEBUOY 115 gm,Each,True,True,Repeated city-panel copy of the same Appendix-A item.,Toilet Soap LIFEBUOY 115 gm,Serial cell: 51

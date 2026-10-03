@@ -1,0 +1,35 @@
+{
+  "retrieved_at_utc": "2026-09-03T12:41:25.582259+00:00",
+  "attempts": [
+    {
+      "url": "https://www.amis.pk/",
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='www.amis.pk', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)')))\"))",
+      "retrieved_at_utc": "2026-09-03T12:41:17.498908+00:00"
+    },
+    {
+      "url": "http://www.amis.pk/",
+      "final_url": "http://www.amis.pk/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 359499,
+      "local_path": "data/raw/amis/response_2.bin",
+      "sha256": "edbd37b9bbb0e77bf10b29dc6ac3fd1d6a5d78f313384d6fcb40fcb38b9d7cab",
+      "text_snippet": "\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd\">\r\n\r\n\r\n<HTML>\r\n\r\n\r\n<META name=\"keywords\" content=\"Price, Today's Price, Today Price, Agriculture,Agriculture Punjab, Agriculture Punjab,Price Control, Price Control & Commodity Management Commodity Prices, Grains Prices, Vegetables Prices, Fruit Prices, rice, wheat, sugarcane, cotton, potato, tomato, ginger, garlic, groundnut, white grain, black grain, mash, moong, masoor p"
+    },
+    {
+      "url": "https://amis.pk/",
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='amis.pk', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)')))\"))",
+      "retrieved_at_utc": "2026-09-03T12:41:22.332908+00:00"
+    },
+    {
+      "url": "http://amis.pk/",
+      "final_url": "http://amis.pk/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 359459,
+      "local_path": "data/raw/amis/response_4.bin",
+      "sha256": "fa2ce46749b66459bb0ab9e0357b4d57a1a58725b0e92110fdfc2a6c0892d44b",
+      "text_snippet": "\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd\">\r\n\r\n\r\n<HTML>\r\n\r\n\r\n<META name=\"keywords\" content=\"Price, Today's Price, Today Price, Agriculture,Agriculture Punjab, Agriculture Punjab,Price Control, Price Control & Commodity Management Commodity Prices, Grains Prices, Vegetables Prices, Fruit Prices, rice, wheat, sugarcane, cotton, potato, tomato, ginger, garlic, groundnut, white grain, black grain, mash, moong, masoor p"
+    }
+  ]
+}

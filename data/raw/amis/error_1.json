@@ -1,0 +1,5 @@
+{
+  "url": "https://www.amis.pk/",
+  "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='www.amis.pk', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)')))\"))",
+  "retrieved_at_utc": "2026-09-03T12:41:17.498908+00:00"
+}
