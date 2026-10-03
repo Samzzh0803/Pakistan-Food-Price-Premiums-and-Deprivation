@@ -1,0 +1,18 @@
+city,city_code,province,pslm_districts,census_units,pslm_rule,population_rule,notes
+Islamabad,01,ICT,Islamabad,ISLAMABAD,single district,sum of census units (total and urban),"Islamabad and Rawalpindi are one contiguous market but two administrative units; kept separate, each with its own district values."
+Rawalpindi,02,Punjab,Rawalpindi,RAWALPINDI,single district,sum of census units (total and urban),See Islamabad.
+Gujranwala,03,Punjab,Gujranwala,GUJRANWALA,single district,sum of census units (total and urban),
+Sialkot,04,Punjab,Sialkot,SIALKOT,single district,sum of census units (total and urban),
+Lahore,05,Punjab,Lahore,LAHORE,single district,sum of census units (total and urban),District is 100% urban in Census 2023.
+Faisalabad,06,Punjab,Faisalabad,FAISALABAD,single district,sum of census units (total and urban),
+Sargodha,07,Punjab,Sargodha,SARGODHA,single district,sum of census units (total and urban),
+Multan,08,Punjab,Multan,MULTAN,single district,sum of census units (total and urban),
+Bahawalpur,09,Punjab,Bahawalpur,BAHAWALPUR,single district,sum of census units (total and urban),
+Karachi,10,Sindh,Karachi Central; Karachi East; Karachi Malir; Karachi South; Karachi West; Korangi,KARACHI CENTRAL; KARACHI EAST; MALIR; KARACHI SOUTH; KARACHI WEST; KEAMARI; KORANGI,population-weighted mean of 6 PSLM districts (Census 2023 weights; Keamari added to Karachi West),sum of census units (total and urban),Seven census districts form one SPI market; PSLM 2019-20 reports six (Keamari created later).
+Hyderabad,11,Sindh,Hyderabad,HYDERABAD,single district,sum of census units (total and urban),
+Sukkur,12,Sindh,Sukkur,SUKKUR,single district,sum of census units (total and urban),
+Larkana,13,Sindh,Larkana,LARKANA,single district,sum of census units (total and urban),
+Peshawar,14,KP,Peshawar,PESHAWAR,single district,sum of census units (total and urban),
+Bannu,15,KP,Bannu,BANNU,single district,sum of census units (total and urban),Census 2023 urban share of Bannu district is 3.6%; district totals describe a mostly rural district.
+Quetta,16,Balochistan,Quetta,QUETTA,single district,sum of census units (total and urban),
+Khuzdar,17,Balochistan,Khuzdar,KHUZDAR,single district,sum of census units (total and urban),"PSLM 2019-20 has no urban sample for Khuzdar: urban indicators are missing, district totals used."
