@@ -1,0 +1,9 @@
+week_end,city,item_id,item_short,price_avg,price_min,price_max,rel_price,source_file,nat_min,nat_max,nat_avg,equals_pbs_national_min_or_max
+2025-05-15,Larkana,23,Tomatoes,13.1,10.0,15.0,-1.239122846525861,data/raw/verification/final_scope/Annex_15.05.2025.xlsx,10.0,90.0,45.23,True
+2026-09-24,Quetta,35,Shirting,239.86,230.0,250.0,-0.8202626300552521,data/raw/pbs_backfill/pbs_annex_2026-09-24.xlsx,230.0,900.0,544.75,True
+2026-08-27,Quetta,35,Shirting,239.86,230.0,250.0,-0.8202626300552521,data/raw/verification/pbs_annex_2026-08-27.xlsx,230.0,900.0,544.75,True
+2026-08-20,Quetta,35,Shirting,239.86,230.0,250.0,-0.8202626300552521,data/raw/verification/pbs_annex_2026-08-20.xlsx,230.0,900.0,544.75,True
+2026-07-30,Quetta,35,Shirting,239.86,230.0,250.0,-0.8201307022096342,data/raw/verification/pbs_annex_2026-07-30.xlsx,230.0,900.0,544.67,True
+2026-08-13,Quetta,35,Shirting,239.86,230.0,250.0,-0.8201307022096342,data/raw/verification/pbs_annex_2026-08-13.xlsx,230.0,900.0,544.67,True
+2025-05-15,Sukkur,23,Tomatoes,20.0,20.0,20.0,-0.8160028031789758,data/raw/verification/final_scope/Annex_15.05.2025.xlsx,10.0,90.0,45.23,False
+2025-12-18,Quetta,35,Shirting,229.85,220.0,240.0,-0.8065457267220669,data/raw/verification/final_scope/Annex_18.12.2025.xlsx,220.0,900.0,514.9,True

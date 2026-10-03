@@ -1,0 +1,6 @@
+operation,source,key,cardinality,rows_after
+stack,3 Appendix-A blocks per workbook,same 51 item rows,rows: 7+7+3 cities x 51 = 867 per week,867
+stack,27 weekly workbooks,week_end,867 x 27,23409
+merge,item_mapping.csv,item_id,many-to-one (51 items),23409
+merge,city table (Census 2023 + PSLM 2019-20),city,many-to-one (17 cities),23409
+merge,urban food CPI,calendar month of week_end,many-to-one (months),23409

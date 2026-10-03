@@ -1,0 +1,4 @@
+kind,rows,options_considered,choice,reason
+Structural non-quote (PBS printed 0/0/0),83.0,remove; impute from other cities (internal); constant,"set to missing, flag, do not impute",Imputing invents a market price PBS does not record; PBS itself excludes these cities from its national mean
+Weekly change across a non-consecutive gap,10367.0,interpolate weeks; impute from CPI (external); leave missing,leave missing,Interpolation would manufacture week-to-week changes nobody observed
+Weeks absent from the PBS site,,impute whole weeks; restrict to observed weeks,treat as a coverage gap,"No source to impute from; stated as a limitation, not filled"

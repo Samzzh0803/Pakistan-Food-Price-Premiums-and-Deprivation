@@ -1,0 +1,6 @@
+level,sd_rel_price
+city x item x week,0.12990209192141292
+city x item x month,0.13032143189513595
+city x item (mean over weeks),0.11473530273929355
+province x item (mean of cities),0.10832679009236648
+national (reference),0.0
