@@ -190,6 +190,8 @@ def model_ready_food(master: pd.DataFrame) -> pd.DataFrame:
     drop = ["source_file", "sha256", "parser_version", "block", "item_label", "price_min", "price_max",
             "is_structural_missing", "is_food"]
     out = encode_dummies(f.drop(columns=drop))
+    # Non-food categories never occur in food rows; their all-zero dummies carry no information.
+    out = out.drop(columns=["cat_administered_utility", "cat_other_nonfood"])
     assert len(out) == len(f)
     return out.reset_index(drop=True)
 

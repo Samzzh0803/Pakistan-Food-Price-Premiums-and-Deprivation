@@ -78,6 +78,7 @@ ext = t("extremes")
 nm = ext[~ext.equals_pbs_national_min_or_max]
 city = pd.read_csv(PROC / "city_table.csv", dtype={"city_code": str})
 bannu = city.set_index("city").loc["Bannu"]
+ntw = city.set_index("city")["no_tap_water_pct"]
 bannu_urban = 100 * bannu.pop_urban / bannu.pop_total
 model_ready = pd.read_parquet(PROC / "model_ready_food.parquet")
 units = pd.read_parquet(PROC / "master_city_item_week.parquet", columns=["item_id", "unit"]).drop_duplicates("item_id").set_index("item_id")["unit"]
@@ -166,8 +167,9 @@ releases ({g('panel.first_week')} to {g('panel.last_week')}) and checked it agai
 {g('validation.item_weeks_checked'):,} item-weeks. We merged district deprivation (PSLM 2019-20), population (Census 2023) and urban food CPI. Across
 32 food items, Islamabad pays {pc('Islamabad')} and Rawalpindi {pc('Rawalpindi')} relative to the national reference, while Sukkur ({pc('Sukkur')}) and
 Bannu ({pc('Bannu')}) pay less. Perishables vary most across cities and branded goods least. City premiums are <i>negatively</i>
-rank-correlated with district deprivation (Spearman ρ = {f(H5c + '.spearman_rho', 2)}, n = 17), so the cities paying most are mostly not the ones
-least able to absorb it. We state five hypotheses for Milestones 03-04.</div>
+rank-correlated with a four-indicator district deprivation composite (Spearman ρ = {f(H5c + '.spearman_rho', 2)}, p = {p(H5c + '.spearman_p')}, n = 17),
+so the cities paying most are mostly not the ones least able to absorb it. On food insecurity alone the correlation is weaker and not significant
+(ρ = {f(H5f + '.spearman_rho', 2)}, p = {p(H5f + '.spearman_p')}), so this pattern is indicative, not established. We state five hypotheses for Milestones 03-04.</div>
 
 <h2>1. Project alignment and master dataset inventory</h2>
 <p><b>Team.</b> Both members are computer scientists. One owns acquisition, parsing and provenance; the other owns statistical framing,
@@ -305,7 +307,9 @@ expectation. The three least deprived cities (Karachi, Islamabad, Rawalpindi) ha
 Sukkur, Larkana) pay below the national reference. The Spearman correlation between premium and the deprivation composite is ρ =
 {f(H5c + '.spearman_rho', 2)} (p = {p(H5c + '.spearman_p')}, n = 17). Dropping each city in turn keeps ρ between {f(H5c + '.loo_spearman_min', 2)} and
 {f(H5c + '.loo_spearman_max', 2)}. Against FIES food insecurity alone, ρ = {f(H5f + '.spearman_rho', 2)} (p = {p(H5f + '.spearman_p')}), which is not
-significant. Khuzdar and Quetta are the exception: their premiums are above zero, though not individually significant, and they have the
+significant. The tap-water indicator is a weak deprivation measure: it rates Gujranwala and Sialkot ({ntw['Sialkot']:.0f}% and {ntw['Gujranwala']:.0f}% of households without tap water) as worse off
+than Quetta or Peshawar, and Karachi and Hyderabad as best off. This mostly reflects reliance on motor pumps and filtration plants in Punjab cities. Without it, the composite gives ρ = {f(H5w + '.spearman_rho', 2)} (p = {p(H5w + '.spearman_p')}).
+Khuzdar and Quetta are the exception: their premiums are above zero, though not individually significant, and they have the
 highest food insecurity in the panel, so burden concentrates there. These are associations across 17 cities, with deprivation data from 2019-20,
 and support no causal claim.</p>
 {fig('fig04_premium_vs_deprivation', 'Fig. 4. City mean food price premium (%) against the PSLM 2019-20 deprivation composite (left; 0-1, higher = more deprived) and moderate-or-severe food insecurity (right; % of population). Every city is labelled; colour shows province; n = 17.')}
@@ -327,7 +331,8 @@ represent. The panel includes no rural markets, AJK or Gilgit-Baltistan, and onl
 H.append(f"""
 <h2>4. Hypotheses and analytical plan</h2>
 <p>Each hypothesis is mapped to master-dataset columns in Table 9. Targets marked † are derived from existing columns, and the rule for each is
-fixed now. abnormal_next_week and model error will be created in Milestone 03, using thresholds fitted on training weeks only.</p>
+fixed now. abnormal_next_week has been derived provisionally in the notebook, which is the source of the base rate and row count quoted below,
+using thresholds fitted on training weeks only. The final label and the model-error columns will be built in Milestone 03.</p>
 <ul>
 <li><b>H1, persistent premiums (SDG 2.1).</b> (a) In log p<sub>c,i,t</sub> = α<sub>i,t</sub> + β<sub>c</sub> + ε with Σβ<sub>c</sub> = 0:
 H0: β<sub>c</sub> = 0 for every city c; H1: β<sub>c</sub> ≠ 0 for at least one c. (b) H0: P(above median at t+1 | above at t) = 0.5;
