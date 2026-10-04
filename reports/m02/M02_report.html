@@ -1,0 +1,2579 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Milestone 02 Report</title><style>
+@page { size: A4; margin: 18mm 17mm 18mm 17mm; }
+body { font-family: 'Cambria', 'Georgia', serif; font-size: 10.3pt; line-height: 1.38; color: #111; background: #fff; }
+h1 { font-size: 16pt; margin: 0 0 4px 0; line-height: 1.2; }
+h2 { font-size: 12.5pt; margin: 16px 0 6px 0; border-bottom: 1px solid #999; padding-bottom: 2px; }
+h3 { font-size: 10.8pt; margin: 11px 0 4px 0; }
+p { margin: 4px 0 7px 0; text-align: justify; }
+.meta { font-size: 9.5pt; color: #333; margin-bottom: 8px; }
+.abstract { border: 1px solid #bbb; padding: 7px 10px; background: #f7f7f7; font-size: 9.6pt; }
+figure { margin: 8px 0 10px 0; text-align: center; page-break-inside: avoid; }
+figcaption { font-size: 8.8pt; color: #222; text-align: left; margin-top: 2px; }
+.tbl { margin: 6px 0 10px 0; page-break-inside: avoid; }
+.tbl.small table { font-size: 7.4pt; }
+.cap { font-size: 8.8pt; font-weight: bold; margin: 0 0 2px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 8.2pt; }
+th { border-bottom: 1.2px solid #333; border-top: 1.2px solid #333; text-align: left; padding: 2px 4px; background: #f2f2f2; }
+td { border-bottom: 0.5px solid #ddd; padding: 1.5px 4px; vertical-align: top; }
+.two { display: flex; gap: 10px; } .two > figure { flex: 1; }
+.pb { page-break-before: always; }
+ul { margin: 3px 0 6px 18px; padding: 0; } li { margin-bottom: 2px; }
+.note { font-size: 8.8pt; color: #333; }
+code { font-size: 8.8pt; }
+</style></head><body>
+<h1>Who Pays More, and Who Can Least Afford It? Food Price Premiums, Deprivation and Abnormal Price Movements Across Selected Pakistani Urban Markets</h1>
+<div class="meta"><b>Milestone 02: data preparation, exploratory analysis and hypotheses (draft Sections II and III)</b><br/>
+Yousuf Uyghur, Computer Science · Sameer Hassan, Computer Science<br/>
+CS/SDP 312/314 L1 Data Science for Social Good, Habib University, Fall 2026 · Instructor: Dr. Muhammad Usman Arif<br/>
+Code and data: github.com/Samzzh0803/Pakistan-Food-Price-Premiums-and-Deprivation (branch <code>milestone-02</code>)</div>
+
+<div class="abstract"><b>Summary.</b> Pakistan's weekly Sensitive Price Indicator (SPI) reports one national figure. Beneath it, PBS publishes
+prices for 51 items in 17 cities. We parse all 27 weekly releases available up to our freeze date
+(2025-05-15 to 2026-09-24; 23,409 city-item-week rows). The parse reproduces PBS's own
+national minimum, maximum and geometric-mean average in every one of 1,377 item-weeks. We merge in
+district deprivation (PSLM 2019-20), population (Census 2023) and urban food CPI. On 32 food items, Islamabad pays +14.1%
+and Rawalpindi +10.2% above the national reference, while Bannu (-7.4%) and Sukkur (-7.1%) pay less.
+4 of 17 city premiums survive a Bonferroni correction. Premiums are persistent: 93%
+of above-median city-item pairs stay above the median the next week. However, 75% of weekly food price
+changes are exactly zero. Across the 17 cities, the premium is <i>negatively</i> rank-correlated with district deprivation
+(Spearman ρ = -0.56, p = 0.020): the cities paying most are mostly not the ones least able
+to absorb it. How many separate quotes stand behind a city's average varies widely, which matters for every later model.</div>
+
+<h2>Changes since Milestone 01</h2>
+<p>Milestone 01 reported a 7-city panel. That was a parsing error. Appendix-A of the PBS Annexure is three tables stacked in one sheet,
+and the earlier script stopped after the first. The panel actually covers all 17 SPI cities
+(8 Punjab, 4 Sindh, 2 Khyber Pakhtunkhwa,
+2 Balochistan, plus Islamabad), so the "Punjab and Islamabad only" limitation is retired.
+The earlier figure of 16,380 rows, explained then as records times MIN/AVG/MAX, was a coincidence of reading three blocks under one set of
+city names. The faulty files are kept as an audit trail and a dated correction note is in the repository
+(<code>reports/CORRECTION_2026-10-04_appendix_a_17_cities.md</code>). Following the instructor's feedback that a price-only study is too
+narrow, we now merge three external sources, each with one job (Table 1). The reference price is the geometric mean across quoting cities,
+which is PBS's own definition (§2.1). Hypothesis H5 (burden versus price) is new and is now testable with n = 17.</p>
+
+<h2>1. Alignment and inventory</h2>
+<p><b>Research question.</b> Beneath the single national weekly SPI figure, do persistent city-level food price differences exist, are the
+cities paying most the ones least able to absorb it, and is the published city detail enough to detect localised price stress?
+<b>SDGs:</b> primary SDG 2 (Target 2.1 access to food; Target 2.c functioning food markets and timely market information), secondary SDG 10
+(reduced inequalities). <b>Division of perspectives:</b> both members are computer scientists, so we split roles. One owns acquisition,
+parsing and provenance. The other owns statistical framing, representation, ethics and policy interpretation.</p>
+
+<div class="tbl "><p class="cap">Table 1. Data inventory. Observational unit: one city x item x week. Master dataset: 23,409 rows x 46 columns; 17 cities, 51 items (32 food), 27 weeks.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Source</th>
+      <th>Role</th>
+      <th>Vintage / coverage</th>
+      <th>Access</th>
+      <th>Size used</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PBS weekly SPI Annexure, Appendix-A</td>
+      <td>Prices: MIN/AVG/MAX by city and item (the panel)</td>
+      <td>27 weeks, 2025-05-15 to 2026-09-24</td>
+      <td>xlsx from pbs.gov.pk release pages</td>
+      <td>23,409 rows (867/week)</td>
+    </tr>
+    <tr>
+      <td>PSLM District Level Survey 2019-20</td>
+      <td>Deprivation (burden denominator): FIES, literacy, schooling, water</td>
+      <td>2019-20</td>
+      <td>PDF report tables, text extraction</td>
+      <td>22 districts</td>
+    </tr>
+    <tr>
+      <td>Pakistan Digital Census 2023, Table 1</td>
+      <td>Population: total and urban, for size and fairness strata</td>
+      <td>2023</td>
+      <td>xlsx by province</td>
+      <td>23 districts</td>
+    </tr>
+    <tr>
+      <td>CPI (Urban) Food &amp; non-alcoholic beverages</td>
+      <td>Deflator only (not a regressor)</td>
+      <td>monthly 2025-05 to 2026-09</td>
+      <td>PDF + Monthly Review docx</td>
+      <td>13 panel months</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>2. Ingestion and preparation</h2>
+<h3>2.1 Collection audit and validation</h3>
+<p><b>Discovery.</b> PBS publishes each weekly release on a page of the form
+<code>/weekly-sensitive-price-indicator-spi-for-the-week-ended-on-DD-MM-YYYY/</code>. That page links the Annexure workbook. We swept
+73 Thursdays from 2025-05-15 onward, trying the Thursday, Wednesday and Friday page for each
+(197 requests, rate-limited, every attempt logged in <code>data/raw/pbs_backfill_manifest.csv</code> with URL,
+SHA-256 and time). Release pages exist for only 12 of those weeks. Direct file URLs for older weeks return 404
+under every naming variant we tried, and site search lists only recent releases. The panel therefore holds 27 weeks:
+27 distinct workbooks, after dropping 12 byte-identical duplicates by hash, keeping the earlier repository
+copy each time. Every re-downloaded file was byte-identical to its earlier copy, which independently confirms provenance. <b>We do not
+describe the archive as complete.</b> Earlier routes that failed or were rejected are documented in the repository audits: the Punjab AMIS wholesale portal
+(HTTPS fails TLS negotiation; HTTP pages load but historical queries were not reproducible and no commodity or market match could be
+verified), an older single-pattern URL sweep that tried Thursdays only, and PDF annexures (superseded by xlsx).
+The week of 2026-10-01 falls after the freeze (2026-09-24). It was saved to an append-only holdout folder,
+hashed and never parsed.</p>
+<p><b>Validation.</b> The parser finds every row whose second cell is <code>DESCRIPTION</code> and reads the city labels <code>Name (NN)</code>
+on the row above. Columns under any other header are not cities. It reads the week from the <code>PRICES ON dd-mm-yyyy</code> cell and checks
+it against the file name. Assertions fail loudly on every week: 3 blocks, 17 cities, 51 items, 867 rows, no duplicate key,
+MIN ≤ AVG ≤ MAX where positive, and zeros only as all-zero triples. Against PBS's own national columns, the cross-city minimum and maximum
+equal PBS's National MIN and MAX in 1,377 of 1,377 item-weeks. The <b>geometric</b>
+mean of the quoting cities' averages matches PBS's National AVG within 0.1% in 1,377 of 1,377
+(worst case 0.046%). The arithmetic mean misses by a median of 0.42%
+and the median by 1.07%. The geometric mean is therefore PBS's reference price and ours. Release
+dates are 25 Thursdays and 2 Wednesdays. There are 15 consecutive pairs
+(14 at 7 days, 1 at 6). Other gaps run from 13 to 77 days (Fig. 1).</p>
+<figure><img src="figures/fig01_coverage.png" style="width:100%"/><figcaption>Fig. 1. Weeks in the training panel (blue), Thursdays checked on the PBS site (grey) and the frozen holdout week (orange). Week changes are only computed across the consecutive pairs; the gaps are a coverage limitation, not filled.</figcaption></figure>
+
+<h3>2.2 Reshaping and cleaning (Unit 03)</h3>
+<p>The raw sheet (179 rows x 25 columns) breaks all three tidy-data rules. The variable city is stored in
+headers. One observation is spread over MIN, AVG and MAX cells under a merged city header. Three tables share one sheet. We melt it to one row
+per city, item and week (867 rows per week), keeping PBS's serial as <code>item_id</code> and its city code as
+<code>city_code</code>, both nominal. The national summary columns of block 3 go to a separate reference table and are never panel rows.
+Table 2 lists every cleaning action. Nothing is deleted.</p>
+
+<div class="tbl "><p class="cap">Table 2. Cleaning log (counts written by the pipeline).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>operation</th>
+      <th>rows_or_files</th>
+      <th>note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>City labels with hyphen or line break repaired</td>
+      <td>0</td>
+      <td>Repair rule in parser; none needed in the 27 training files</td>
+    </tr>
+    <tr>
+      <td>Zero MIN/AVG/MAX triples set to missing</td>
+      <td>83</td>
+      <td>Structural non-quotes; PBS excludes them from its national mean</td>
+    </tr>
+    <tr>
+      <td>Week dates read from 'PRICES ON' text</td>
+      <td>27</td>
+      <td>All match the date in the file name</td>
+    </tr>
+    <tr>
+      <td>Item label wording changes mapped to first label</td>
+      <td>17</td>
+      <td>Item 42 renamed in 2026-09-24 release, unit and price unchanged</td>
+    </tr>
+    <tr>
+      <td>Duplicate workbooks dropped (identical sha256)</td>
+      <td>12</td>
+      <td>Earlier repo copy kept; re-downloads byte-identical</td>
+    </tr>
+    <tr>
+      <td>Rows deleted</td>
+      <td>0</td>
+      <td>Nothing deleted; missing values are flagged, not dropped</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>2.3 Missing data</h3>
+<p>Of the options taught (remove, impute from internal data, impute from external data, constant), none is applied to prices. There are
+83 structural non-quotes (0.35% of rows), where PBS prints 0/0/0: rice IRRI-6/9 in
+Gujranwala, Lahore and Sialkot in every week, and gas charges in Khuzdar in two weeks. PBS itself leaves these cities out of its national mean,
+so imputing would invent a market price the source does not record. Weekly changes across non-consecutive gaps
+(10,367 rows, 44.3%) stay missing, because interpolation would manufacture changes nobody
+observed. Missing weeks are a coverage gap. The trade-off is statistical convenience against selection bias: complete-case analysis is
+honest here only because the missingness is structural and documented (Table 3; per-column counts are in the notebook and codebook).</p>
+
+<div class="tbl "><p class="cap">Table 3. The three kinds of missingness and the choice made for each.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>kind</th>
+      <th>rows</th>
+      <th>choice</th>
+      <th>reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Structural non-quote (PBS printed 0/0/0)</td>
+      <td>83.000</td>
+      <td>set to missing, flag, do not impute</td>
+      <td>Imputing invents a market price PBS does not record; PBS itself excludes these cities from its national mean</td>
+    </tr>
+    <tr>
+      <td>Weekly change across a non-consecutive gap</td>
+      <td>10,367.000</td>
+      <td>leave missing</td>
+      <td>Interpolation would manufacture week-to-week changes nobody observed</td>
+    </tr>
+    <tr>
+      <td>Weeks absent from the PBS site</td>
+      <td>–</td>
+      <td>treat as a coverage gap</td>
+      <td>No source to impute from; stated as a limitation, not filled</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>2.4 Transformations, scaling, encoding and discretisation (Unit 04)</h3>
+<p><b>Log price.</b> Prices behave multiplicatively, so a 10% premium means the same thing on salt and on a 20 kg flour bag. Pooled raw PKR
+across items is not a meaningful distribution: it mixes units, with skewness 2.13. Within an item, the median
+skewness falls from 0.216 on raw prices to 0.024 on log prices. All
+cross-city comparisons use the relative price <i>rel_price</i> = log(price / national geometric mean). By construction it sums to zero across
+quoting cities in each item-week, which is exactly the sum-to-zero premium in H1. <b>Redundancy:</b> log MIN and log AVG correlate at
+0.998, so we keep AVG plus the within-city range. Provenance columns are kept for audit and excluded from
+analysis. <b>Normalisation:</b> min-max scaling (0 to 1, higher = more deprived) for the deprivation indicators; z-scores of price within
+item and week. Decimal scaling divides by a power of ten that differs by item (10^4 for flour), so it
+does not make items comparable. Scaling matters because the distance-based methods in §3.7 would otherwise be dominated by large-valued
+features. All constants come from the training panel. <b>Encoding:</b> 0/1 dummies for province and item category, and sum-to-zero (deviation)
+coding for cities, so each city coefficient is a premium relative to the average city. <b>Splitting:</b> <code>week_end</code> is split into
+year, month and ISO week (13 calendar months). <b>Discretisation:</b> equal-width bins collapse on population because
+of Karachi (Table 4), so the strata used for H4 and the contingency tables are equal-frequency terciles.</p>
+
+<div class="tbl "><p class="cap">Table 4. Equal-width against equal-frequency binning (cities per bin).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable (17 cities)</th>
+      <th>method</th>
+      <th>low</th>
+      <th>mid</th>
+      <th>high</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>pop_urban</td>
+      <td>equal-width</td>
+      <td>15</td>
+      <td>0</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>pop_urban</td>
+      <td>equal-frequency (terciles)</td>
+      <td>6</td>
+      <td>5</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>equal-width</td>
+      <td>9</td>
+      <td>6</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>equal-frequency (terciles)</td>
+      <td>6</td>
+      <td>5</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>2.5 Integration and the external sources</h3>
+<p>Stacking joins the three blocks and the 27 weeks. Merging adds the item classification (on <code>item_id</code>), the city
+attributes (on <code>city</code>) and the CPI (on the calendar month of <code>week_end</code>). Each merge is many-to-one, and the row count is
+asserted unchanged (23,409; Table 5). <b>Crosswalk decisions</b> (Appendix Table A3): Karachi is one SPI
+market but seven Census 2023 districts and six PSLM 2019-20 districts. Keamari was split from Karachi West after the survey, so PSLM values are
+population-weighted with Keamari added to West's weight. Islamabad and Rawalpindi form one contiguous market but are kept as two
+administrative units, each with its own district values; §3.7 shows they are each other's nearest neighbour in price space. PSLM has no urban
+sample for Khuzdar, and FIES is published only for district totals, so all four indicators use <b>district totals</b> for comparability. The
+urban values are kept as a sensitivity column. The four deprivation indicators, all oriented so that higher means more deprived, are
+moderate-or-severe food insecurity (FIES, SDG 2.1.2; 7.9% in Islamabad
+to 29.3% in Khuzdar), illiteracy at age 10+, children 5-16 out of
+school, and households without tap water. They are min-max scaled and averaged into a transparent composite. The water indicator partly reflects
+infrastructure type (much of urban Punjab uses motor pumps), so a composite without it is reported as a sensitivity check. These are
+<b>district deprivation measures from 2019-20, not city income</b>: PBS publishes income only by province. <b>CPI:</b> urban food CPI rose
+14.0% from 2025-05 to 2026-09. It is used only to express real price
+levels. H1, H2 and H5 compare cities within the same week, so no national deflator can change them, and a nationally uniform series would be
+collinear with week effects as a regressor.</p>
+
+<div class="tbl "><p class="cap">Table 5. Stacking and merging steps, keys, cardinality and row counts.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>operation</th>
+      <th>source</th>
+      <th>key</th>
+      <th>cardinality</th>
+      <th>rows_after</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>stack</td>
+      <td>3 Appendix-A blocks per workbook</td>
+      <td>same 51 item rows</td>
+      <td>rows: 7+7+3 cities x 51 = 867 per week</td>
+      <td>867</td>
+    </tr>
+    <tr>
+      <td>stack</td>
+      <td>27 weekly workbooks</td>
+      <td>week_end</td>
+      <td>867 x 27</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>item_mapping.csv</td>
+      <td>item_id</td>
+      <td>many-to-one (51 items)</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>city table (Census 2023 + PSLM 2019-20)</td>
+      <td>city</td>
+      <td>many-to-one (17 cities)</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>urban food CPI</td>
+      <td>calendar month of week_end</td>
+      <td>many-to-one (months)</td>
+      <td>23409</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>3. Exploratory data analysis</h2>
+<p>Table 6 summarises the key variables at their own unit of analysis. City attributes have 17 distinct values and item comparisons about 32,
+so every city-level or item-level test below is run on aggregated values, never on the 23,409 rows.</p>
+
+<div class="tbl "><p class="cap">Table 6. Summary statistics (mean, median, SD, IQR) for key variables. rel_price and dlog are in log points.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable</th>
+      <th>n</th>
+      <th>mean</th>
+      <th>median</th>
+      <th>sd</th>
+      <th>iqr</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>rel_price (food, log points)</td>
+      <td>14607</td>
+      <td>-0.000</td>
+      <td>0.000</td>
+      <td>0.130</td>
+      <td>0.110</td>
+      <td>-1.239</td>
+      <td>0.708</td>
+    </tr>
+    <tr>
+      <td>dlog_price (food, consecutive weeks)</td>
+      <td>8115</td>
+      <td>-0.003</td>
+      <td>0.000</td>
+      <td>0.072</td>
+      <td>0.000</td>
+      <td>-0.981</td>
+      <td>0.709</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct (food)</td>
+      <td>14607</td>
+      <td>6.812</td>
+      <td>1.395</td>
+      <td>11.665</td>
+      <td>9.384</td>
+      <td>0.000</td>
+      <td>152.858</td>
+    </tr>
+    <tr>
+      <td>single_quote (food, share)</td>
+      <td>14607</td>
+      <td>0.486</td>
+      <td>0.000</td>
+      <td>0.500</td>
+      <td>1.000</td>
+      <td>0.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>real_price_avg / price_avg (deflator ratio)</td>
+      <td>14607</td>
+      <td>0.342</td>
+      <td>0.341</td>
+      <td>0.012</td>
+      <td>0.013</td>
+      <td>0.321</td>
+      <td>0.366</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite (17 cities)</td>
+      <td>17</td>
+      <td>0.427</td>
+      <td>0.349</td>
+      <td>0.217</td>
+      <td>0.261</td>
+      <td>0.138</td>
+      <td>0.974</td>
+    </tr>
+    <tr>
+      <td>fies_mod_sev_pct (17 cities)</td>
+      <td>17</td>
+      <td>15.314</td>
+      <td>16.380</td>
+      <td>5.926</td>
+      <td>8.310</td>
+      <td>7.930</td>
+      <td>29.260</td>
+    </tr>
+    <tr>
+      <td>pop_urban, millions (17 cities)</td>
+      <td>17</td>
+      <td>3.524</td>
+      <td>1.619</td>
+      <td>4.940</td>
+      <td>2.485</td>
+      <td>0.048</td>
+      <td>18.868</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>3.1 City premiums (H1)</h3>
+<p>For each city we average rel_price over weeks for each food item. The observations are then those item-level means, so n is the number of
+food items: 31 for the three cities with structural rice gaps, 32 otherwise. Islamabad's mean premium is +14.1% (95% t-interval
+[8.9, 19.6]), Rawalpindi +10.2% and Karachi +5.2%. At the other end are Sukkur (-7.1%) and Bannu
+(-7.4%) (Fig. 2, Table 7). In two-tailed tests of H0: mean premium = 0, 8 of 17 cities differ at 0.05. Seventeen
+tests inflate the Type I error, so at the Bonferroni threshold 0.05/17 = 0.0029 only 4
+survive: Islamabad, Rawalpindi, Sukkur, Bannu. A Type I error here would tell a policymaker that a city's consumers pay more when they do not. A Type II error would
+miss a real premium, a cost borne by that city's households. Resistant and non-resistant summaries diverge: Larkana's
+mean premium (-4.9%) and median (-0.2%)
+differ by 4.8 points, because a few items pull the mean. We report both and treat the median as the safer
+summary where they disagree. Bootstrapping items (2000 resamples) puts intervals that exclude zero on the median premium of
+6 cities. The 17 cities are PBS's purposive selection, so these intervals describe the item basket within
+these markets, not Pakistan's urban areas at large. An exploratory regression of log price on item-week effects and sum-to-zero city effects
+(n = 14,607 rows) returns city coefficients identical to the simple means (r = 1.000),
+as expected in a near-balanced panel. Its F statistic for H1a (F = 179.3, df = 16, 13,727) treats rows as independent,
+which repeated weekly prices are not, so we read it descriptively.</p>
+
+<figure><img src="figures/fig02_city_premiums.png" style="width:72%"/><figcaption>Fig. 2. Mean food premium per city with 95% t-intervals (n = food items). Filled markers survive Bonferroni.</figcaption></figure>
+<div class="tbl "><p class="cap">Table 7. City food price premiums against the national geometric mean (percent = exp(mean log premium) - 1).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>city</th>
+      <th>province</th>
+      <th>n items</th>
+      <th>mean %</th>
+      <th>95% CI (%)</th>
+      <th>median %</th>
+      <th>t</th>
+      <th>p</th>
+      <th>Bonferroni</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Islamabad</td>
+      <td>ICT</td>
+      <td>32</td>
+      <td>14.14</td>
+      <td>[8.9, 19.6]</td>
+      <td>12.64</td>
+      <td>5.73</td>
+      <td>&lt; 0.001</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>Rawalpindi</td>
+      <td>Punjab</td>
+      <td>32</td>
+      <td>10.21</td>
+      <td>[6.0, 14.6]</td>
+      <td>6.79</td>
+      <td>5.10</td>
+      <td>&lt; 0.001</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>Karachi</td>
+      <td>Sindh</td>
+      <td>32</td>
+      <td>5.22</td>
+      <td>[1.7, 8.9]</td>
+      <td>2.63</td>
+      <td>3.04</td>
+      <td>0.005</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Quetta</td>
+      <td>Balochistan</td>
+      <td>32</td>
+      <td>2.87</td>
+      <td>[-1.4, 7.3]</td>
+      <td>3.16</td>
+      <td>1.37</td>
+      <td>0.181</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Khuzdar</td>
+      <td>Balochistan</td>
+      <td>32</td>
+      <td>1.92</td>
+      <td>[-2.1, 6.1]</td>
+      <td>2.32</td>
+      <td>0.96</td>
+      <td>0.345</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Peshawar</td>
+      <td>KP</td>
+      <td>32</td>
+      <td>1.65</td>
+      <td>[-2.0, 5.4]</td>
+      <td>0.41</td>
+      <td>0.92</td>
+      <td>0.365</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Multan</td>
+      <td>Punjab</td>
+      <td>32</td>
+      <td>1.19</td>
+      <td>[-1.8, 4.2]</td>
+      <td>0.69</td>
+      <td>0.82</td>
+      <td>0.420</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Lahore</td>
+      <td>Punjab</td>
+      <td>31</td>
+      <td>-0.68</td>
+      <td>[-3.1, 1.8]</td>
+      <td>0.04</td>
+      <td>-0.56</td>
+      <td>0.580</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Gujranwala</td>
+      <td>Punjab</td>
+      <td>31</td>
+      <td>-1.31</td>
+      <td>[-4.9, 2.4]</td>
+      <td>-0.72</td>
+      <td>-0.73</td>
+      <td>0.473</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Faisalabad</td>
+      <td>Punjab</td>
+      <td>32</td>
+      <td>-1.45</td>
+      <td>[-3.3, 0.4]</td>
+      <td>-0.14</td>
+      <td>-1.56</td>
+      <td>0.128</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Hyderabad</td>
+      <td>Sindh</td>
+      <td>32</td>
+      <td>-1.93</td>
+      <td>[-5.6, 1.9]</td>
+      <td>-0.10</td>
+      <td>-1.03</td>
+      <td>0.313</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Sialkot</td>
+      <td>Punjab</td>
+      <td>31</td>
+      <td>-2.69</td>
+      <td>[-6.0, 0.7]</td>
+      <td>-0.20</td>
+      <td>-1.61</td>
+      <td>0.119</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Sargodha</td>
+      <td>Punjab</td>
+      <td>32</td>
+      <td>-3.62</td>
+      <td>[-6.5, -0.6]</td>
+      <td>-2.63</td>
+      <td>-2.45</td>
+      <td>0.020</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Bahawalpur</td>
+      <td>Punjab</td>
+      <td>32</td>
+      <td>-3.78</td>
+      <td>[-6.6, -0.9]</td>
+      <td>-2.45</td>
+      <td>-2.65</td>
+      <td>0.013</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Larkana</td>
+      <td>Sindh</td>
+      <td>32</td>
+      <td>-4.92</td>
+      <td>[-9.6, -0.0]</td>
+      <td>-0.16</td>
+      <td>-2.06</td>
+      <td>0.048</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>Sukkur</td>
+      <td>Sindh</td>
+      <td>32</td>
+      <td>-7.11</td>
+      <td>[-11.0, -3.1]</td>
+      <td>-4.05</td>
+      <td>-3.54</td>
+      <td>0.001</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>Bannu</td>
+      <td>KP</td>
+      <td>32</td>
+      <td>-7.36</td>
+      <td>[-11.1, -3.5]</td>
+      <td>-4.57</td>
+      <td>-3.77</td>
+      <td>&lt; 0.001</td>
+      <td>yes</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>3.2 Dispersion by item type (H2)</h3>
+<p>The coefficient of variation compares spread across items priced in different units. Mean cross-city CV is highest for perishables
+(0.157, 11 items) and prepared food (0.144),
+lower for storable staples (0.107, 10 items), and lowest for branded
+packaged goods (0.026), which carry printed or distributor prices (Fig. 3). A one-tailed comparison of
+perishables against storables gives SE(A - B) = 0.0256, Welch t = 1.92, p = 0.037. The
+rank-based check gives p = 0.057. With about ten items a side this is marginal evidence, and we do not oversell it.
+Items were classified on storability and pricing mechanism before looking at dispersion.</p>
+<div class="two"><figure><img src="figures/fig03_dispersion_by_category.png" style="width:100%"/><figcaption>Fig. 3. Mean cross-city CV per food item, by category. Branded goods barely vary across cities; perishables vary most.</figcaption></figure>
+<figure><img src="figures/fig11_box_province_category.png" style="width:100%"/><figcaption>Fig. 4. Food relative prices by province and by item category (city x item x week).</figcaption></figure></div>
+
+<h3>3.3 Persistence and sticky prices (H1b, H3)</h3>
+<p>Across 3,269 consecutive-week pairs where a city was above the cross-city median, 92.7% stayed above it
+the next week. City rates range from 82% to 97%, and a one-tailed test of the 17 city rates
+against 0.5 rejects decisively (t = 37.0, p < 0.001). Persistence is partly mechanical, however:
+75.1% of weekly food log changes are exactly zero (56% for perishables,
+75% for storables, 92% for branded and
+98% for prepared items). Restricted to pairs where the price changed (916 pairs),
+the stay-above rate is still 84.1% (t = 7.3, p < 0.001), with
+the lowest city at 52%. That stickiness reshapes H3. Under the contracted rule (abnormal = |change| above the
+item's own 90th percentile), the threshold is zero for 13 of 32 food items, so any movement at all would count as
+abnormal (§4.2).</p>
+
+<h3>3.4 Distributions and outliers</h3>
+<p>Relative prices are roughly symmetric (skew -0.14) but heavy-tailed (excess kurtosis
+3.47), with a spike at zero from items priced identically everywhere (Fig. 5). Across all 51 items, the
+quartile method flags 3,649 of 23,326 values as mild (beyond 1.5 IQR) and
+1,251 as regular (beyond 3 IQR). The mean-and-SD method flags 1,598 beyond 2 SD and
+434 beyond 3 SD. The methods disagree because the narrow IQR, set by the many zero-premium items, puts the fences
+close, while the SD is inflated by the very extremes it is meant to find, which masks them. On weekly changes the IQR is exactly
+0, so both quartile tiers flag every non-zero change (2,502). That is a degenerate result
+and the method is unusable there. We checked the eight largest |rel_price| values against the raw workbooks: 7
+equal PBS's own national MIN or MAX for that item-week. The other (Sukkur, Tomatoes, week 2025-05-15) has MIN = 20, AVG = 20, MAX = 20 PKR in the raw sheet, a genuine quoted price. All are kept and flagged, because large moves are what H3 studies. The CLT supports t-intervals on city means over about 32 items,
+but the item-level means are skewed for some cities (median skewness across cities -0.29), which is one more reason to report
+medians and bootstrap intervals alongside.</p>
+<div class="two"><figure><img src="figures/fig08_relprice_hist.png" style="width:100%"/><figcaption>Fig. 5. Relative prices with the 1.5 IQR and 3 SD fences and a fitted normal curve. Heavy tails and a spike at 0.</figcaption></figure>
+<figure><img src="figures/fig13_aggregation.png" style="width:100%"/><figcaption>Fig. 6. SD of food relative prices at successive levels of aggregation; the national headline sets it to 0.</figcaption></figure></div>
+
+<h3>3.5 Who pays more versus who can least afford it (H5)</h3>
+<p>Following the Anscombe lesson, we plot before computing (Fig. 7). The relationship runs <b>against</b> the "poor pay more" expectation.
+Premiums are highest in the least deprived cities (Islamabad, Rawalpindi, Karachi), and several of the most deprived (Bannu, Sukkur, Larkana)
+pay below the national reference. Spearman ρ between premium and the deprivation composite is -0.56
+(p = 0.020, n = 17). Dropping each city in turn keeps ρ between -0.72 and
+-0.48, and the most influential city is Khuzdar. With FIES alone, ρ =
+-0.32 (p = 0.209), not significant. Without the water indicator, ρ = -0.50
+(p = 0.041). A simple line of premium on the composite has slope -0.127 log points per unit of
+deprivation (95% CI [-0.249, -0.004], R² = 0.24). This is
+an association across 17 cities, not a causal effect, and the deprivation data predate the prices by six years. The burden re-ranking (Fig. 8)
+shows the policy point. The five highest-premium cities (Islamabad, Rawalpindi, Karachi, Quetta, Khuzdar) share 1 member with the
+five most deprived (Khuzdar, Larkana, Bahawalpur, Sukkur, Bannu) and 2 with the five most food-insecure. Combining premium with
+need, the top three cities for burden are Khuzdar, Quetta, Multan under the composite definition and Khuzdar, Quetta, Bahawalpur under the
+FIES definition. Under both, burden concentrates in Khuzdar and Quetta, whose premiums are above the reference (though not individually
+significant) and whose food insecurity is the highest in the panel.</p>
+<figure><img src="figures/fig04_premium_vs_deprivation.png" style="width:100%"/><figcaption>Fig. 7. City premium against the deprivation composite (left) and FIES food insecurity (right), every city labelled. n = 17; Spearman coefficients in panel titles.</figcaption></figure>
+<div class="two"><figure><img src="figures/fig14_reranking.png" style="width:100%"/><figcaption>Fig. 8. Ranks by premium and by deprivation; crossing lines show the re-ranking.</figcaption></figure>
+<figure><img src="figures/fig06_correlation.png" style="width:100%"/><figcaption>Fig. 9. City-level Spearman correlations (n = 17). Premium correlates negatively with deprivation and with the share of single-quote records.</figcaption></figure></div>
+<p>The correlation matrix (Fig. 9) adds a warning. The premium correlates at r = -0.68 with the city's share
+of single-quote records. The high-premium cities are also those whose averages rest on more distinct quotes. Whether that reflects market
+structure (larger, more varied markets) or measurement is a question for H4, and it is why measurement quality is carried as a control.</p>
+
+<h3>3.6 Representation and measurement quality (H4, exploratory)</h3>
+<p>The 17 cities cover 65% of the urban population of the four provinces and Islamabad (Census 2023),
+and no rural market, AJK or Gilgit-Baltistan. Representation is uneven: Sindh holds 31% of that
+urban population but 24% of the cities, while KP's two cities cover only
+32% of KP's urban population (Appendix Table A4). Measurement quality varies more. The share of
+food records where MIN = MAX, meaning the published average may rest on one quote, runs from 20% in
+Karachi to 91% in Sukkur (Fig. 10). Across province, population
+tercile and deprivation tercile, Kruskal-Wallis tests on n = 17 do not find group differences (p = 0.751,
+0.274 and 0.069), but with three to five groups of three to eight cities they have
+little power. Aggregating to provinces would also hide a mean within-Punjab spread of 0.22 log
+points per item between the cheapest and dearest Punjab city (Fig. 6). That is the project's argument about the national headline in miniature.</p>
+<div class="two"><figure><img src="figures/fig07_single_quote_share.png" style="width:100%"/><figcaption>Fig. 10. Share of food records where MIN = MAX, by city: a data-quality disparity relevant to H4.</figcaption></figure>
+<figure><img src="figures/fig10_province_tercile.png" style="width:100%"/><figcaption>Fig. 11. Conditional proportions of premium terciles within each province (contingency table in the notebook).</figcaption></figure></div>
+
+<h3>3.7 Do markets group geographically? (exploratory, later-syllabus methods)</h3>
+<p>These methods come later in the course. We use them here only to describe the data, not to confirm anything. On the standardised
+17 x 31 matrix of city-by-item mean relative prices (rice IRRI-6/9 dropped for its structural gaps), Ward clustering at
+three clusters gives Islamabad, Rawalpindi; the other seven Punjab cities; and the Sindh, KP and Balochistan cities together (Fig. 12).
+Islamabad and Rawalpindi are each other's nearest neighbour, which supports treating them as one market in later robustness checks.
+Karachi's nearest neighbour is Hyderabad, but Hyderabad's is Faisalabad, so that pair is not mutual. PCA (Fig. 13) puts
+32% of the variance on the first component, which tracks the mean premium (|r| = 0.97):
+the dominant pattern across cities is a general price level. k-means on items' dispersion, volatility and share of unchanged prices separates
+2 flexible items (Onions, Tomatoes), 7 intermediate and
+23 sticky items. Perishables split across all three types, so the hand-made category is a coarse proxy for price
+behaviour (Appendix Table A5).</p>
+<div class="two"><figure><img src="figures/fig05_dendrogram.png" style="width:100%"/><figcaption>Fig. 12. Ward dendrogram of cities (exploratory); labels coloured by province.</figcaption></figure>
+<figure><img src="figures/fig09_pca.png" style="width:100%"/><figcaption>Fig. 13. Cities on the first two principal components of their food price profiles (exploratory).</figcaption></figure></div>
+
+
+<h2>4. Hypotheses and analytical plan</h2>
+<h3>4.1 Formal statements</h3>
+<ul>
+<li><b>H1a (persistent premiums; SDG 2.1):</b> log p<sub>c,i,t</sub> = α<sub>i,t</sub> + β<sub>c</sub> + ε, with Σβ<sub>c</sub> = 0.
+H0: β<sub>c</sub> = 0 for all c; H1: some β<sub>c</sub> ≠ 0. Target <code>log_price</code>; predictors city dummies; controls item-week effects.
+If some cities persistently pay more for the same basket, access to food (Target 2.1) differs by place in a way the national figure hides.</li>
+<li><b>H1b (persistence):</b> H0: P(above median at t+1 | above at t) = 0.5; H1: &gt; 0.5. Consecutive pairs only, reported also for
+changed-price pairs, because unchanged prices make persistence partly mechanical.</li>
+<li><b>H2 (perishability and dispersion; SDG 2.c):</b> H0: μ<sub>CV,perishable</sub> = μ<sub>CV,storable</sub>; H1: perishable &gt; storable.
+The effective n is the number of items. The volatility half needs more consecutive weeks than the archive provides and stays contingent.
+Dispersion in perishables points to market-functioning frictions (Target 2.c).</li>
+<li><b>H3 (abnormal movement; SDG 2.c early warning):</b> H0: a classifier on lagged features does no better than the base rate
+(AUC = 0.5) on a time-ordered test; H1: AUC &gt; 0.5. Target <code>abnormal_next_week</code>, with thresholds per item fitted on training
+weeks only.</li>
+<li><b>H4 (representation and model performance; SDG 10):</b> H0: error rates and data quality are equal across city groups (province,
+population tercile, deprivation tercile); H1: at least one group differs.</li>
+<li><b>H5 (burden versus price; SDG 2.1 and 10):</b> H0: Spearman ρ(premium, deprivation) = 0; H1: ρ ≠ 0, two-sided, n = 17. The burden
+re-ranking is descriptive and is shown under two definitions (composite and FIES).</li>
+</ul>
+<h3>4.2 Refinement of H3 (sharpens the contract, does not change its substance)</h3>
+<p>Because 75% of weekly food changes are zero, the per-item 90th percentile of |change| is zero for
+13 food items, so "abnormal" would mean "moved at all" (base rate 7.8%). We propose defining
+the threshold as the 90th percentile among <i>non-zero</i> changes. That keeps "abnormal against the item's own history" but excludes
+4 items with fewer than five changes, and gives a base rate of 2.9% on
+7,095 labelled rows. Ranking candidate predictors with the mean-and-variance test on training weeks puts
+is_perishable first (score 6.85), followed by whether the price changed this week and the size of the
+change (Table 8).</p>
+
+<div class="tbl "><p class="cap">Table 8. H3 candidate predictors ranked by |mean(abnormal) - mean(normal)| / SE(A - B), refined label, training weeks only.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>feature</th>
+      <th>mean_abnormal</th>
+      <th>mean_normal</th>
+      <th>n_abnormal</th>
+      <th>n_normal</th>
+      <th>score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>is_perishable</td>
+      <td>0.624</td>
+      <td>0.389</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>6.854</td>
+    </tr>
+    <tr>
+      <td>price_changed</td>
+      <td>0.587</td>
+      <td>0.285</td>
+      <td>126</td>
+      <td>4131</td>
+      <td>6.770</td>
+    </tr>
+    <tr>
+      <td>abs_dlog</td>
+      <td>0.075</td>
+      <td>0.023</td>
+      <td>126</td>
+      <td>4131</td>
+      <td>4.254</td>
+    </tr>
+    <tr>
+      <td>log_pop_urban</td>
+      <td>14.056</td>
+      <td>14.372</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>3.070</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>0.467</td>
+      <td>0.426</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>2.884</td>
+    </tr>
+    <tr>
+      <td>abs_dlog_lag1</td>
+      <td>0.082</td>
+      <td>0.026</td>
+      <td>61</td>
+      <td>1831</td>
+      <td>2.680</td>
+    </tr>
+    <tr>
+      <td>abs_rel_price</td>
+      <td>0.105</td>
+      <td>0.086</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>2.434</td>
+    </tr>
+    <tr>
+      <td>rel_price</td>
+      <td>-0.006</td>
+      <td>0.000</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>0.614</td>
+    </tr>
+    <tr>
+      <td>single_quote</td>
+      <td>0.473</td>
+      <td>0.470</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>0.087</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct</td>
+      <td>6.815</td>
+      <td>6.832</td>
+      <td>205</td>
+      <td>6890</td>
+      <td>0.021</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl "><p class="cap">Table 9. Hypothesis mapping: target, predictors, controls, unit of analysis, effective sample and planned test.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Hypothesis</th>
+      <th>Target</th>
+      <th>Predictor(s)</th>
+      <th>Controls</th>
+      <th>Unit</th>
+      <th>Effective n</th>
+      <th>Planned test</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>H1a premiums</td>
+      <td>log_price</td>
+      <td>city (sum-to-zero dummies)</td>
+      <td>item-week effects</td>
+      <td>city x item x week (food)</td>
+      <td>17 cities; 32 items x 27 weeks</td>
+      <td>F test of city effects; descriptive regression</td>
+    </tr>
+    <tr>
+      <td>H1b persistence</td>
+      <td>above median next week</td>
+      <td>above median this week</td>
+      <td>consecutive pairs only; changed-price subset</td>
+      <td>city x item pair</td>
+      <td>17 cities (rate per city)</td>
+      <td>one-sample t of city rates vs 0.5 (one-tailed)</td>
+    </tr>
+    <tr>
+      <td>H2 dispersion</td>
+      <td>mean cross-city CV</td>
+      <td>item category</td>
+      <td>none (item-level)</td>
+      <td>item</td>
+      <td>11 vs 10 items</td>
+      <td>Welch t, one-tailed; Mann-Whitney check</td>
+    </tr>
+    <tr>
+      <td>H3 abnormal move</td>
+      <td>abnormal_next_week</td>
+      <td>lagged change, range, single quote, perishable</td>
+      <td>item thresholds fit on training weeks</td>
+      <td>city x item x week</td>
+      <td>7,095 labelled rows; 2.9% positive</td>
+      <td>AUC on a time-ordered test (M03)</td>
+    </tr>
+    <tr>
+      <td>H4 representation</td>
+      <td>error rate; data quality</td>
+      <td>province, population tercile, deprivation tercile</td>
+      <td>item category</td>
+      <td>city (17) / city-group</td>
+      <td>17 cities, 3 to 5 groups</td>
+      <td>Kruskal-Wallis now; group error rates in M03</td>
+    </tr>
+    <tr>
+      <td>H5 burden</td>
+      <td>city premium</td>
+      <td>deprivation composite; FIES</td>
+      <td>leave-one-out</td>
+      <td>city</td>
+      <td>17</td>
+      <td>Spearman, two-sided</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>4.3 Validation design and planned models (Milestones 03 and 04)</h3>
+<p>Validation will be time-ordered: model fitting on the earliest weeks, validation on later ones, and the frozen week-14 holdout
+(weeks after 2026-09-24) opened once at the end (Fig. 14). Random folds would leak, because the same city-item series appears on
+both sides and later prices inform earlier labels. Accuracy alone will mislead at a 2.9% base rate: a model that always
+predicts "normal" is right about 97% of the time. Milestone 03 will report AUC, precision-recall and
+recall at a fixed alert budget, broken down by city group for H4. The planned models, within the course's agreed scope of classification,
+regression, clustering and fairness, are logistic regression (baseline, interpretable), tree ensembles (random forest or gradient boosting)
+and a small neural network for comparison, all using lag features inside the classifier. No time-series forecasting models and no
+optimisation.</p>
+<figure><img src="figures/fig12_split_design.png" style="width:85%"/><figcaption>Fig. 14. Planned time-ordered split and the frozen holdout (design only; nothing was fitted in this milestone).</figcaption></figure>
+
+<h2>5. Limitations and responsible use</h2>
+<ul>
+<li><b>Coverage:</b> 27 weeks with gaps; only 15 consecutive pairs, which limits volatility and H3 sample
+size. More weeks will be added only from new releases, and the holdout stays sealed.</li>
+<li><b>Purposive sample:</b> 17 PBS cities, urban only, with no AJK or Gilgit-Baltistan and two cities each for KP and Balochistan. No result
+generalises to rural or small-town markets.</li>
+<li><b>Deprivation is not income:</b> district-level 2019-20 survey indicators against 2025-26 prices; a slow-moving structural attribute. District
+totals include rural areas, most strongly for Bannu (urban share 3.6% in Census 2023).</li>
+<li><b>Measurement:</b> SPI records retail prices only. Some city averages rest on a single quote. PDF table extraction for PSLM is checked
+against the printed rows (page references in the manifest) and should be human-verified.</li>
+<li><b>No causal claims:</b> every relationship reported here is an association across at most 17 cities.</li>
+<li><b>Responsible use:</b> labelling a city "expensive" or "deprived" can stigmatise it, and a premium may reflect quality or quote mix as much
+as price. Results are framed as signals for further investigation, not as rankings for action.</li>
+</ul>
+
+<h2>References</h2>
+<p class="note">Pakistan Bureau of Statistics. Weekly Sensitive Price Indicator (SPI), Annexure workbooks, weeks ended 2025-05-15 to
+2026-09-24. https://www.pbs.gov.pk/ (retrieved 2026; URLs and SHA-256 in data/raw manifests).<br/>
+Pakistan Bureau of Statistics. Pakistan Social and Living Standards Measurement Survey (PSLM) 2019-20, District Level. Tables 2.14(a), 2.15,
+7.1, 9.1.<br/>
+Pakistan Bureau of Statistics. 7th Population and Housing Census 2023 (Digital Census), Table 1, district results.<br/>
+Pakistan Bureau of Statistics. CPI (Urban) Group-wise Cumulative Indices (base 2015-16), and Monthly Review on Price Indices, August and
+September 2026.<br/>
+Wickham, H. (2014). Tidy Data. <i>Journal of Statistical Software</i>, 59(10).<br/>
+Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statistician</i>, 27(1), 17-21.<br/>
+FAO. The Food Insecurity Experience Scale (FIES), SDG indicator 2.1.2.</p>
+
+<h2 class="pb">Appendix</h2>
+
+<div class="tbl small"><p class="cap">Table A1. Methods map: technique, course unit, where it is used, what it showed, and the CLO it serves. Rows marked (exploratory) are later-syllabus methods used in exploratory form only.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Technique</th>
+      <th>Course unit/week</th>
+      <th>Where</th>
+      <th>What it showed</th>
+      <th>CLO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Attribute types / codebook</td>
+      <td>02</td>
+      <td>§2.4, App. C</td>
+      <td>46 columns typed; IDs nominal, rel_price interval</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Tidy data, melting</td>
+      <td>03</td>
+      <td>§2.2</td>
+      <td>179x25 sheet with 3 stacked blocks -&gt; 867 tidy rows/week</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Cleaning</td>
+      <td>03</td>
+      <td>§2.2, Table 2</td>
+      <td>83 zero triples to missing; 17 relabelled rows; 0 deleted</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Missing-data options</td>
+      <td>03</td>
+      <td>§2.3, Table 3</td>
+      <td>Three kinds of missingness; none imputed</td>
+      <td>CLO1, CLO3</td>
+    </tr>
+    <tr>
+      <td>Integration: stack, merge</td>
+      <td>03</td>
+      <td>§2.5, Table 5</td>
+      <td>Row count 23,409 unchanged by every join</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Aggregation</td>
+      <td>04</td>
+      <td>§3.6, Fig. 6</td>
+      <td>Within-Punjab range of 0.22 log pts vanishes at province level</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Splitting dates</td>
+      <td>04</td>
+      <td>§2.4</td>
+      <td>13 calendar months; year, month, ISO week</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Sampling, bootstrap</td>
+      <td>04</td>
+      <td>§3.1</td>
+      <td>6 city medians exclude 0 (2000 resamples)</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>Feature subset selection</td>
+      <td>04</td>
+      <td>§4, Table 8</td>
+      <td>log MIN/AVG r = 0.998; top H3 candidate: is_perishable</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>Discretisation</td>
+      <td>04</td>
+      <td>§2.4, Table 4</td>
+      <td>Population equal-width bins 15/0/2 vs terciles 6/5/6</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Normalisation</td>
+      <td>04</td>
+      <td>§2.4</td>
+      <td>Min-max deprivation, z within item-week; decimal scaling rejected</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Encoding</td>
+      <td>04</td>
+      <td>§2.4</td>
+      <td>Province/category dummies; sum-to-zero city coding</td>
+      <td>CLO1</td>
+    </tr>
+    <tr>
+      <td>Central tendency, geometric mean</td>
+      <td>05</td>
+      <td>§2.1</td>
+      <td>Geometric mean reproduces PBS average in 1,377/1,377 item-weeks</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Variation, CV</td>
+      <td>05</td>
+      <td>§3.2, Fig. 3</td>
+      <td>Mean CV perishable 0.157 vs branded 0.026</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Resistant statistics</td>
+      <td>05</td>
+      <td>§3.1</td>
+      <td>Larkana: mean and median differ by 4.8 pts</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Outliers, both methods</td>
+      <td>05</td>
+      <td>§3.4, Fig. 5</td>
+      <td>rel_price: 3,649 (1.5 IQR) vs 434 (3 SD)</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Histogram, bar, box plots</td>
+      <td>05</td>
+      <td>Figs. 3, 10, 5, 4</td>
+      <td>Dispersion by category; single-quote share; fences</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Scatter plots, Anscombe</td>
+      <td>05</td>
+      <td>§3.5, Fig. 7</td>
+      <td>Leave-one-out Spearman -0.72 to -0.48</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Covariance, correlation</td>
+      <td>05</td>
+      <td>§3.5, Fig. 9</td>
+      <td>Premium vs single-quote share r = -0.68</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Quant x cat, cat x cat</td>
+      <td>05</td>
+      <td>Figs. 11, 4</td>
+      <td>Premium tercile by province; rel_price by province</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>Normal, CLT</td>
+      <td>06</td>
+      <td>§3.4</td>
+      <td>rel_price excess kurtosis 3.47; t-intervals over ~32 items</td>
+      <td>CLO4</td>
+    </tr>
+    <tr>
+      <td>t-intervals (sigma unknown)</td>
+      <td>07</td>
+      <td>§3.1, Fig. 2</td>
+      <td>95% CI per city, n = food items</td>
+      <td>CLO2, CLO4</td>
+    </tr>
+    <tr>
+      <td>Hypothesis tests, errors</td>
+      <td>07</td>
+      <td>§3.1-3.3</td>
+      <td>4 of 17 cities survive Bonferroni; H2 p = 0.037</td>
+      <td>CLO2, CLO4</td>
+    </tr>
+    <tr>
+      <td>Hierarchical clustering (exploratory)</td>
+      <td>13-14</td>
+      <td>§3.7, Fig. 12</td>
+      <td>3 clusters: Islamabad-Rawalpindi, other Punjab, rest</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>k-means items (exploratory)</td>
+      <td>13</td>
+      <td>§3.7</td>
+      <td>2 flexible, 7 intermediate, 23 sticky items</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>Nearest neighbours (exploratory)</td>
+      <td>7</td>
+      <td>§3.7</td>
+      <td>Islamabad and Rawalpindi mutual nearest neighbours</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>PCA (exploratory)</td>
+      <td>Unit 05 (named)</td>
+      <td>§3.7, Fig. 13</td>
+      <td>PC1 32% of variance; |r| with premium 0.97</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>Regression (exploratory)</td>
+      <td>10</td>
+      <td>§3.1, §3.5</td>
+      <td>City effects = simple means (r = 1.000); slope on deprivation -0.127</td>
+      <td>CLO2</td>
+    </tr>
+    <tr>
+      <td>Holdout and CV design</td>
+      <td>8</td>
+      <td>§4.3, Fig. 14</td>
+      <td>Time-ordered split; week-14 holdout frozen</td>
+      <td>CLO2, CLO3</td>
+    </tr>
+    <tr>
+      <td>Bias and fairness (exploratory)</td>
+      <td>8, 15</td>
+      <td>§3.6, Fig. 10</td>
+      <td>MIN=MAX share 20% (Karachi) to 91% (Sukkur)</td>
+      <td>CLO3</td>
+    </tr>
+    <tr>
+      <td>Evaluation metrics (exploratory)</td>
+      <td>6</td>
+      <td>§4.3</td>
+      <td>Refined abnormal base rate 2.9%</td>
+      <td>CLO2</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A2. Per-item summary over training weeks (all 51 items): mean price (PKR per PBS unit), mean cross-city CV, share of unchanged consecutive-week prices, share of records with MIN = MAX.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>PBS #</th>
+      <th>item</th>
+      <th>category</th>
+      <th>mean price (PKR)</th>
+      <th>mean CV</th>
+      <th>share unchanged wk/wk</th>
+      <th>share MIN=MAX</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Wheat flour 20kg</td>
+      <td>Storable staple</td>
+      <td>2,213.646</td>
+      <td>0.108</td>
+      <td>0.494</td>
+      <td>0.301</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Rice basmati broken</td>
+      <td>Storable staple</td>
+      <td>218.454</td>
+      <td>0.192</td>
+      <td>0.949</td>
+      <td>0.240</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Rice IRRI-6/9</td>
+      <td>Storable staple</td>
+      <td>156.874</td>
+      <td>0.141</td>
+      <td>0.943</td>
+      <td>0.177</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Bread plain</td>
+      <td>Prepared food</td>
+      <td>113.288</td>
+      <td>0.072</td>
+      <td>0.988</td>
+      <td>0.919</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Beef with bone</td>
+      <td>Perishable</td>
+      <td>1,195.088</td>
+      <td>0.110</td>
+      <td>0.906</td>
+      <td>0.340</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Mutton</td>
+      <td>Perishable</td>
+      <td>2,211.312</td>
+      <td>0.115</td>
+      <td>0.906</td>
+      <td>0.344</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Chicken broiler (live)</td>
+      <td>Perishable</td>
+      <td>379.066</td>
+      <td>0.074</td>
+      <td>0.075</td>
+      <td>0.549</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Milk fresh</td>
+      <td>Perishable</td>
+      <td>208.180</td>
+      <td>0.112</td>
+      <td>0.945</td>
+      <td>0.442</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Curd (dahi) loose</td>
+      <td>Perishable</td>
+      <td>245.620</td>
+      <td>0.164</td>
+      <td>0.945</td>
+      <td>0.458</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Powdered milk NIDO 390g</td>
+      <td>Branded/packaged</td>
+      <td>1,128.550</td>
+      <td>0.026</td>
+      <td>0.898</td>
+      <td>0.706</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Eggs (farm)</td>
+      <td>Perishable</td>
+      <td>289.193</td>
+      <td>0.042</td>
+      <td>0.239</td>
+      <td>0.458</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>Mustard oil (avg quality)</td>
+      <td>Storable staple</td>
+      <td>550.066</td>
+      <td>0.122</td>
+      <td>0.894</td>
+      <td>0.423</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Cooking oil 5L tin (brand)</td>
+      <td>Branded/packaged</td>
+      <td>2,981.018</td>
+      <td>0.015</td>
+      <td>0.875</td>
+      <td>0.935</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>Vegetable ghee 2.5kg tin (brand)</td>
+      <td>Branded/packaged</td>
+      <td>1,514.523</td>
+      <td>0.017</td>
+      <td>0.894</td>
+      <td>0.946</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>Vegetable ghee 1kg pouch (brand)</td>
+      <td>Branded/packaged</td>
+      <td>589.763</td>
+      <td>0.011</td>
+      <td>0.867</td>
+      <td>0.935</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>Bananas</td>
+      <td>Perishable</td>
+      <td>170.233</td>
+      <td>0.269</td>
+      <td>0.580</td>
+      <td>0.275</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>Pulse masoor</td>
+      <td>Storable staple</td>
+      <td>277.183</td>
+      <td>0.090</td>
+      <td>0.788</td>
+      <td>0.303</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>Pulse moong</td>
+      <td>Storable staple</td>
+      <td>382.797</td>
+      <td>0.091</td>
+      <td>0.769</td>
+      <td>0.298</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>Pulse mash</td>
+      <td>Storable staple</td>
+      <td>455.341</td>
+      <td>0.079</td>
+      <td>0.792</td>
+      <td>0.312</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>Pulse gram</td>
+      <td>Storable staple</td>
+      <td>274.550</td>
+      <td>0.103</td>
+      <td>0.678</td>
+      <td>0.333</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>Potatoes</td>
+      <td>Perishable</td>
+      <td>62.326</td>
+      <td>0.237</td>
+      <td>0.537</td>
+      <td>0.264</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>Onions</td>
+      <td>Perishable</td>
+      <td>108.545</td>
+      <td>0.184</td>
+      <td>0.259</td>
+      <td>0.301</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>Tomatoes</td>
+      <td>Perishable</td>
+      <td>138.434</td>
+      <td>0.245</td>
+      <td>0.125</td>
+      <td>0.327</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>Sugar refined</td>
+      <td>Storable staple</td>
+      <td>165.730</td>
+      <td>0.036</td>
+      <td>0.392</td>
+      <td>0.429</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>Gur</td>
+      <td>Storable staple</td>
+      <td>235.110</td>
+      <td>0.114</td>
+      <td>0.843</td>
+      <td>0.290</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>Salt powdered 800g (brand)</td>
+      <td>Branded/packaged</td>
+      <td>67.129</td>
+      <td>0.068</td>
+      <td>0.965</td>
+      <td>0.824</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>Chilli powder 200g (brand)</td>
+      <td>Branded/packaged</td>
+      <td>346.754</td>
+      <td>0.041</td>
+      <td>0.965</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>Garlic</td>
+      <td>Perishable</td>
+      <td>421.912</td>
+      <td>0.169</td>
+      <td>0.604</td>
+      <td>0.233</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>Tea Lipton 190g</td>
+      <td>Branded/packaged</td>
+      <td>450.141</td>
+      <td>0.004</td>
+      <td>0.992</td>
+      <td>0.904</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>Cooked beef (hotel plate)</td>
+      <td>Prepared food</td>
+      <td>321.057</td>
+      <td>0.168</td>
+      <td>0.984</td>
+      <td>0.355</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>Cooked daal (hotel plate)</td>
+      <td>Prepared food</td>
+      <td>172.415</td>
+      <td>0.180</td>
+      <td>0.988</td>
+      <td>0.327</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>Tea prepared (cup)</td>
+      <td>Prepared food</td>
+      <td>64.085</td>
+      <td>0.158</td>
+      <td>0.976</td>
+      <td>0.556</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>Cigarettes Capstan 20s</td>
+      <td>Other non-food</td>
+      <td>246.273</td>
+      <td>0.027</td>
+      <td>0.973</td>
+      <td>0.797</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>Long cloth 57in (brand)</td>
+      <td>Other non-food</td>
+      <td>679.400</td>
+      <td>0.163</td>
+      <td>0.996</td>
+      <td>0.523</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>Shirting</td>
+      <td>Other non-food</td>
+      <td>546.212</td>
+      <td>0.293</td>
+      <td>0.973</td>
+      <td>0.214</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>Lawn printed (brand)</td>
+      <td>Other non-food</td>
+      <td>676.896</td>
+      <td>0.156</td>
+      <td>0.988</td>
+      <td>0.458</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>Georgette</td>
+      <td>Other non-food</td>
+      <td>316.572</td>
+      <td>0.208</td>
+      <td>0.980</td>
+      <td>0.370</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>Gents sandal Bata</td>
+      <td>Other non-food</td>
+      <td>2,499.000</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>Gents sponge chappal Bata</td>
+      <td>Other non-food</td>
+      <td>628.630</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>Ladies sandal Bata</td>
+      <td>Other non-food</td>
+      <td>1,428.630</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>Electricity Q1</td>
+      <td>Administered/utility</td>
+      <td>6.086</td>
+      <td>0.000</td>
+      <td>0.733</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>Gas Q1</td>
+      <td>Administered/utility</td>
+      <td>2,522.796</td>
+      <td>0.000</td>
+      <td>0.937</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>Firewood</td>
+      <td>Other non-food</td>
+      <td>1,471.809</td>
+      <td>0.214</td>
+      <td>0.910</td>
+      <td>0.298</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>Energy saver bulb (brand)</td>
+      <td>Other non-food</td>
+      <td>413.412</td>
+      <td>0.290</td>
+      <td>0.976</td>
+      <td>0.804</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>Washing soap Sufi (brand)</td>
+      <td>Other non-food</td>
+      <td>135.581</td>
+      <td>0.046</td>
+      <td>0.988</td>
+      <td>0.832</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>Match box</td>
+      <td>Other non-food</td>
+      <td>6.297</td>
+      <td>0.117</td>
+      <td>1.000</td>
+      <td>0.824</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td>Petrol super</td>
+      <td>Administered/utility</td>
+      <td>305.818</td>
+      <td>0.003</td>
+      <td>0.667</td>
+      <td>0.745</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>Hi-speed diesel</td>
+      <td>Administered/utility</td>
+      <td>326.530</td>
+      <td>0.002</td>
+      <td>0.600</td>
+      <td>0.747</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>LPG 11.67kg cylinder</td>
+      <td>Administered/utility</td>
+      <td>3,921.730</td>
+      <td>0.057</td>
+      <td>0.420</td>
+      <td>0.427</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>Telephone call charges</td>
+      <td>Administered/utility</td>
+      <td>1.790</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td>Toilet soap Lifebuoy (brand)</td>
+      <td>Other non-food</td>
+      <td>117.292</td>
+      <td>0.034</td>
+      <td>0.980</td>
+      <td>0.991</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A3a. City attributes: Census 2023 urban population and PSLM 2019-20 district deprivation indicators (higher = more deprived).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>city</th>
+      <th>province</th>
+      <th>urban pop. (m)</th>
+      <th>FIES mod/sev %</th>
+      <th>illiterate 10+ %</th>
+      <th>out of school 5-16 %</th>
+      <th>no tap water %</th>
+      <th>composite (0-1)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Islamabad</td>
+      <td>ICT</td>
+      <td>1.11</td>
+      <td>7.93</td>
+      <td>15.00</td>
+      <td>10.00</td>
+      <td>74.31</td>
+      <td>0.16</td>
+    </tr>
+    <tr>
+      <td>Rawalpindi</td>
+      <td>Punjab</td>
+      <td>4.21</td>
+      <td>9.41</td>
+      <td>18.00</td>
+      <td>10.00</td>
+      <td>77.16</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <td>Gujranwala</td>
+      <td>Punjab</td>
+      <td>3.59</td>
+      <td>10.53</td>
+      <td>26.00</td>
+      <td>15.00</td>
+      <td>95.06</td>
+      <td>0.33</td>
+    </tr>
+    <tr>
+      <td>Sialkot</td>
+      <td>Punjab</td>
+      <td>1.48</td>
+      <td>9.65</td>
+      <td>21.00</td>
+      <td>11.00</td>
+      <td>93.78</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <td>Lahore</td>
+      <td>Punjab</td>
+      <td>13.00</td>
+      <td>17.96</td>
+      <td>23.00</td>
+      <td>16.00</td>
+      <td>76.71</td>
+      <td>0.34</td>
+    </tr>
+    <tr>
+      <td>Faisalabad</td>
+      <td>Punjab</td>
+      <td>4.39</td>
+      <td>8.67</td>
+      <td>33.00</td>
+      <td>21.00</td>
+      <td>90.11</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>Sargodha</td>
+      <td>Punjab</td>
+      <td>1.61</td>
+      <td>16.38</td>
+      <td>33.00</td>
+      <td>18.00</td>
+      <td>92.44</td>
+      <td>0.43</td>
+    </tr>
+    <tr>
+      <td>Multan</td>
+      <td>Punjab</td>
+      <td>2.50</td>
+      <td>16.88</td>
+      <td>39.00</td>
+      <td>30.00</td>
+      <td>89.09</td>
+      <td>0.51</td>
+    </tr>
+    <tr>
+      <td>Bahawalpur</td>
+      <td>Punjab</td>
+      <td>1.62</td>
+      <td>21.25</td>
+      <td>51.00</td>
+      <td>32.00</td>
+      <td>86.87</td>
+      <td>0.61</td>
+    </tr>
+    <tr>
+      <td>Karachi</td>
+      <td>Sindh</td>
+      <td>18.87</td>
+      <td>9.60</td>
+      <td>23.85</td>
+      <td>25.74</td>
+      <td>32.94</td>
+      <td>0.14</td>
+    </tr>
+    <tr>
+      <td>Hyderabad</td>
+      <td>Sindh</td>
+      <td>2.02</td>
+      <td>16.59</td>
+      <td>34.00</td>
+      <td>34.00</td>
+      <td>31.68</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <td>Sukkur</td>
+      <td>Sindh</td>
+      <td>0.81</td>
+      <td>15.53</td>
+      <td>46.00</td>
+      <td>48.00</td>
+      <td>81.74</td>
+      <td>0.59</td>
+    </tr>
+    <tr>
+      <td>Larkana</td>
+      <td>Sindh</td>
+      <td>0.80</td>
+      <td>17.28</td>
+      <td>44.00</td>
+      <td>56.00</td>
+      <td>100.00</td>
+      <td>0.70</td>
+    </tr>
+    <tr>
+      <td>Peshawar</td>
+      <td>KP</td>
+      <td>1.91</td>
+      <td>11.22</td>
+      <td>40.00</td>
+      <td>25.00</td>
+      <td>55.51</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <td>Bannu</td>
+      <td>KP</td>
+      <td>0.05</td>
+      <td>18.73</td>
+      <td>47.00</td>
+      <td>39.00</td>
+      <td>75.19</td>
+      <td>0.56</td>
+    </tr>
+    <tr>
+      <td>Quetta</td>
+      <td>Balochistan</td>
+      <td>1.57</td>
+      <td>23.47</td>
+      <td>36.00</td>
+      <td>35.00</td>
+      <td>59.72</td>
+      <td>0.49</td>
+    </tr>
+    <tr>
+      <td>Khuzdar</td>
+      <td>Balochistan</td>
+      <td>0.36</td>
+      <td>29.26</td>
+      <td>78.00</td>
+      <td>60.00</td>
+      <td>92.98</td>
+      <td>0.97</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A3b. City-district crosswalk and alignment decisions.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>city</th>
+      <th>city_code</th>
+      <th>province</th>
+      <th>pslm_districts</th>
+      <th>census_units</th>
+      <th>pslm_rule</th>
+      <th>notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Islamabad</td>
+      <td>01</td>
+      <td>ICT</td>
+      <td>Islamabad</td>
+      <td>ISLAMABAD</td>
+      <td>single district</td>
+      <td>Islamabad and Rawalpindi are one contiguous market but two administrative units; kept separate, each with its own district values.</td>
+    </tr>
+    <tr>
+      <td>Rawalpindi</td>
+      <td>02</td>
+      <td>Punjab</td>
+      <td>Rawalpindi</td>
+      <td>RAWALPINDI</td>
+      <td>single district</td>
+      <td>See Islamabad.</td>
+    </tr>
+    <tr>
+      <td>Gujranwala</td>
+      <td>03</td>
+      <td>Punjab</td>
+      <td>Gujranwala</td>
+      <td>GUJRANWALA</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Sialkot</td>
+      <td>04</td>
+      <td>Punjab</td>
+      <td>Sialkot</td>
+      <td>SIALKOT</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Lahore</td>
+      <td>05</td>
+      <td>Punjab</td>
+      <td>Lahore</td>
+      <td>LAHORE</td>
+      <td>single district</td>
+      <td>District is 100% urban in Census 2023.</td>
+    </tr>
+    <tr>
+      <td>Faisalabad</td>
+      <td>06</td>
+      <td>Punjab</td>
+      <td>Faisalabad</td>
+      <td>FAISALABAD</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Sargodha</td>
+      <td>07</td>
+      <td>Punjab</td>
+      <td>Sargodha</td>
+      <td>SARGODHA</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Multan</td>
+      <td>08</td>
+      <td>Punjab</td>
+      <td>Multan</td>
+      <td>MULTAN</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Bahawalpur</td>
+      <td>09</td>
+      <td>Punjab</td>
+      <td>Bahawalpur</td>
+      <td>BAHAWALPUR</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Karachi</td>
+      <td>10</td>
+      <td>Sindh</td>
+      <td>Karachi Central; Karachi East; Karachi Malir; Karachi South; Karachi West; Korangi</td>
+      <td>KARACHI CENTRAL; KARACHI EAST; MALIR; KARACHI SOUTH; KARACHI WEST; KEAMARI; KORANGI</td>
+      <td>population-weighted mean of 6 PSLM districts (Census 2023 weights; Keamari added to Karachi West)</td>
+      <td>Seven census districts form one SPI market; PSLM 2019-20 reports six (Keamari created later).</td>
+    </tr>
+    <tr>
+      <td>Hyderabad</td>
+      <td>11</td>
+      <td>Sindh</td>
+      <td>Hyderabad</td>
+      <td>HYDERABAD</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Sukkur</td>
+      <td>12</td>
+      <td>Sindh</td>
+      <td>Sukkur</td>
+      <td>SUKKUR</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Larkana</td>
+      <td>13</td>
+      <td>Sindh</td>
+      <td>Larkana</td>
+      <td>LARKANA</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Peshawar</td>
+      <td>14</td>
+      <td>KP</td>
+      <td>Peshawar</td>
+      <td>PESHAWAR</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Bannu</td>
+      <td>15</td>
+      <td>KP</td>
+      <td>Bannu</td>
+      <td>BANNU</td>
+      <td>single district</td>
+      <td>Census 2023 urban share of Bannu district is 3.6%; district totals describe a mostly rural district.</td>
+    </tr>
+    <tr>
+      <td>Quetta</td>
+      <td>16</td>
+      <td>Balochistan</td>
+      <td>Quetta</td>
+      <td>QUETTA</td>
+      <td>single district</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Khuzdar</td>
+      <td>17</td>
+      <td>Balochistan</td>
+      <td>Khuzdar</td>
+      <td>KHUZDAR</td>
+      <td>single district</td>
+      <td>PSLM 2019-20 has no urban sample for Khuzdar: urban indicators are missing, district totals used.</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A4. Representation: SPI cities' urban population against provincial urban population (Census 2023).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>province</th>
+      <th>n_cities</th>
+      <th>spi_pop_urban</th>
+      <th>province_pop_urban</th>
+      <th>share_of_province_urban</th>
+      <th>share_of_national_urban</th>
+      <th>share_of_spi_cities</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ICT</td>
+      <td>1</td>
+      <td>1,108,872.000</td>
+      <td>1,108,872.000</td>
+      <td>1.000</td>
+      <td>0.012</td>
+      <td>0.059</td>
+    </tr>
+    <tr>
+      <td>Punjab</td>
+      <td>8</td>
+      <td>32,412,617.000</td>
+      <td>51,975,967.000</td>
+      <td>0.624</td>
+      <td>0.560</td>
+      <td>0.471</td>
+    </tr>
+    <tr>
+      <td>Sindh</td>
+      <td>4</td>
+      <td>22,503,550.000</td>
+      <td>28,965,488.000</td>
+      <td>0.777</td>
+      <td>0.312</td>
+      <td>0.235</td>
+    </tr>
+    <tr>
+      <td>KP</td>
+      <td>2</td>
+      <td>1,954,373.000</td>
+      <td>6,131,296.000</td>
+      <td>0.319</td>
+      <td>0.066</td>
+      <td>0.118</td>
+    </tr>
+    <tr>
+      <td>Balochistan</td>
+      <td>2</td>
+      <td>1,929,924.000</td>
+      <td>4,611,828.000</td>
+      <td>0.418</td>
+      <td>0.050</td>
+      <td>0.118</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A5. k-means market types (exploratory) against hand-made item categories (number of food items).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>item_category</th>
+      <th>flexible</th>
+      <th>intermediate</th>
+      <th>sticky</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>branded_packaged</td>
+      <td>0</td>
+      <td>0</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <td>perishable</td>
+      <td>2</td>
+      <td>5</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>prepared_food</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>storable_staple</td>
+      <td>0</td>
+      <td>2</td>
+      <td>8</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A6. H5 correlations under three deprivation definitions, with leave-one-out ranges (n = 17).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>deprivation_measure</th>
+      <th>n</th>
+      <th>pearson_r</th>
+      <th>pearson_p</th>
+      <th>spearman_rho</th>
+      <th>spearman_p</th>
+      <th>loo_pearson_min</th>
+      <th>loo_pearson_max</th>
+      <th>loo_spearman_min</th>
+      <th>loo_spearman_max</th>
+      <th>loo_most_influential</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>17</td>
+      <td>-0.494</td>
+      <td>0.044</td>
+      <td>-0.559</td>
+      <td>0.020</td>
+      <td>-0.730</td>
+      <td>-0.397</td>
+      <td>-0.721</td>
+      <td>-0.476</td>
+      <td>Khuzdar</td>
+    </tr>
+    <tr>
+      <td>fies_mod_sev_pct</td>
+      <td>17</td>
+      <td>-0.335</td>
+      <td>0.188</td>
+      <td>-0.321</td>
+      <td>0.209</td>
+      <td>-0.491</td>
+      <td>-0.185</td>
+      <td>-0.456</td>
+      <td>-0.185</td>
+      <td>Khuzdar</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite_nowater</td>
+      <td>17</td>
+      <td>-0.443</td>
+      <td>0.075</td>
+      <td>-0.500</td>
+      <td>0.041</td>
+      <td>-0.664</td>
+      <td>-0.308</td>
+      <td>-0.659</td>
+      <td>-0.400</td>
+      <td>Khuzdar</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A7. Outlier counts by the quartile and mean/SD methods, both tiers.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable</th>
+      <th>n</th>
+      <th>Q1</th>
+      <th>Q3</th>
+      <th>IQR</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>iqr_mild_1.5</th>
+      <th>iqr_regular_3</th>
+      <th>sd_mild_2</th>
+      <th>sd_regular_3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>rel_price, all 51 items</td>
+      <td>23326</td>
+      <td>-0.0374</td>
+      <td>0.0464</td>
+      <td>0.0838</td>
+      <td>0.0000</td>
+      <td>0.1328</td>
+      <td>3649</td>
+      <td>1251</td>
+      <td>1598</td>
+      <td>434</td>
+    </tr>
+    <tr>
+      <td>weekly log change, all items</td>
+      <td>12959</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.0008</td>
+      <td>0.0620</td>
+      <td>2502</td>
+      <td>2502</td>
+      <td>493</td>
+      <td>296</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A8. Codebook of the master dataset (Unit 02 attribute types; missing counts).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>column</th>
+      <th>attribute_type</th>
+      <th>meaningful_operations</th>
+      <th>n_missing</th>
+      <th>pct_missing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>week_end</td>
+      <td>interval</td>
+      <td>differences in days; order; no true zero</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>year</td>
+      <td>interval</td>
+      <td>order, differences</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>month</td>
+      <td>ordinal (cyclic)</td>
+      <td>order within year; mode</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>iso_week</td>
+      <td>ordinal (cyclic)</td>
+      <td>order within year</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>city</td>
+      <td>nominal</td>
+      <td>equality, counts, mode</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>city_code</td>
+      <td>nominal</td>
+      <td>equality only (stored as text)</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>province</td>
+      <td>nominal</td>
+      <td>equality, counts</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>item_id</td>
+      <td>nominal</td>
+      <td>equality only (number is a PBS serial)</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>item_label</td>
+      <td>nominal</td>
+      <td>equality</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>item_short</td>
+      <td>nominal</td>
+      <td>equality</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>unit</td>
+      <td>nominal</td>
+      <td>equality</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>is_food</td>
+      <td>binary (nominal)</td>
+      <td>counts, proportions</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>item_category</td>
+      <td>nominal</td>
+      <td>counts, mode</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>price_min</td>
+      <td>ratio</td>
+      <td>all arithmetic; ratios meaningful within an item</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>price_avg</td>
+      <td>ratio</td>
+      <td>all arithmetic; ratios meaningful within an item</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>price_max</td>
+      <td>ratio</td>
+      <td>all arithmetic; ratios meaningful within an item</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>is_structural_missing</td>
+      <td>binary</td>
+      <td>counts</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>log_price</td>
+      <td>interval</td>
+      <td>differences = log ratios</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>national_gm</td>
+      <td>ratio</td>
+      <td>all arithmetic within an item-week</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>rel_price</td>
+      <td>interval</td>
+      <td>differences, means; ratios of rel_price are meaningless</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>cross_city_median</td>
+      <td>ratio</td>
+      <td>within an item-week</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>above_median</td>
+      <td>binary</td>
+      <td>proportions</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>above_median_prev</td>
+      <td>binary</td>
+      <td>proportions</td>
+      <td>10450</td>
+      <td>44.64</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>single_quote</td>
+      <td>binary</td>
+      <td>proportions</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>price_z_item_week</td>
+      <td>interval</td>
+      <td>differences, means</td>
+      <td>2903</td>
+      <td>12.40</td>
+    </tr>
+    <tr>
+      <td>days_since_prev</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>867</td>
+      <td>3.70</td>
+    </tr>
+    <tr>
+      <td>is_consecutive</td>
+      <td>binary</td>
+      <td>counts</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>dlog_price</td>
+      <td>interval</td>
+      <td>differences, means</td>
+      <td>10450</td>
+      <td>44.64</td>
+    </tr>
+    <tr>
+      <td>price_changed</td>
+      <td>binary</td>
+      <td>proportions</td>
+      <td>10450</td>
+      <td>44.64</td>
+    </tr>
+    <tr>
+      <td>dlog_price_lag1</td>
+      <td>interval</td>
+      <td>differences, means</td>
+      <td>15634</td>
+      <td>66.79</td>
+    </tr>
+    <tr>
+      <td>pop_total</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>pop_urban</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>log_pop_urban</td>
+      <td>interval</td>
+      <td>differences</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>fies_mod_sev_pct</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>illiteracy10_pct</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>out_of_school_pct</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>no_tap_water_pct</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>interval (0-1 scaled)</td>
+      <td>order, differences; zero is the sample minimum</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite_nowater</td>
+      <td>interval (0-1 scaled)</td>
+      <td>order, differences</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>cpi_urban_food</td>
+      <td>ratio (index)</td>
+      <td>ratios between months</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>real_price_avg</td>
+      <td>ratio</td>
+      <td>all arithmetic</td>
+      <td>83</td>
+      <td>0.35</td>
+    </tr>
+    <tr>
+      <td>block</td>
+      <td>nominal</td>
+      <td>provenance only</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>source_file</td>
+      <td>nominal</td>
+      <td>provenance only</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>sha256</td>
+      <td>nominal</td>
+      <td>provenance only</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>parser_version</td>
+      <td>nominal</td>
+      <td>provenance only</td>
+      <td>0</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table></div>
+</body></html>

@@ -48,6 +48,52 @@
   "holdout_found": 1,
   "holdout_weeks": "2026-10-01"
  },
+ "external": {
+  "cpi_months_in_panel": 13,
+  "cpi_first_month": "2025-05",
+  "cpi_last_month": "2026-09",
+  "cpi_first": 273.34,
+  "cpi_last": 311.67,
+  "cpi_change_pct": 14.0228,
+  "pslm_districts_used": 22,
+  "census_units_used": 23,
+  "karachi_pslm_districts": 6,
+  "karachi_census_districts": 7,
+  "pop_urban_17_cities": 59909336.0,
+  "deprivation_indicators": 4,
+  "range": {
+   "fies_mod_sev_pct": {
+    "min": 7.93,
+    "max": 29.26,
+    "min_city": "Islamabad",
+    "max_city": "Khuzdar"
+   },
+   "illiteracy10_pct": {
+    "min": 15.0,
+    "max": 78.0,
+    "min_city": "Islamabad",
+    "max_city": "Khuzdar"
+   },
+   "out_of_school_pct": {
+    "min": 10.0,
+    "max": 60.0,
+    "min_city": "Islamabad",
+    "max_city": "Khuzdar"
+   },
+   "no_tap_water_pct": {
+    "min": 31.68,
+    "max": 100.0,
+    "min_city": "Hyderabad",
+    "max_city": "Larkana"
+   },
+   "deprivation_composite": {
+    "min": 0.138,
+    "max": 0.9743,
+    "min_city": "Karachi",
+    "max_city": "Khuzdar"
+   }
+  }
+ },
  "codebook": {
   "columns": 46
  },
@@ -303,9 +349,6 @@
   },
   "top8_match_pbs_extremes": 7
  },
- "corr": {
-  "pearson_premium_single_quote": -0.6779
- },
  "h5": {
   "deprivation_composite": {
    "pearson_r": -0.4941,
@@ -348,6 +391,9 @@
   "top3_burden_composite": "Khuzdar, Quetta, Multan",
   "top3_burden_fies": "Khuzdar, Quetta, Bahawalpur"
  },
+ "corr": {
+  "pearson_premium_single_quote": -0.6779
+ },
  "normal": {
   "rel_price_skew": -0.1443,
   "rel_price_excess_kurtosis": 3.4716,
@@ -381,72 +427,30 @@
   "n_cities_changed": 17,
   "city_rate_changed_min": 0.5185
  },
- "partb": {
-  "matrix_items": 31,
-  "matrix_cities": 17,
-  "ward_k3": {
-   "cluster_1": "Islamabad, Rawalpindi",
-   "cluster_2": "Gujranwala, Sialkot, Lahore, Faisalabad, Sargodha, Multan, Bahawalpur",
-   "cluster_3": "Karachi, Hyderabad, Sukkur, Larkana, Peshawar, Bannu, Quetta, Khuzdar"
+ "h4": {
+  "single_quote_min_city": "Karachi",
+  "single_quote_min": 0.1979,
+  "single_quote_max_city": "Sukkur",
+  "single_quote_max": 0.9086,
+  "kruskal_province": {
+   "H": 1.9167,
+   "p": 0.7511
   },
-  "nn": {
-   "Islamabad": "Rawalpindi",
-   "Rawalpindi": "Islamabad",
-   "Gujranwala": "Sialkot",
-   "Sialkot": "Faisalabad",
-   "Lahore": "Faisalabad",
-   "Faisalabad": "Lahore",
-   "Sargodha": "Faisalabad",
-   "Multan": "Faisalabad",
-   "Bahawalpur": "Sialkot",
-   "Karachi": "Hyderabad",
-   "Hyderabad": "Faisalabad",
-   "Sukkur": "Hyderabad",
-   "Larkana": "Hyderabad",
-   "Peshawar": "Karachi",
-   "Bannu": "Sargodha",
-   "Quetta": "Karachi",
-   "Khuzdar": "Quetta"
+  "kruskal_pop_tercile": {
+   "H": 2.5869,
+   "p": 0.2743
   },
-  "pca_var_pc1": 0.3177,
-  "pca_var_pc2": 0.1975,
-  "pca_pc1_corr_mean_premium": 0.969,
-  "kmeans_k": 3,
-  "kmeans": {
-   "flexible": {
-    "n": 2,
-    "items": "Onions, Tomatoes"
-   },
-   "intermediate": {
-    "n": 7,
-    "items": "Wheat flour 20kg, Chicken broiler (live), Eggs (farm), Bananas, Potatoes, Sugar refined, Garlic"
-   },
-   "sticky": {
-    "n": 23,
-    "items": "Rice basmati broken, Rice IRRI-6/9, Bread plain, Beef with bone, Mutton, Milk fresh, Curd (dahi) loose, Powdered milk NIDO 390g, Mustard oil (avg quality), Cooking oil 5L tin (brand), Vegetable ghee 2.5kg tin (brand), Vegetable ghee 1kg pouch (brand), Pulse masoor, Pulse moong, Pulse mash, Pulse gram, Gur, Salt powdered 800g (brand), Chilli powder 200g (brand), Tea Lipton 190g, Cooked beef (hotel plate), Cooked daal (hotel plate), Tea prepared (cup)"
-   }
+  "kruskal_deprivation_tercile": {
+   "H": 5.3464,
+   "p": 0.069
   },
-  "reg": {
-   "n_obs": 14607,
-   "corr_coef_vs_simple_mean": 1.0,
-   "max_abs_diff_coef_vs_mean": 0.0001
-  },
-  "simple_reg": {
-   "slope": -0.1265,
-   "slope_ci_lo": -0.249,
-   "slope_ci_hi": -0.004,
-   "intercept": 0.0539,
-   "r2": 0.2442,
-   "p": 0.0438,
-   "n": 17
+  "single_quote_by_province": {
+   "Balochistan": 0.3906,
+   "ICT": 0.2396,
+   "KP": 0.5185,
+   "Punjab": 0.5548,
+   "Sindh": 0.447
   }
- },
- "h1a": {
-  "F": 179.2882,
-  "df1": 16,
-  "df2": 13727,
-  "p": 0.0,
-  "r2_within": 0.1729
  },
  "representation": {
   "national_urban_pop_4prov_ict": 92793451.0,
@@ -477,31 +481,6 @@
    "share_of_spi_cities": 0.1176
   }
  },
- "h4": {
-  "single_quote_min_city": "Karachi",
-  "single_quote_min": 0.1979,
-  "single_quote_max_city": "Sukkur",
-  "single_quote_max": 0.9086,
-  "kruskal_province": {
-   "H": 1.9167,
-   "p": 0.7511
-  },
-  "kruskal_pop_tercile": {
-   "H": 2.5869,
-   "p": 0.2743
-  },
-  "kruskal_deprivation_tercile": {
-   "H": 5.3464,
-   "p": 0.069
-  },
-  "single_quote_by_province": {
-   "Balochistan": 0.3906,
-   "ICT": 0.2396,
-   "KP": 0.5185,
-   "Punjab": 0.5548,
-   "Sindh": 0.447
-  }
- },
  "eval": {
   "share_unchanged": {
    "branded_packaged": 0.9221,
@@ -510,6 +489,73 @@
    "storable_staple": 0.7509
   },
   "share_unchanged_food_all": 0.7507
+ },
+ "partb": {
+  "matrix_items": 31,
+  "matrix_cities": 17,
+  "nn": {
+   "Islamabad": "Rawalpindi",
+   "Rawalpindi": "Islamabad",
+   "Gujranwala": "Sialkot",
+   "Sialkot": "Faisalabad",
+   "Lahore": "Faisalabad",
+   "Faisalabad": "Lahore",
+   "Sargodha": "Faisalabad",
+   "Multan": "Faisalabad",
+   "Bahawalpur": "Sialkot",
+   "Karachi": "Hyderabad",
+   "Hyderabad": "Faisalabad",
+   "Sukkur": "Hyderabad",
+   "Larkana": "Hyderabad",
+   "Peshawar": "Karachi",
+   "Bannu": "Sargodha",
+   "Quetta": "Karachi",
+   "Khuzdar": "Quetta"
+  },
+  "ward_k3": {
+   "cluster_1": "Islamabad, Rawalpindi",
+   "cluster_2": "Gujranwala, Sialkot, Lahore, Faisalabad, Sargodha, Multan, Bahawalpur",
+   "cluster_3": "Karachi, Hyderabad, Sukkur, Larkana, Peshawar, Bannu, Quetta, Khuzdar"
+  },
+  "reg": {
+   "n_obs": 14607,
+   "corr_coef_vs_simple_mean": 1.0,
+   "max_abs_diff_coef_vs_mean": 0.0001
+  },
+  "simple_reg": {
+   "slope": -0.1265,
+   "slope_ci_lo": -0.249,
+   "slope_ci_hi": -0.004,
+   "intercept": 0.0539,
+   "r2": 0.2442,
+   "p": 0.0438,
+   "n": 17
+  },
+  "pca_var_pc1": 0.3177,
+  "pca_var_pc2": 0.1975,
+  "pca_pc1_corr_mean_premium": 0.969,
+  "kmeans_k": 3,
+  "kmeans": {
+   "flexible": {
+    "n": 2,
+    "items": "Onions, Tomatoes"
+   },
+   "intermediate": {
+    "n": 7,
+    "items": "Wheat flour 20kg, Chicken broiler (live), Eggs (farm), Bananas, Potatoes, Sugar refined, Garlic"
+   },
+   "sticky": {
+    "n": 23,
+    "items": "Rice basmati broken, Rice IRRI-6/9, Bread plain, Beef with bone, Mutton, Milk fresh, Curd (dahi) loose, Powdered milk NIDO 390g, Mustard oil (avg quality), Cooking oil 5L tin (brand), Vegetable ghee 2.5kg tin (brand), Vegetable ghee 1kg pouch (brand), Pulse masoor, Pulse moong, Pulse mash, Pulse gram, Gur, Salt powdered 800g (brand), Chilli powder 200g (brand), Tea Lipton 190g, Cooked beef (hotel plate), Cooked daal (hotel plate), Tea prepared (cup)"
+   }
+  }
+ },
+ "h1a": {
+  "F": 179.2882,
+  "df1": 16,
+  "df2": 13727,
+  "p": 0.0,
+  "r2_within": 0.1729
  },
  "figures": {
   "count": 14

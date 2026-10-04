@@ -62,6 +62,12 @@ def style():
 
 
 def savefig(fig, name):
+    """Save a figure. Figure numbers are assigned by the manuscript, so any 'Fig. N.' prefix is dropped."""
+    import re
+    for ax in fig.axes:
+        ax.set_title(re.sub(r"^Fig\. \d+\. ", "", ax.get_title()))
+    if fig._suptitle is not None:
+        fig._suptitle.set_text(re.sub(r"^Fig\. \d+\. ", "", fig._suptitle.get_text()))
     FIGURES.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIGURES / f"{name}.png", bbox_inches="tight")
     plt.close(fig)
@@ -120,6 +126,27 @@ def backfill_summary(manifest: pd.DataFrame) -> dict:
     put("backfill.holdout_found", int((got.split == "holdout").sum()))
     put("backfill.holdout_weeks", ", ".join(got[got.split == "holdout"].candidate_date))
     return N["backfill"]
+
+
+def external_summary(o: dict) -> pd.DataFrame:
+    """Facts about the merged external sources, for the inventory table."""
+    m, city, cpi = o["master"], o["city"], o["cpi"]
+    months = m.week_end.dt.to_period("M").dt.to_timestamp().drop_duplicates().sort_values()
+    c = cpi.set_index("month").loc[months, "cpi_urban_food"]
+    put("external.cpi_months_in_panel", len(months))
+    put("external.cpi_first_month", str(months.iloc[0].date())[:7]); put("external.cpi_last_month", str(months.iloc[-1].date())[:7])
+    put("external.cpi_first", c.iloc[0]); put("external.cpi_last", c.iloc[-1])
+    put("external.cpi_change_pct", 100 * (c.iloc[-1] / c.iloc[0] - 1))
+    put("external.pslm_districts_used", sum(len(x.split("; ")) for x in o["crosswalk"].pslm_districts))
+    put("external.census_units_used", sum(len(x.split("; ")) for x in o["crosswalk"].census_units))
+    put("external.karachi_pslm_districts", 6); put("external.karachi_census_districts", 7)
+    put("external.pop_urban_17_cities", city.pop_urban.sum())
+    put("external.deprivation_indicators", 4)
+    for col in ["fies_mod_sev_pct", "illiteracy10_pct", "out_of_school_pct", "no_tap_water_pct", "deprivation_composite"]:
+        put(f"external.range.{col}.min", city[col].min()); put(f"external.range.{col}.max", city[col].max())
+        put(f"external.range.{col}.min_city", city.loc[city[col].idxmin(), "city"])
+        put(f"external.range.{col}.max_city", city.loc[city[col].idxmax(), "city"])
+    return cpi
 
 
 # ============================================================================ Unit 02

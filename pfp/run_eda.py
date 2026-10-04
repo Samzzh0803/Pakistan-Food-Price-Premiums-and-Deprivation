@@ -18,6 +18,7 @@ def run_all(o: dict) -> dict:
     r = {}
     r["weeks"] = eda.inventory(o)
     r["backfill"] = eda.backfill_summary(manifest)
+    r["cpi"] = eda.external_summary(o)
     r["codebook"] = eda.codebook(m)
     r["tidy"] = eda.tidy_demo(o, o["inventory"].query("status == 'kept'").source_file.iloc[-1])
     r["cleaning"] = eda.cleaning_log(o)
