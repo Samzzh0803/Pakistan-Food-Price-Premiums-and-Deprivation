@@ -157,7 +157,7 @@ H = []
 H.append(f"""<!doctype html><html><head><meta charset="utf-8"><title>Milestone 02 Report</title><style>{css}</style></head><body>
 <h1>Who Pays More, and Who Can Least Afford It? Food Price Premiums, Deprivation and Abnormal Price Movements Across Selected Pakistani Urban Markets</h1>
 <div class="meta"><b>Milestone 02: Data preparation, EDA and hypotheses (draft Sections II and III of the manuscript)</b><br/>
-Yousuf Uyghur, Computer Science · Sameer Hassan, Computer Science<br/>
+<b>Group 30</b> · Yousuf Uyghur (mu07486), Computer Science · Sameer Hassan (sh09036), Computer Science<br/>
 CS/SDP 312/314 L1 Data Science for Social Good, Habib University, Fall 2026 · Dr. Muhammad Usman Arif<br/>
 Notebook, code and data: github.com/Samzzh0803/Pakistan-Food-Price-Premiums-and-Deprivation (branch <code>milestone-02</code>)</div>
 
