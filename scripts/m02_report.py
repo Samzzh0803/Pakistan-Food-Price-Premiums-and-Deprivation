@@ -230,9 +230,9 @@ flagged: rice IRRI-6/9 is never quoted in Gujranwala, Lahore or Sialkot, and Khu
 from its national mean. Missing counts and percentages for <b>every column</b> are in Appendix Table A1. Most of the missingness is structural:
 weekly change columns are undefined across non-consecutive weeks ({f('missing.lag_missing_pct')}% of rows), because only
 {g('panel.consecutive_pairs')} pairs of weeks are 6-8 days apart. Table 3 gives the choice made for each kind of missingness.
-<b>Selection bias:</b> listwise deletion is safe for the price comparisons only because the missingness is structural. Excluding cities that do not
-sell an item removes no market that exists. The coverage gaps in weeks, however, mean the volatility analysis sees only the weeks PBS kept
-online.</p>
+<b>Selection bias:</b> we exclude structural non-quotes from price comparisons, so results describe quoting markets and may still
+reflect selection bias, because a missing quote does not prove an item is unavailable in that city. The gaps in weekly coverage also mean the
+volatility analysis sees only the weeks we could retrieve.</p>
 """)
 H.append(html_table(missing.drop(columns=["options_considered"]), "Table 3. Kinds of missingness, the choice made for each, and why."))
 H.append(f"""

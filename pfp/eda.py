@@ -498,7 +498,7 @@ def summary_table(m: pd.DataFrame, city: pd.DataFrame) -> pd.DataFrame:
     f = food_rows(m)
     lab = f.groupby("item_id")["price_avg"]
     cols = {
-        "price_avg, within item (PKR; z-scored to pool items)": f.price_z_item_week,
+        "price_z_item_week (food; z-score, unitless)": f.price_z_item_week,
         "rel_price (food; log points)": f.rel_price,
         "dlog_price (food; log points, consecutive weeks)": f.dlog_price.dropna(),
         "within_city_range_pct (food; %)": f.within_city_range_pct,
