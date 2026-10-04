@@ -52,7 +52,7 @@ def put(path: str, value):
 
 def save_numbers():
     NUMBERS_JSON.parent.mkdir(parents=True, exist_ok=True)
-    NUMBERS_JSON.write_text(json.dumps(N, indent=1, default=str), encoding="utf-8")
+    NUMBERS_JSON.write_text(json.dumps(N, indent=1, default=str, sort_keys=True), encoding="utf-8")
 
 
 def style():

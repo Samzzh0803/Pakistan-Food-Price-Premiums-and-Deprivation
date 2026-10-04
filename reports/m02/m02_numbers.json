@@ -1,310 +1,544 @@
 {
- "panel": {
-  "rows": 23409,
-  "cols": 46,
-  "weeks": 27,
-  "first_week": "2025-05-15",
-  "last_week": "2026-09-24",
-  "cities": 17,
-  "items": 51,
-  "food_items": 32,
-  "consecutive_pairs": 15,
-  "pairs_7d": 14,
-  "pairs_6d": 1,
-  "gap_min_nonconsec": 13,
-  "gap_max": 77,
-  "thursdays": 25,
-  "wednesdays": 2,
-  "structural_missing_rows": 83,
-  "structural_missing_pct": 0.3546,
-  "train_cutoff": "2026-09-24",
-  "cities_by_province": {
-   "Punjab": 8,
-   "Sindh": 4,
-   "KP": 2,
-   "Balochistan": 2,
-   "ICT": 1
-  }
- },
- "validation": {
-  "item_weeks_checked": 1377,
-  "min_max_pass": 1377,
-  "gm_pass": 1377,
-  "gm_max_abs_rel_err_pct": 0.046,
-  "am_median_abs_rel_err_pct": 0.4191,
-  "md_median_abs_rel_err_pct": 1.0693
- },
- "files": {
-  "kept": 27,
-  "duplicates": 12,
-  "raw_annex_files": 39
- },
- "backfill": {
-  "thursdays_attempted": 73,
-  "pages_requested": 197,
-  "weeks_found": 12,
-  "weeks_missing": 61,
-  "train_found": 11,
-  "holdout_found": 1,
-  "holdout_weeks": "2026-10-01"
- },
- "external": {
-  "cpi_months_in_panel": 13,
-  "cpi_first_month": "2025-05",
-  "cpi_last_month": "2026-09",
-  "cpi_first": 273.34,
-  "cpi_last": 311.67,
-  "cpi_change_pct": 14.0228,
-  "pslm_districts_used": 22,
-  "census_units_used": 23,
-  "karachi_pslm_districts": 6,
-  "karachi_census_districts": 7,
-  "pop_urban_17_cities": 59909336.0,
-  "deprivation_indicators": 4,
-  "range": {
-   "fies_mod_sev_pct": {
-    "min": 7.93,
-    "max": 29.26,
-    "min_city": "Islamabad",
-    "max_city": "Khuzdar"
-   },
-   "illiteracy10_pct": {
-    "min": 15.0,
-    "max": 78.0,
-    "min_city": "Islamabad",
-    "max_city": "Khuzdar"
-   },
-   "out_of_school_pct": {
-    "min": 10.0,
-    "max": 60.0,
-    "min_city": "Islamabad",
-    "max_city": "Khuzdar"
-   },
-   "no_tap_water_pct": {
-    "min": 31.68,
-    "max": 100.0,
-    "min_city": "Hyderabad",
-    "max_city": "Larkana"
-   },
-   "deprivation_composite": {
-    "min": 0.138,
-    "max": 0.9743,
-    "min_city": "Karachi",
-    "max_city": "Khuzdar"
-   }
-  }
- },
- "codebook": {
-  "columns": 46
- },
- "tidy": {
-  "raw_rows": 179,
-  "raw_cols": 25,
-  "raw_blocks": 3,
-  "raw_value_cells": 2601,
-  "tidy_rows_per_week": 867,
-  "tidy_cols_core": 10
- },
- "cleaning": {
-  "relabelled_rows": 17
- },
- "missing": {
-  "structural_rows": 83,
-  "lag_missing_rows": 10367,
-  "lag_missing_pct": 44.2864
- },
- "integration": {
-  "rows_after_all_joins": 23409
- },
  "aggregation": {
   "mean_sd_across_cities": 0.0994,
   "mean_sd_across_provinces": 0.0935,
   "punjab_mean_within_range_logpts": 0.2198,
-  "sd_rel_price_city_item_week": 0.1299,
+  "sd_city_overall_premium": 0.0555,
   "sd_rel_price_city_item_month": 0.1303,
-  "sd_city_overall_premium": 0.0555
+  "sd_rel_price_city_item_week": 0.1299
  },
- "splitting": {
-  "years": "[2025, 2026]",
-  "months_covered": 13
- },
- "premium": {
-  "n_sig_05": 8,
-  "n_sig_bonferroni": 4,
-  "bonferroni_alpha": 0.0029,
-  "city": {
-   "Islamabad": {
-    "pct_mean": 14.1415,
-    "pct_median": 12.6392,
-    "ci_lo_pct": 8.8957,
-    "ci_hi_pct": 19.64,
-    "p": 0.0,
-    "n_items": 32
-   },
-   "Rawalpindi": {
-    "pct_mean": 10.2073,
-    "pct_median": 6.7893,
-    "ci_lo_pct": 6.0059,
-    "ci_hi_pct": 14.5752,
-    "p": 0.0,
-    "n_items": 32
-   },
-   "Karachi": {
-    "pct_mean": 5.2158,
-    "pct_median": 2.6303,
-    "ci_lo_pct": 1.6856,
-    "ci_hi_pct": 8.8685,
-    "p": 0.0048,
-    "n_items": 32
-   },
-   "Quetta": {
-    "pct_mean": 2.8734,
-    "pct_median": 3.1554,
-    "ci_lo_pct": -1.3798,
-    "ci_hi_pct": 7.31,
-    "p": 0.181,
-    "n_items": 32
-   },
-   "Khuzdar": {
-    "pct_mean": 1.9236,
-    "pct_median": 2.3173,
-    "ci_lo_pct": -2.121,
-    "ci_hi_pct": 6.1354,
-    "p": 0.3446,
-    "n_items": 32
-   },
-   "Peshawar": {
-    "pct_mean": 1.6499,
-    "pct_median": 0.4093,
-    "ci_lo_pct": -1.9709,
-    "ci_hi_pct": 5.4045,
-    "p": 0.3646,
-    "n_items": 32
-   },
-   "Multan": {
-    "pct_mean": 1.1934,
-    "pct_median": 0.6908,
-    "ci_lo_pct": -1.7606,
-    "ci_hi_pct": 4.2362,
-    "p": 0.4204,
-    "n_items": 32
-   },
-   "Lahore": {
-    "pct_mean": -0.6797,
-    "pct_median": 0.039,
-    "ci_lo_pct": -3.1208,
-    "ci_hi_pct": 1.8229,
-    "p": 0.5798,
-    "n_items": 31
-   },
-   "Gujranwala": {
-    "pct_mean": -1.3118,
-    "pct_median": -0.7194,
-    "ci_lo_pct": -4.9089,
-    "ci_hi_pct": 2.4214,
-    "p": 0.4733,
-    "n_items": 31
-   },
-   "Faisalabad": {
-    "pct_mean": -1.4464,
-    "pct_median": -0.1418,
-    "ci_lo_pct": -3.3038,
-    "ci_hi_pct": 0.4466,
-    "p": 0.1285,
-    "n_items": 32
-   },
-   "Hyderabad": {
-    "pct_mean": -1.9266,
-    "pct_median": -0.1039,
-    "ci_lo_pct": -5.6449,
-    "ci_hi_pct": 1.9383,
-    "p": 0.3126,
-    "n_items": 32
-   },
-   "Sialkot": {
-    "pct_mean": -2.6851,
-    "pct_median": -0.2033,
-    "ci_lo_pct": -5.9955,
-    "ci_hi_pct": 0.7419,
-    "p": 0.1187,
-    "n_items": 31
-   },
-   "Sargodha": {
-    "pct_mean": -3.6198,
-    "pct_median": -2.6307,
-    "ci_lo_pct": -6.5353,
-    "ci_hi_pct": -0.6134,
-    "p": 0.0202,
-    "n_items": 32
-   },
-   "Bahawalpur": {
-    "pct_mean": -3.7808,
-    "pct_median": -2.4509,
-    "ci_lo_pct": -6.5981,
-    "ci_hi_pct": -0.8786,
-    "p": 0.0127,
-    "n_items": 32
-   },
-   "Larkana": {
-    "pct_mean": -4.9228,
-    "pct_median": -0.1641,
-    "ci_lo_pct": -9.5625,
-    "ci_hi_pct": -0.0451,
-    "p": 0.0481,
-    "n_items": 32
-   },
-   "Sukkur": {
-    "pct_mean": -7.1148,
-    "pct_median": -4.052,
-    "ci_lo_pct": -10.9814,
-    "ci_hi_pct": -3.0802,
-    "p": 0.0013,
-    "n_items": 32
-   },
-   "Bannu": {
-    "pct_mean": -7.3579,
-    "pct_median": -4.5654,
-    "ci_lo_pct": -11.1066,
-    "ci_hi_pct": -3.451,
-    "p": 0.0007,
-    "n_items": 32
-   }
-  },
-  "top_city": "Islamabad",
-  "bottom_city": "Bannu",
-  "max_mean_median_gap_city": "Larkana",
-  "max_mean_median_gap_pts": 4.7587
+ "backfill": {
+  "holdout_found": 1,
+  "holdout_weeks": "2026-10-01",
+  "pages_requested": 197,
+  "thursdays_attempted": 73,
+  "train_found": 11,
+  "weeks_found": 12,
+  "weeks_missing": 61
  },
  "bootstrap": {
-  "reps": 2000,
-  "n_cities_excluding_zero": 6
+  "n_cities_excluding_zero": 6,
+  "reps": 2000
  },
- "h3": {
-  "items_p90_zero": 13,
-  "items_too_few_changes": 4,
-  "base_rate_contract": 0.0775,
-  "base_rate_refined": 0.0289,
-  "labelled_rows_contract": 8115,
-  "labelled_rows_refined": 7095
+ "cleaning": {
+  "relabelled_rows": 17
+ },
+ "codebook": {
+  "columns": 46
+ },
+ "corr": {
+  "pearson_premium_single_quote": -0.6779
+ },
+ "discretisation": {
+  "deprivation_composite": {
+   "equal_freq": "6/5/6",
+   "equal_width": "9/6/2"
+  },
+  "pop_urban": {
+   "equal_freq": "6/5/6",
+   "equal_width": "15/0/2"
+  }
+ },
+ "eval": {
+  "share_unchanged": {
+   "branded_packaged": 0.9221,
+   "perishable": 0.5565,
+   "prepared_food": 0.9843,
+   "storable_staple": 0.7509
+  },
+  "share_unchanged_food_all": 0.7507
+ },
+ "external": {
+  "census_units_used": 23,
+  "cpi_change_pct": 14.0228,
+  "cpi_first": 273.34,
+  "cpi_first_month": "2025-05",
+  "cpi_last": 311.67,
+  "cpi_last_month": "2026-09",
+  "cpi_months_in_panel": 13,
+  "deprivation_indicators": 4,
+  "karachi_census_districts": 7,
+  "karachi_pslm_districts": 6,
+  "pop_urban_17_cities": 59909336.0,
+  "pslm_districts_used": 22,
+  "range": {
+   "deprivation_composite": {
+    "max": 0.9743,
+    "max_city": "Khuzdar",
+    "min": 0.138,
+    "min_city": "Karachi"
+   },
+   "fies_mod_sev_pct": {
+    "max": 29.26,
+    "max_city": "Khuzdar",
+    "min": 7.93,
+    "min_city": "Islamabad"
+   },
+   "illiteracy10_pct": {
+    "max": 78.0,
+    "max_city": "Khuzdar",
+    "min": 15.0,
+    "min_city": "Islamabad"
+   },
+   "no_tap_water_pct": {
+    "max": 100.0,
+    "max_city": "Larkana",
+    "min": 31.68,
+    "min_city": "Hyderabad"
+   },
+   "out_of_school_pct": {
+    "max": 60.0,
+    "max_city": "Khuzdar",
+    "min": 10.0,
+    "min_city": "Islamabad"
+   }
+  }
  },
  "feature_sel": {
-  "corr_logmin_logavg": 0.9984,
   "corr_logmax_logavg": 0.9984,
+  "corr_logmin_logavg": 0.9984,
   "top_feature": "is_perishable",
   "top_score": 6.8541
  },
- "discretisation": {
-  "pop_urban": {
-   "equal_width": "15/0/2",
-   "equal_freq": "6/5/6"
+ "figures": {
+  "count": 14
+ },
+ "files": {
+  "duplicates": 12,
+  "kept": 27,
+  "raw_annex_files": 39
+ },
+ "h1a": {
+  "F": 179.2882,
+  "df1": 16,
+  "df2": 13727,
+  "p": 0.0,
+  "r2_within": 0.1729
+ },
+ "h1b": {
+  "city_rate_changed_min": 0.5185,
+  "city_rate_max": 0.9657,
+  "city_rate_min": 0.8172,
+  "n_cities": 17,
+  "n_cities_changed": 17,
+  "n_pairs": 3269,
+  "n_pairs_changed": 916,
+  "overall_stay_rate": 0.9269,
+  "overall_stay_rate_changed": 0.8406,
+  "p_one_tailed": 0.0,
+  "p_one_tailed_changed": 0.0,
+  "t_vs_half": 36.9665,
+  "t_vs_half_changed": 7.3034
+ },
+ "h2": {
+  "mannwhitney_p_one_tailed": 0.0566,
+  "mean_cv_perishable": 0.1565,
+  "mean_cv_storable": 0.1075,
+  "n_perishable": 11,
+  "n_storable": 10,
+  "p_one_tailed": 0.0368,
+  "se_diff": 0.0256,
+  "t_welch": 1.9156
+ },
+ "h3": {
+  "base_rate_contract": 0.0775,
+  "base_rate_refined": 0.0289,
+  "items_p90_zero": 13,
+  "items_too_few_changes": 4,
+  "labelled_rows_contract": 8115,
+  "labelled_rows_refined": 7095
+ },
+ "h4": {
+  "kruskal_deprivation_tercile": {
+   "H": 5.3464,
+   "p": 0.069
   },
+  "kruskal_pop_tercile": {
+   "H": 2.5869,
+   "p": 0.2743
+  },
+  "kruskal_province": {
+   "H": 1.9167,
+   "p": 0.7511
+  },
+  "single_quote_by_province": {
+   "Balochistan": 0.3906,
+   "ICT": 0.2396,
+   "KP": 0.5185,
+   "Punjab": 0.5548,
+   "Sindh": 0.447
+  },
+  "single_quote_max": 0.9086,
+  "single_quote_max_city": "Sukkur",
+  "single_quote_min": 0.1979,
+  "single_quote_min_city": "Karachi"
+ },
+ "h5": {
   "deprivation_composite": {
-   "equal_width": "9/6/2",
-   "equal_freq": "6/5/6"
-  }
+   "loo_most_influential": "Khuzdar",
+   "loo_pearson_max": -0.3968,
+   "loo_pearson_min": -0.7297,
+   "loo_spearman_max": -0.4765,
+   "loo_spearman_min": -0.7206,
+   "pearson_p": 0.0438,
+   "pearson_r": -0.4941,
+   "spearman_p": 0.0197,
+   "spearman_rho": -0.5588
+  },
+  "deprivation_composite_nowater": {
+   "loo_most_influential": "Khuzdar",
+   "loo_pearson_max": -0.3083,
+   "loo_pearson_min": -0.6643,
+   "loo_spearman_max": -0.4,
+   "loo_spearman_min": -0.6588,
+   "pearson_p": 0.0749,
+   "pearson_r": -0.443,
+   "spearman_p": 0.041,
+   "spearman_rho": -0.5
+  },
+  "fies_mod_sev_pct": {
+   "loo_most_influential": "Khuzdar",
+   "loo_pearson_max": -0.1848,
+   "loo_pearson_min": -0.4914,
+   "loo_spearman_max": -0.1853,
+   "loo_spearman_min": -0.4559,
+   "pearson_p": 0.1883,
+   "pearson_r": -0.3353,
+   "spearman_p": 0.2089,
+   "spearman_rho": -0.3211
+  },
+  "top3_burden_composite": "Khuzdar, Quetta, Multan",
+  "top3_burden_fies": "Khuzdar, Quetta, Bahawalpur",
+  "top5_deprivation": "Khuzdar, Larkana, Bahawalpur, Sukkur, Bannu",
+  "top5_fies": "Khuzdar, Quetta, Bahawalpur, Bannu, Lahore",
+  "top5_overlap_premium_deprivation": 1,
+  "top5_overlap_premium_fies": 2,
+  "top5_premium": "Islamabad, Rawalpindi, Karachi, Quetta, Khuzdar"
+ },
+ "integration": {
+  "rows_after_all_joins": 23409
+ },
+ "missing": {
+  "lag_missing_pct": 44.2864,
+  "lag_missing_rows": 10367,
+  "structural_rows": 83
+ },
+ "normal": {
+  "city_item_skew_median": -0.2908,
+  "median_within_item_skew_log": 0.0236,
+  "median_within_item_skew_raw": 0.216,
+  "pooled_raw_price_skew": 2.1284,
+  "rel_price_excess_kurtosis": 3.4716,
+  "rel_price_skew": -0.1443
  },
  "normalisation": {
   "decimal_scaling_j_wheat": 4
+ },
+ "outliers": {
+  "dlog": {
+   "IQR": 0.0,
+   "iqr_mild_1_5": 2502,
+   "iqr_regular_3": 2502,
+   "n": 12959,
+   "sd_mild_2": 493,
+   "sd_regular_3": 296
+  },
+  "rel": {
+   "IQR": 0.0838,
+   "iqr_mild_1_5": 3649,
+   "iqr_regular_3": 1251,
+   "n": 23326,
+   "sd_mild_2": 1598,
+   "sd_regular_3": 434
+  },
+  "top8_match_pbs_extremes": 7
+ },
+ "panel": {
+  "cities": 17,
+  "cities_by_province": {
+   "Balochistan": 2,
+   "ICT": 1,
+   "KP": 2,
+   "Punjab": 8,
+   "Sindh": 4
+  },
+  "cols": 46,
+  "consecutive_pairs": 15,
+  "first_week": "2025-05-15",
+  "food_items": 32,
+  "gap_max": 77,
+  "gap_min_nonconsec": 13,
+  "items": 51,
+  "last_week": "2026-09-24",
+  "pairs_6d": 1,
+  "pairs_7d": 14,
+  "rows": 23409,
+  "structural_missing_pct": 0.3546,
+  "structural_missing_rows": 83,
+  "thursdays": 25,
+  "train_cutoff": "2026-09-24",
+  "wednesdays": 2,
+  "weeks": 27
+ },
+ "partb": {
+  "kmeans": {
+   "flexible": {
+    "items": "Onions, Tomatoes",
+    "n": 2
+   },
+   "intermediate": {
+    "items": "Wheat flour 20kg, Chicken broiler (live), Eggs (farm), Bananas, Potatoes, Sugar refined, Garlic",
+    "n": 7
+   },
+   "sticky": {
+    "items": "Rice basmati broken, Rice IRRI-6/9, Bread plain, Beef with bone, Mutton, Milk fresh, Curd (dahi) loose, Powdered milk NIDO 390g, Mustard oil (avg quality), Cooking oil 5L tin (brand), Vegetable ghee 2.5kg tin (brand), Vegetable ghee 1kg pouch (brand), Pulse masoor, Pulse moong, Pulse mash, Pulse gram, Gur, Salt powdered 800g (brand), Chilli powder 200g (brand), Tea Lipton 190g, Cooked beef (hotel plate), Cooked daal (hotel plate), Tea prepared (cup)",
+    "n": 23
+   }
+  },
+  "kmeans_k": 3,
+  "matrix_cities": 17,
+  "matrix_items": 31,
+  "nn": {
+   "Bahawalpur": "Sialkot",
+   "Bannu": "Sargodha",
+   "Faisalabad": "Lahore",
+   "Gujranwala": "Sialkot",
+   "Hyderabad": "Faisalabad",
+   "Islamabad": "Rawalpindi",
+   "Karachi": "Hyderabad",
+   "Khuzdar": "Quetta",
+   "Lahore": "Faisalabad",
+   "Larkana": "Hyderabad",
+   "Multan": "Faisalabad",
+   "Peshawar": "Karachi",
+   "Quetta": "Karachi",
+   "Rawalpindi": "Islamabad",
+   "Sargodha": "Faisalabad",
+   "Sialkot": "Faisalabad",
+   "Sukkur": "Hyderabad"
+  },
+  "pca_pc1_corr_mean_premium": 0.969,
+  "pca_var_pc1": 0.3177,
+  "pca_var_pc2": 0.1975,
+  "reg": {
+   "corr_coef_vs_simple_mean": 1.0,
+   "max_abs_diff_coef_vs_mean": 0.0001,
+   "n_obs": 14607
+  },
+  "simple_reg": {
+   "intercept": 0.0539,
+   "n": 17,
+   "p": 0.0438,
+   "r2": 0.2442,
+   "slope": -0.1265,
+   "slope_ci_hi": -0.004,
+   "slope_ci_lo": -0.249
+  },
+  "ward_k3": {
+   "cluster_1": "Islamabad, Rawalpindi",
+   "cluster_2": "Gujranwala, Sialkot, Lahore, Faisalabad, Sargodha, Multan, Bahawalpur",
+   "cluster_3": "Karachi, Hyderabad, Sukkur, Larkana, Peshawar, Bannu, Quetta, Khuzdar"
+  }
+ },
+ "premium": {
+  "bonferroni_alpha": 0.0029,
+  "bottom_city": "Bannu",
+  "city": {
+   "Bahawalpur": {
+    "ci_hi_pct": -0.8786,
+    "ci_lo_pct": -6.5981,
+    "n_items": 32,
+    "p": 0.0127,
+    "pct_mean": -3.7808,
+    "pct_median": -2.4509
+   },
+   "Bannu": {
+    "ci_hi_pct": -3.451,
+    "ci_lo_pct": -11.1066,
+    "n_items": 32,
+    "p": 0.0007,
+    "pct_mean": -7.3579,
+    "pct_median": -4.5654
+   },
+   "Faisalabad": {
+    "ci_hi_pct": 0.4466,
+    "ci_lo_pct": -3.3038,
+    "n_items": 32,
+    "p": 0.1285,
+    "pct_mean": -1.4464,
+    "pct_median": -0.1418
+   },
+   "Gujranwala": {
+    "ci_hi_pct": 2.4214,
+    "ci_lo_pct": -4.9089,
+    "n_items": 31,
+    "p": 0.4733,
+    "pct_mean": -1.3118,
+    "pct_median": -0.7194
+   },
+   "Hyderabad": {
+    "ci_hi_pct": 1.9383,
+    "ci_lo_pct": -5.6449,
+    "n_items": 32,
+    "p": 0.3126,
+    "pct_mean": -1.9266,
+    "pct_median": -0.1039
+   },
+   "Islamabad": {
+    "ci_hi_pct": 19.64,
+    "ci_lo_pct": 8.8957,
+    "n_items": 32,
+    "p": 0.0,
+    "pct_mean": 14.1415,
+    "pct_median": 12.6392
+   },
+   "Karachi": {
+    "ci_hi_pct": 8.8685,
+    "ci_lo_pct": 1.6856,
+    "n_items": 32,
+    "p": 0.0048,
+    "pct_mean": 5.2158,
+    "pct_median": 2.6303
+   },
+   "Khuzdar": {
+    "ci_hi_pct": 6.1354,
+    "ci_lo_pct": -2.121,
+    "n_items": 32,
+    "p": 0.3446,
+    "pct_mean": 1.9236,
+    "pct_median": 2.3173
+   },
+   "Lahore": {
+    "ci_hi_pct": 1.8229,
+    "ci_lo_pct": -3.1208,
+    "n_items": 31,
+    "p": 0.5798,
+    "pct_mean": -0.6797,
+    "pct_median": 0.039
+   },
+   "Larkana": {
+    "ci_hi_pct": -0.0451,
+    "ci_lo_pct": -9.5625,
+    "n_items": 32,
+    "p": 0.0481,
+    "pct_mean": -4.9228,
+    "pct_median": -0.1641
+   },
+   "Multan": {
+    "ci_hi_pct": 4.2362,
+    "ci_lo_pct": -1.7606,
+    "n_items": 32,
+    "p": 0.4204,
+    "pct_mean": 1.1934,
+    "pct_median": 0.6908
+   },
+   "Peshawar": {
+    "ci_hi_pct": 5.4045,
+    "ci_lo_pct": -1.9709,
+    "n_items": 32,
+    "p": 0.3646,
+    "pct_mean": 1.6499,
+    "pct_median": 0.4093
+   },
+   "Quetta": {
+    "ci_hi_pct": 7.31,
+    "ci_lo_pct": -1.3798,
+    "n_items": 32,
+    "p": 0.181,
+    "pct_mean": 2.8734,
+    "pct_median": 3.1554
+   },
+   "Rawalpindi": {
+    "ci_hi_pct": 14.5752,
+    "ci_lo_pct": 6.0059,
+    "n_items": 32,
+    "p": 0.0,
+    "pct_mean": 10.2073,
+    "pct_median": 6.7893
+   },
+   "Sargodha": {
+    "ci_hi_pct": -0.6134,
+    "ci_lo_pct": -6.5353,
+    "n_items": 32,
+    "p": 0.0202,
+    "pct_mean": -3.6198,
+    "pct_median": -2.6307
+   },
+   "Sialkot": {
+    "ci_hi_pct": 0.7419,
+    "ci_lo_pct": -5.9955,
+    "n_items": 31,
+    "p": 0.1187,
+    "pct_mean": -2.6851,
+    "pct_median": -0.2033
+   },
+   "Sukkur": {
+    "ci_hi_pct": -3.0802,
+    "ci_lo_pct": -10.9814,
+    "n_items": 32,
+    "p": 0.0013,
+    "pct_mean": -7.1148,
+    "pct_median": -4.052
+   }
+  },
+  "max_mean_median_gap_city": "Larkana",
+  "max_mean_median_gap_pts": 4.7587,
+  "n_sig_05": 8,
+  "n_sig_bonferroni": 4,
+  "top_city": "Islamabad"
+ },
+ "representation": {
+  "Balochistan": {
+   "share_of_national_urban": 0.0497,
+   "share_of_province_urban": 0.4185,
+   "share_of_spi_cities": 0.1176
+  },
+  "ICT": {
+   "share_of_national_urban": 0.0119,
+   "share_of_province_urban": 1.0,
+   "share_of_spi_cities": 0.0588
+  },
+  "KP": {
+   "share_of_national_urban": 0.0661,
+   "share_of_province_urban": 0.3188,
+   "share_of_spi_cities": 0.1176
+  },
+  "Punjab": {
+   "share_of_national_urban": 0.5601,
+   "share_of_province_urban": 0.6236,
+   "share_of_spi_cities": 0.4706
+  },
+  "Sindh": {
+   "share_of_national_urban": 0.3122,
+   "share_of_province_urban": 0.7769,
+   "share_of_spi_cities": 0.2353
+  },
+  "national_urban_pop_4prov_ict": 92793451.0,
+  "spi_share_national_urban": 0.6456
+ },
+ "splitting": {
+  "months_covered": 13,
+  "years": "[2025, 2026]"
+ },
+ "summary": {
+  "dlog_share_zero_food": 0.7507,
+  "single_quote_share_food": 0.4861
+ },
+ "tidy": {
+  "raw_blocks": 3,
+  "raw_cols": 25,
+  "raw_rows": 179,
+  "raw_value_cells": 2601,
+  "tidy_cols_core": 10,
+  "tidy_rows_per_week": 867
+ },
+ "validation": {
+  "am_median_abs_rel_err_pct": 0.4191,
+  "gm_max_abs_rel_err_pct": 0.046,
+  "gm_pass": 1377,
+  "item_weeks_checked": 1377,
+  "md_median_abs_rel_err_pct": 1.0693,
+  "min_max_pass": 1377
  },
  "variation": {
   "mean_cv": {
@@ -325,239 +559,5 @@
    "prepared_food": 0.9843,
    "storable_staple": 0.7543
   }
- },
- "summary": {
-  "dlog_share_zero_food": 0.7507,
-  "single_quote_share_food": 0.4861
- },
- "outliers": {
-  "rel": {
-   "n": 23326,
-   "IQR": 0.0838,
-   "iqr_mild_1_5": 3649,
-   "iqr_regular_3": 1251,
-   "sd_mild_2": 1598,
-   "sd_regular_3": 434
-  },
-  "dlog": {
-   "n": 12959,
-   "IQR": 0.0,
-   "iqr_mild_1_5": 2502,
-   "iqr_regular_3": 2502,
-   "sd_mild_2": 493,
-   "sd_regular_3": 296
-  },
-  "top8_match_pbs_extremes": 7
- },
- "h5": {
-  "deprivation_composite": {
-   "pearson_r": -0.4941,
-   "pearson_p": 0.0438,
-   "spearman_rho": -0.5588,
-   "spearman_p": 0.0197,
-   "loo_pearson_min": -0.7297,
-   "loo_pearson_max": -0.3968,
-   "loo_spearman_min": -0.7206,
-   "loo_spearman_max": -0.4765,
-   "loo_most_influential": "Khuzdar"
-  },
-  "fies_mod_sev_pct": {
-   "pearson_r": -0.3353,
-   "pearson_p": 0.1883,
-   "spearman_rho": -0.3211,
-   "spearman_p": 0.2089,
-   "loo_pearson_min": -0.4914,
-   "loo_pearson_max": -0.1848,
-   "loo_spearman_min": -0.4559,
-   "loo_spearman_max": -0.1853,
-   "loo_most_influential": "Khuzdar"
-  },
-  "deprivation_composite_nowater": {
-   "pearson_r": -0.443,
-   "pearson_p": 0.0749,
-   "spearman_rho": -0.5,
-   "spearman_p": 0.041,
-   "loo_pearson_min": -0.6643,
-   "loo_pearson_max": -0.3083,
-   "loo_spearman_min": -0.6588,
-   "loo_spearman_max": -0.4,
-   "loo_most_influential": "Khuzdar"
-  },
-  "top5_premium": "Islamabad, Rawalpindi, Karachi, Quetta, Khuzdar",
-  "top5_deprivation": "Khuzdar, Larkana, Bahawalpur, Sukkur, Bannu",
-  "top5_fies": "Khuzdar, Quetta, Bahawalpur, Bannu, Lahore",
-  "top5_overlap_premium_deprivation": 1,
-  "top5_overlap_premium_fies": 2,
-  "top3_burden_composite": "Khuzdar, Quetta, Multan",
-  "top3_burden_fies": "Khuzdar, Quetta, Bahawalpur"
- },
- "corr": {
-  "pearson_premium_single_quote": -0.6779
- },
- "normal": {
-  "rel_price_skew": -0.1443,
-  "rel_price_excess_kurtosis": 3.4716,
-  "city_item_skew_median": -0.2908,
-  "median_within_item_skew_raw": 0.216,
-  "median_within_item_skew_log": 0.0236,
-  "pooled_raw_price_skew": 2.1284
- },
- "h2": {
-  "n_perishable": 11,
-  "n_storable": 10,
-  "mean_cv_perishable": 0.1565,
-  "mean_cv_storable": 0.1075,
-  "se_diff": 0.0256,
-  "t_welch": 1.9156,
-  "p_one_tailed": 0.0368,
-  "mannwhitney_p_one_tailed": 0.0566
- },
- "h1b": {
-  "overall_stay_rate": 0.9269,
-  "n_pairs": 3269,
-  "overall_stay_rate_changed": 0.8406,
-  "n_pairs_changed": 916,
-  "n_cities": 17,
-  "city_rate_min": 0.8172,
-  "city_rate_max": 0.9657,
-  "t_vs_half": 36.9665,
-  "p_one_tailed": 0.0,
-  "t_vs_half_changed": 7.3034,
-  "p_one_tailed_changed": 0.0,
-  "n_cities_changed": 17,
-  "city_rate_changed_min": 0.5185
- },
- "h4": {
-  "single_quote_min_city": "Karachi",
-  "single_quote_min": 0.1979,
-  "single_quote_max_city": "Sukkur",
-  "single_quote_max": 0.9086,
-  "kruskal_province": {
-   "H": 1.9167,
-   "p": 0.7511
-  },
-  "kruskal_pop_tercile": {
-   "H": 2.5869,
-   "p": 0.2743
-  },
-  "kruskal_deprivation_tercile": {
-   "H": 5.3464,
-   "p": 0.069
-  },
-  "single_quote_by_province": {
-   "Balochistan": 0.3906,
-   "ICT": 0.2396,
-   "KP": 0.5185,
-   "Punjab": 0.5548,
-   "Sindh": 0.447
-  }
- },
- "representation": {
-  "national_urban_pop_4prov_ict": 92793451.0,
-  "spi_share_national_urban": 0.6456,
-  "ICT": {
-   "share_of_province_urban": 1.0,
-   "share_of_national_urban": 0.0119,
-   "share_of_spi_cities": 0.0588
-  },
-  "Punjab": {
-   "share_of_province_urban": 0.6236,
-   "share_of_national_urban": 0.5601,
-   "share_of_spi_cities": 0.4706
-  },
-  "Sindh": {
-   "share_of_province_urban": 0.7769,
-   "share_of_national_urban": 0.3122,
-   "share_of_spi_cities": 0.2353
-  },
-  "KP": {
-   "share_of_province_urban": 0.3188,
-   "share_of_national_urban": 0.0661,
-   "share_of_spi_cities": 0.1176
-  },
-  "Balochistan": {
-   "share_of_province_urban": 0.4185,
-   "share_of_national_urban": 0.0497,
-   "share_of_spi_cities": 0.1176
-  }
- },
- "eval": {
-  "share_unchanged": {
-   "branded_packaged": 0.9221,
-   "perishable": 0.5565,
-   "prepared_food": 0.9843,
-   "storable_staple": 0.7509
-  },
-  "share_unchanged_food_all": 0.7507
- },
- "partb": {
-  "matrix_items": 31,
-  "matrix_cities": 17,
-  "nn": {
-   "Islamabad": "Rawalpindi",
-   "Rawalpindi": "Islamabad",
-   "Gujranwala": "Sialkot",
-   "Sialkot": "Faisalabad",
-   "Lahore": "Faisalabad",
-   "Faisalabad": "Lahore",
-   "Sargodha": "Faisalabad",
-   "Multan": "Faisalabad",
-   "Bahawalpur": "Sialkot",
-   "Karachi": "Hyderabad",
-   "Hyderabad": "Faisalabad",
-   "Sukkur": "Hyderabad",
-   "Larkana": "Hyderabad",
-   "Peshawar": "Karachi",
-   "Bannu": "Sargodha",
-   "Quetta": "Karachi",
-   "Khuzdar": "Quetta"
-  },
-  "ward_k3": {
-   "cluster_1": "Islamabad, Rawalpindi",
-   "cluster_2": "Gujranwala, Sialkot, Lahore, Faisalabad, Sargodha, Multan, Bahawalpur",
-   "cluster_3": "Karachi, Hyderabad, Sukkur, Larkana, Peshawar, Bannu, Quetta, Khuzdar"
-  },
-  "reg": {
-   "n_obs": 14607,
-   "corr_coef_vs_simple_mean": 1.0,
-   "max_abs_diff_coef_vs_mean": 0.0001
-  },
-  "simple_reg": {
-   "slope": -0.1265,
-   "slope_ci_lo": -0.249,
-   "slope_ci_hi": -0.004,
-   "intercept": 0.0539,
-   "r2": 0.2442,
-   "p": 0.0438,
-   "n": 17
-  },
-  "pca_var_pc1": 0.3177,
-  "pca_var_pc2": 0.1975,
-  "pca_pc1_corr_mean_premium": 0.969,
-  "kmeans_k": 3,
-  "kmeans": {
-   "flexible": {
-    "n": 2,
-    "items": "Onions, Tomatoes"
-   },
-   "intermediate": {
-    "n": 7,
-    "items": "Wheat flour 20kg, Chicken broiler (live), Eggs (farm), Bananas, Potatoes, Sugar refined, Garlic"
-   },
-   "sticky": {
-    "n": 23,
-    "items": "Rice basmati broken, Rice IRRI-6/9, Bread plain, Beef with bone, Mutton, Milk fresh, Curd (dahi) loose, Powdered milk NIDO 390g, Mustard oil (avg quality), Cooking oil 5L tin (brand), Vegetable ghee 2.5kg tin (brand), Vegetable ghee 1kg pouch (brand), Pulse masoor, Pulse moong, Pulse mash, Pulse gram, Gur, Salt powdered 800g (brand), Chilli powder 200g (brand), Tea Lipton 190g, Cooked beef (hotel plate), Cooked daal (hotel plate), Tea prepared (cup)"
-   }
-  }
- },
- "h1a": {
-  "F": 179.2882,
-  "df1": 16,
-  "df2": 13727,
-  "p": 0.0,
-  "r2_within": 0.1729
- },
- "figures": {
-  "count": 14
  }
 }
