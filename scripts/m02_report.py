@@ -118,7 +118,7 @@ hyp = pd.DataFrame([
      "master, food rows", "17 cities (one rate each)"),
     ("H2 dispersion", "cv, averaged per item", "item_category (perishable vs storable_staple)", "n_quoting",
      "item_week_dispersion view", "11 vs 10 items"),
-    ("H3 abnormal move", "abnormal_next_week † (to be derived in M03)",
+    ("H3 abnormal move", "abnormal_next_week † (derived provisionally; final in M03)",
      "dlog_price, dlog_price_lag1, price_changed, rel_price, within_city_range_pct, single_quote, cat_* dummies",
      "prov_* dummies, log_pop_urban, iso_week", "model_ready_food", f"{g('h3.labelled_rows_refined'):,} labelled rows"),
     ("H4 representation", "model error † (M03); single_quote (now)", "province; terciles of pop_urban and deprivation_composite †",
@@ -307,7 +307,7 @@ expectation. The three least deprived cities (Karachi, Islamabad, Rawalpindi) ha
 Sukkur, Larkana) pay below the national reference. The Spearman correlation between premium and the deprivation composite is ρ =
 {f(H5c + '.spearman_rho', 2)} (p = {p(H5c + '.spearman_p')}, n = 17). Dropping each city in turn keeps ρ between {f(H5c + '.loo_spearman_min', 2)} and
 {f(H5c + '.loo_spearman_max', 2)}. Against FIES food insecurity alone, ρ = {f(H5f + '.spearman_rho', 2)} (p = {p(H5f + '.spearman_p')}), which is not
-significant. The tap-water indicator is a weak deprivation measure: it rates Gujranwala and Sialkot ({ntw['Sialkot']:.0f}% and {ntw['Gujranwala']:.0f}% of households without tap water) as worse off
+significant. The tap-water indicator is a weak deprivation measure: it rates Gujranwala and Sialkot ({ntw['Gujranwala']:.0f}% and {ntw['Sialkot']:.0f}% of households without tap water) as worse off
 than Quetta or Peshawar, and Karachi and Hyderabad as best off. This mostly reflects reliance on motor pumps and filtration plants in Punjab cities. Without it, the composite gives ρ = {f(H5w + '.spearman_rho', 2)} (p = {p(H5w + '.spearman_p')}).
 Khuzdar and Quetta are the exception: their premiums are above zero, though not individually significant, and they have the
 highest food insecurity in the panel, so burden concentrates there. These are associations across 17 cities, with deprivation data from 2019-20,
