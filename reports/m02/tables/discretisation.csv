@@ -1,0 +1,5 @@
+variable,method,low,mid,high
+pop_urban,equal-width,15,0,2
+pop_urban,equal-frequency (terciles),6,5,6
+deprivation_composite,equal-width,9,6,2
+deprivation_composite,equal-frequency (terciles),6,5,6

@@ -1,0 +1,47 @@
+column,dtype,attribute_type,meaningful_operations,n_missing,pct_missing
+week_end,datetime64[s],interval,differences in days; order; no true zero,0,0.0
+year,int32,interval,"order, differences",0,0.0
+month,int32,ordinal (cyclic),order within year; mode,0,0.0
+iso_week,int64,ordinal (cyclic),order within year,0,0.0
+city,str,nominal,"equality, counts, mode",0,0.0
+city_code,str,nominal,equality only (stored as text),0,0.0
+province,str,nominal,"equality, counts",0,0.0
+item_id,int64,nominal,equality only (number is a PBS serial),0,0.0
+item_label,str,nominal,equality,0,0.0
+item_short,str,nominal,equality,0,0.0
+unit,str,nominal,equality,0,0.0
+is_food,int64,binary (nominal),"counts, proportions",0,0.0
+item_category,str,nominal,"counts, mode",0,0.0
+price_min,float64,ratio,all arithmetic; ratios meaningful within an item,83,0.35
+price_avg,float64,ratio,all arithmetic; ratios meaningful within an item,83,0.35
+price_max,float64,ratio,all arithmetic; ratios meaningful within an item,83,0.35
+is_structural_missing,bool,binary,counts,0,0.0
+log_price,float64,interval,differences = log ratios,83,0.35
+national_gm,float64,ratio,all arithmetic within an item-week,0,0.0
+rel_price,float64,interval,"differences, means; ratios of rel_price are meaningless",83,0.35
+cross_city_median,float64,ratio,within an item-week,0,0.0
+above_median,float64,binary,proportions,83,0.35
+above_median_prev,float64,binary,proportions,10450,44.64
+within_city_range_pct,float64,ratio,all arithmetic,83,0.35
+single_quote,float64,binary,proportions,83,0.35
+price_z_item_week,float64,interval,"differences, means",2903,12.4
+days_since_prev,float64,ratio,all arithmetic,867,3.7
+is_consecutive,bool,binary,counts,0,0.0
+dlog_price,float64,interval,"differences, means",10450,44.64
+price_changed,float64,binary,proportions,10450,44.64
+dlog_price_lag1,float64,interval,"differences, means",15634,66.79
+pop_total,float64,ratio,all arithmetic,0,0.0
+pop_urban,float64,ratio,all arithmetic,0,0.0
+log_pop_urban,float64,interval,differences,0,0.0
+fies_mod_sev_pct,float64,ratio,all arithmetic,0,0.0
+illiteracy10_pct,float64,ratio,all arithmetic,0,0.0
+out_of_school_pct,float64,ratio,all arithmetic,0,0.0
+no_tap_water_pct,float64,ratio,all arithmetic,0,0.0
+deprivation_composite,float64,interval (0-1 scaled),"order, differences; zero is the sample minimum",0,0.0
+deprivation_composite_nowater,float64,interval (0-1 scaled),"order, differences",0,0.0
+cpi_urban_food,float64,ratio (index),ratios between months,0,0.0
+real_price_avg,float64,ratio,all arithmetic,83,0.35
+block,int64,nominal,provenance only,0,0.0
+source_file,str,nominal,provenance only,0,0.0
+sha256,str,nominal,provenance only,0,0.0
+parser_version,str,nominal,provenance only,0,0.0

@@ -1,0 +1,52 @@
+item_id,item_short,is_food,item_category,rationale
+1,Wheat flour 20kg,1,storable_staple,Milled cereal stored for months; price partly administered via provincial wheat policy
+2,Rice basmati broken,1,storable_staple,Dry grain stored for months
+3,Rice IRRI-6/9,1,storable_staple,Dry grain stored for months
+4,Bread plain,1,prepared_food,Bakery product made daily; price set by local bakeries
+5,Beef with bone,1,perishable,Fresh meat; no cold-chain storage at retail
+6,Mutton,1,perishable,Fresh meat; no cold-chain storage at retail
+7,Chicken broiler (live),1,perishable,Live bird sold same day; supply turns over daily
+8,Milk fresh,1,perishable,Raw milk spoils within a day
+9,Curd (dahi) loose,1,perishable,Fresh dairy spoils within days
+10,Powdered milk NIDO 390g,1,branded_packaged,Branded packaged product with national distributor pricing
+11,Eggs (farm),1,perishable,Fresh produce with short shelf life
+12,Mustard oil (avg quality),1,storable_staple,Loose edible oil stored for months
+13,Cooking oil 5L tin (brand),1,branded_packaged,Branded tin with printed or distributor price
+14,Vegetable ghee 2.5kg tin (brand),1,branded_packaged,Branded tin with printed or distributor price
+15,Vegetable ghee 1kg pouch (brand),1,branded_packaged,Branded pouch with printed or distributor price
+16,Bananas,1,perishable,Fresh fruit ripens within days
+17,Pulse masoor,1,storable_staple,Dry pulse stored for months
+18,Pulse moong,1,storable_staple,Dry pulse stored for months
+19,Pulse mash,1,storable_staple,Dry pulse stored for months
+20,Pulse gram,1,storable_staple,Dry pulse stored for months
+21,Potatoes,1,perishable,Fresh vegetable sold through daily mandi auctions
+22,Onions,1,perishable,Fresh vegetable sold through daily mandi auctions
+23,Tomatoes,1,perishable,Fresh vegetable spoils within days
+24,Sugar refined,1,storable_staple,Dry commodity stored for months
+25,Gur,1,storable_staple,Dry sweetener stored for months
+26,Salt powdered 800g (brand),1,branded_packaged,Branded packet with printed price
+27,Chilli powder 200g (brand),1,branded_packaged,Branded packet with printed price
+28,Garlic,1,perishable,Fresh produce sold through daily mandi auctions
+29,Tea Lipton 190g,1,branded_packaged,Branded packet with printed price
+30,Cooked beef (hotel plate),1,prepared_food,Restaurant meal; price includes labour and rent
+31,Cooked daal (hotel plate),1,prepared_food,Restaurant meal; price includes labour and rent
+32,Tea prepared (cup),1,prepared_food,Prepared drink; price includes labour and rent
+33,Cigarettes Capstan 20s,0,other_nonfood,Branded tobacco with printed retail price
+34,Long cloth 57in (brand),0,other_nonfood,Textile
+35,Shirting,0,other_nonfood,Textile
+36,Lawn printed (brand),0,other_nonfood,Textile
+37,Georgette,0,other_nonfood,Textile
+38,Gents sandal Bata,0,other_nonfood,Branded footwear
+39,Gents sponge chappal Bata,0,other_nonfood,Branded footwear
+40,Ladies sandal Bata,0,other_nonfood,Branded footwear
+41,Electricity Q1,0,administered_utility,Regulated tariff (NEPRA)
+42,Gas Q1,0,administered_utility,Regulated tariff (OGRA)
+43,Firewood,0,other_nonfood,Fuel sold in local markets
+44,Energy saver bulb (brand),0,other_nonfood,Branded household good
+45,Washing soap Sufi (brand),0,other_nonfood,Branded household good
+46,Match box,0,other_nonfood,Household good
+47,Petrol super,0,administered_utility,Government-notified fortnightly price
+48,Hi-speed diesel,0,administered_utility,Government-notified fortnightly price
+49,LPG 11.67kg cylinder,0,administered_utility,OGRA-notified monthly price
+50,Telephone call charges,0,administered_utility,Regulated tariff
+51,Toilet soap Lifebuoy (brand),0,other_nonfood,Branded household good

@@ -1,0 +1,8 @@
+city,province,item_short,item_category,prov_ICT,prov_Sindh,prov_KP,prov_Balochistan,cat_perishable,cat_branded_packaged,cat_prepared_food
+Islamabad,ICT,Beef with bone,perishable,1,0,0,0,1,0,0
+Lahore,Punjab,Beef with bone,perishable,0,0,0,0,1,0,0
+Karachi,Sindh,Beef with bone,perishable,0,1,0,0,1,0,0
+Peshawar,KP,Beef with bone,perishable,0,0,1,0,1,0,0
+Quetta,Balochistan,Beef with bone,perishable,0,0,0,1,1,0,0
+Islamabad,ICT,Cooking oil 5L tin (brand),branded_packaged,1,0,0,0,0,1,0
+Islamabad,ICT,Cooked daal (hotel plate),prepared_food,1,0,0,0,0,0,1

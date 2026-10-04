@@ -1,0 +1,7 @@
+operation,rows_or_files,note
+City labels with hyphen or line break repaired,0,Repair rule in parser; none needed in the 27 training files
+Zero MIN/AVG/MAX triples set to missing,83,Structural non-quotes; PBS excludes them from its national mean
+Week dates read from 'PRICES ON' text,27,All match the date in the file name
+Item label wording changes mapped to first label,17,"Item 42 renamed in 2026-09-24 release, unit and price unchanged"
+Duplicate workbooks dropped (identical sha256),12,Earlier repo copy kept; re-downloads byte-identical
+Rows deleted,0,"Nothing deleted; missing values are flagged, not dropped"
