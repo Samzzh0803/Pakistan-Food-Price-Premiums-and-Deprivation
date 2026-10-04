@@ -48,7 +48,7 @@ and the old script read only the first. The panel covers all 17 SPI cities (8 Pu
 4 Sindh, 2 KP, 2 Balochistan, plus
 Islamabad). A correction note is in the repository. Following the instructor's feedback, three external sources are now merged.</p>
 
-<div class="tbl "><p class="cap">Table 1. Master dataset: 23,409 rows × 46 columns. Observational unit: 1 row = 1 item's retail price in 1 city in 1 week (17 cities × 51 items, 32 of them food × 27 weeks).</p><table class="dataframe">
+<div class="tbl "><p class="cap">Table 1. Master dataset: 23,409 rows × 46 columns. Observational unit: 1 row = 1 item's retail price in 1 city in 1 week (17 cities × 51 items × 27 weeks; 32 of the 51 items are food).</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>Source</th>
@@ -89,9 +89,8 @@ Islamabad). A correction note is in the repository. Following the instructor's f
 <h3>2.1 Collection audit</h3>
 <p>Each PBS weekly release page (<code>/weekly-sensitive-price-indicator-spi-for-the-week-ended-on-DD-MM-YYYY/</code>) links an Annexure workbook.
 A rate-limited script tried the Thursday, Wednesday and Friday page for each of 73 weeks from
-2025-05-15 and logged every request, URL and SHA-256 hash. It found release pages for 12 weeks. Combined with
-workbooks already retrieved for Milestone 01, after dropping 12 byte-identical duplicates, the panel holds 27
-weeks. Other weeks may exist under URLs we did not try, so we do not treat the archive as complete. The week after our freeze date
+2025-05-15 and logged every request, URL and SHA-256 hash. It found release pages for 12 weeks, most of them weeks already retrieved for Milestone 01 (the
+re-downloads were byte-identical). After dropping 12 duplicate files, the panel holds 27 weeks. Other weeks may exist under URLs we did not try, so we do not treat the archive as complete. The week after our freeze date
 (2026-10-01) was stored, unopened, as a holdout. External files were downloaded from pbs.gov.pk and are kept unchanged with
 their URLs and hashes.</p>
 <p><b>Validation.</b> The parser asserts, for every week: 3 blocks, 17 cities, 51 items, 867 rows; no duplicate key; MIN ≤ AVG ≤ MAX; and zeros only as
@@ -196,7 +195,7 @@ volatility analysis sees only the weeks we could retrieve.</p>
       <td>Interpolation would manufacture week-to-week changes nobody observed</td>
     </tr>
     <tr>
-      <td>Weeks absent from the PBS site</td>
+      <td>Weeks not retrieved from the PBS site</td>
       <td>–</td>
       <td>treat as a coverage gap</td>
       <td>No source to impute from; stated as a limitation, not filled</td>
@@ -209,7 +208,7 @@ volatility analysis sees only the weeks we could retrieve.</p>
 20 kg flour bag. Within an item, the median skewness of prices falls from 0.22 (raw) to
 0.02 (log). Prices pooled across items in PKR are not a meaningful distribution (skewness
 2.13), because they mix units. The main variable is
-<code>rel_price</code> = log(city price / national geometric mean), which sums to zero across cities in each item-week. City urban population
+<code>rel_price</code> = log(city price / national geometric mean), which sums to zero across cities in each item-week. District urban population
 is strongly right-skewed (skewness 2.30, driven by Karachi). Its log (<code>log_pop_urban</code>) has skewness
 -0.72. <b>Scaling.</b> The four deprivation indicators are min-max scaled to 0-1 (higher = more deprived) and averaged
 into <code>deprivation_composite</code>. Prices are z-scored within each item and week (<code>price_z_item_week</code>). All constants come from
@@ -326,7 +325,7 @@ premium relative to the average city.</p>
 <p>Table 5 reports each variable at its own unit of analysis. City attributes take 17 values, so city-level relationships are always analysed with
 n = 17, never with the 23,409 rows. <b>Skewed distributions</b> show up where the resistant and non-resistant measures disagree. The
 within-city price range has mean 6.8% but median 1.4% (skewness
-3.55). Urban population has mean 3.52 m but median 1.62 m.
+3.55). District urban population has mean 3.52 million but median 1.62 million.
 For city premiums, Larkana's mean (-4.9%) and median
 (-0.2%) differ by 4.8 points, because a few
 items drive the mean. We report medians alongside means wherever the two disagree. Weekly price changes are dominated by zeros:
@@ -392,7 +391,7 @@ items drive the mean. We report medians alongside means wherever the two disagre
       <td>152.858</td>
     </tr>
     <tr>
-      <td>single_quote (food; share MIN = MAX)</td>
+      <td>single_quote (food; 1 if MIN = MAX, else 0)</td>
       <td>14607</td>
       <td>0.486</td>
       <td>0.000</td>
@@ -458,7 +457,7 @@ items drive the mean. We report medians alongside means wherever the two disagre
       <td>0.974</td>
     </tr>
     <tr>
-      <td>pop_urban (17 cities; millions)</td>
+      <td>pop_urban (17 city districts; millions)</td>
       <td>17</td>
       <td>3.524</td>
       <td>1.619</td>
@@ -469,7 +468,7 @@ items drive the mean. We report medians alongside means wherever the two disagre
       <td>18.868</td>
     </tr>
     <tr>
-      <td>log_pop_urban (17 cities; log persons)</td>
+      <td>log_pop_urban (17 city districts; log persons)</td>
       <td>17</td>
       <td>14.368</td>
       <td>14.298</td>
@@ -508,7 +507,7 @@ priced identically everywhere, so the quartile fences sit close and flag 3,649 v
 by the extreme values themselves, which pulls the 3-SD fence outward and masks them: only 434 are flagged. On weekly
 changes the IQR is exactly 0, so the quartile rule flags every non-zero change and is unusable. We checked the eight most extreme relative prices
 against the raw workbooks. 7 equal PBS's own national minimum or maximum for that item-week, and the other is a
-genuine printed quote (Sukkur tomatoes, PKR 20). They are therefore true
+genuine printed quote (Sukkur tomatoes, PKR 20 per 1 kg). They are therefore true
 prices: we keep and flag them rather than trim them, because large moves are what H3 studies.</p>
 
 <div class="tbl "><p class="cap">Table 6. Outliers by the quartile rule (beyond Q1 − k·IQR or Q3 + k·IQR) and the z-score rule (|z| > 2, 3). Units: log points.</p><table class="dataframe">
@@ -688,8 +687,8 @@ food differs by place in a way the national figure hides.</li>
 &gt; μ<sub>CV, storable</sub>. Greater dispersion in perishables points to market-functioning frictions.</li>
 <li><b>H3, abnormal next-week movement (SDG 2.c, early warning).</b> H0: a classifier on lagged features achieves AUC = 0.5 on a time-ordered test
 set; H1: AUC &gt; 0.5. "Abnormal" means a change larger than the item's own 90th percentile of non-zero changes in the training weeks. We use
-non-zero changes because 75% of weekly changes are zero, and the plain 90th percentile would be 0 for
-13 items. Base rate: 2.9%.</li>
+non-zero changes because 75% of weekly food price changes are zero, and the plain 90th percentile would be 0
+for 13 of the 32 food items. Base rate: 2.9%.</li>
 <li><b>H4, representation and model fairness (SDG 10).</b> H0: model error rates and data quality (share of MIN = MAX records) are equal across
 city groups (province, population tercile, deprivation tercile); H1: at least one group differs.</li>
 <li><b>H5, burden versus price (SDG 2.1, SDG 10).</b> H0: Spearman ρ(city premium, deprivation) = 0; H1: ρ ≠ 0, two-sided, n = 17. EDA already
@@ -792,7 +791,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
 
 <h2 class="pb">Appendix</h2>
 
-<p class="cap">Table A1. Missing values (count and % of 23,409 rows) for every column of the master dataset, with Unit 02 attribute type. Weekly-change columns are missing wherever the previous week is not 6-8 days earlier. Price columns are missing only for the structural non-quotes. price_z_item_week is undefined where every quoting city charges the same price (SD = 0).</p><div class="two"><div class="tbl small"><p class="cap"></p><table class="dataframe">
+<p class="cap">Table A1. Missing values (count and % of 23,409 rows) for every column of the master dataset, with Unit 02 attribute type. Weekly-change columns are missing wherever the previous week is not 6-8 days earlier. Price columns are missing only for the structural non-quotes. price_z_item_week is undefined where every quoting city charges the same price (SD = 0). days_since_prev is missing in the first week.</p><div class="two"><div class="tbl small"><p class="cap"></p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>column</th>
@@ -1277,13 +1276,14 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     </tr>
   </tbody>
 </table></div>
-<div class="tbl small"><p class="cap">Table A3. Per-item summary over training weeks: mean price, mean cross-city CV, share of unchanged consecutive-week prices, share of records with MIN = MAX.</p><table class="dataframe">
+<div class="tbl small"><p class="cap">Table A3. Per-item summary over the 27 training weeks. Mean price = average of the quoting cities’ average prices in each week, then averaged over weeks, in PKR per the PBS unit shown (e.g. eggs per dozen, wheat flour per 20 kg bag). Mean CV = cross-city coefficient of variation, averaged over weeks. Share unchanged = share of consecutive-week price changes that are exactly 0. Share MIN = MAX = share of city-week records where all quotes were equal.</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>PBS #</th>
       <th>item</th>
+      <th>PBS unit</th>
       <th>category</th>
-      <th>mean price (PKR/unit)</th>
+      <th>mean price (PKR per PBS unit)</th>
       <th>mean CV</th>
       <th>share unchanged wk/wk</th>
       <th>share MIN = MAX</th>
@@ -1293,6 +1293,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>1</td>
       <td>Wheat flour 20kg</td>
+      <td>20 Kg</td>
       <td>Storable staple</td>
       <td>2,213.646</td>
       <td>0.108</td>
@@ -1302,6 +1303,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>2</td>
       <td>Rice basmati broken</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>218.454</td>
       <td>0.192</td>
@@ -1311,6 +1313,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>3</td>
       <td>Rice IRRI-6/9</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>156.874</td>
       <td>0.141</td>
@@ -1320,6 +1323,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>4</td>
       <td>Bread plain</td>
+      <td>Each</td>
       <td>Prepared food</td>
       <td>113.288</td>
       <td>0.072</td>
@@ -1329,6 +1333,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>5</td>
       <td>Beef with bone</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>1,195.088</td>
       <td>0.110</td>
@@ -1338,6 +1343,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>6</td>
       <td>Mutton</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>2,211.312</td>
       <td>0.115</td>
@@ -1347,6 +1353,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>7</td>
       <td>Chicken broiler (live)</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>379.066</td>
       <td>0.074</td>
@@ -1356,6 +1363,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>8</td>
       <td>Milk fresh</td>
+      <td>1 Ltr</td>
       <td>Perishable</td>
       <td>208.180</td>
       <td>0.112</td>
@@ -1365,6 +1373,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>9</td>
       <td>Curd (dahi) loose</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>245.620</td>
       <td>0.164</td>
@@ -1374,6 +1383,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>10</td>
       <td>Powdered milk NIDO 390g</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>1,128.550</td>
       <td>0.026</td>
@@ -1383,6 +1393,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>11</td>
       <td>Eggs (farm)</td>
+      <td>1 Dozen</td>
       <td>Perishable</td>
       <td>289.193</td>
       <td>0.042</td>
@@ -1392,6 +1403,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>12</td>
       <td>Mustard oil (avg quality)</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>550.066</td>
       <td>0.122</td>
@@ -1401,6 +1413,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>13</td>
       <td>Cooking oil 5L tin (brand)</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>2,981.018</td>
       <td>0.015</td>
@@ -1410,6 +1423,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>14</td>
       <td>Vegetable ghee 2.5kg tin (brand)</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>1,514.523</td>
       <td>0.017</td>
@@ -1419,6 +1433,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>15</td>
       <td>Vegetable ghee 1kg pouch (brand)</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>589.763</td>
       <td>0.011</td>
@@ -1428,6 +1443,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>16</td>
       <td>Bananas</td>
+      <td>1 Dozen</td>
       <td>Perishable</td>
       <td>170.233</td>
       <td>0.269</td>
@@ -1437,6 +1453,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>17</td>
       <td>Pulse masoor</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>277.183</td>
       <td>0.090</td>
@@ -1446,6 +1463,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>18</td>
       <td>Pulse moong</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>382.797</td>
       <td>0.091</td>
@@ -1455,6 +1473,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>19</td>
       <td>Pulse mash</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>455.341</td>
       <td>0.079</td>
@@ -1464,6 +1483,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>20</td>
       <td>Pulse gram</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>274.550</td>
       <td>0.103</td>
@@ -1473,6 +1493,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>21</td>
       <td>Potatoes</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>62.326</td>
       <td>0.237</td>
@@ -1482,6 +1503,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>22</td>
       <td>Onions</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>108.545</td>
       <td>0.184</td>
@@ -1491,6 +1513,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>23</td>
       <td>Tomatoes</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>138.434</td>
       <td>0.245</td>
@@ -1500,6 +1523,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>24</td>
       <td>Sugar refined</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>165.730</td>
       <td>0.036</td>
@@ -1509,6 +1533,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>25</td>
       <td>Gur</td>
+      <td>1 Kg</td>
       <td>Storable staple</td>
       <td>235.110</td>
       <td>0.114</td>
@@ -1518,6 +1543,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>26</td>
       <td>Salt powdered 800g (brand)</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>67.129</td>
       <td>0.068</td>
@@ -1527,6 +1553,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>27</td>
       <td>Chilli powder 200g (brand)</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>346.754</td>
       <td>0.041</td>
@@ -1536,6 +1563,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>28</td>
       <td>Garlic</td>
+      <td>1 Kg</td>
       <td>Perishable</td>
       <td>421.912</td>
       <td>0.169</td>
@@ -1545,6 +1573,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>29</td>
       <td>Tea Lipton 190g</td>
+      <td>Each</td>
       <td>Branded/packaged</td>
       <td>450.141</td>
       <td>0.004</td>
@@ -1554,6 +1583,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>30</td>
       <td>Cooked beef (hotel plate)</td>
+      <td>Per Plate</td>
       <td>Prepared food</td>
       <td>321.057</td>
       <td>0.168</td>
@@ -1563,6 +1593,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>31</td>
       <td>Cooked daal (hotel plate)</td>
+      <td>Per Plate</td>
       <td>Prepared food</td>
       <td>172.415</td>
       <td>0.180</td>
@@ -1572,6 +1603,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>32</td>
       <td>Tea prepared (cup)</td>
+      <td>Per Cup</td>
       <td>Prepared food</td>
       <td>64.085</td>
       <td>0.158</td>
@@ -1581,6 +1613,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>33</td>
       <td>Cigarettes Capstan 20s</td>
+      <td>Each</td>
       <td>Other non-food</td>
       <td>246.273</td>
       <td>0.027</td>
@@ -1590,6 +1623,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>34</td>
       <td>Long cloth 57in (brand)</td>
+      <td>1 mtr</td>
       <td>Other non-food</td>
       <td>679.400</td>
       <td>0.163</td>
@@ -1599,6 +1633,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>35</td>
       <td>Shirting</td>
+      <td>1 mtr</td>
       <td>Other non-food</td>
       <td>546.212</td>
       <td>0.293</td>
@@ -1608,6 +1643,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>36</td>
       <td>Lawn printed (brand)</td>
+      <td>1 mtr</td>
       <td>Other non-food</td>
       <td>676.896</td>
       <td>0.156</td>
@@ -1617,6 +1653,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>37</td>
       <td>Georgette</td>
+      <td>1 mtr</td>
       <td>Other non-food</td>
       <td>316.572</td>
       <td>0.208</td>
@@ -1626,6 +1663,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>38</td>
       <td>Gents sandal Bata</td>
+      <td>Pair</td>
       <td>Other non-food</td>
       <td>2,499.000</td>
       <td>0.000</td>
@@ -1635,6 +1673,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>39</td>
       <td>Gents sponge chappal Bata</td>
+      <td>Pair</td>
       <td>Other non-food</td>
       <td>628.630</td>
       <td>0.000</td>
@@ -1644,6 +1683,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>40</td>
       <td>Ladies sandal Bata</td>
+      <td>Pair</td>
       <td>Other non-food</td>
       <td>1,428.630</td>
       <td>0.000</td>
@@ -1653,6 +1693,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>41</td>
       <td>Electricity Q1</td>
+      <td>Per Unit</td>
       <td>Administered/utility</td>
       <td>6.086</td>
       <td>0.000</td>
@@ -1662,6 +1703,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>42</td>
       <td>Gas Q1</td>
+      <td>MMBTU</td>
       <td>Administered/utility</td>
       <td>2,522.796</td>
       <td>0.000</td>
@@ -1671,6 +1713,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>43</td>
       <td>Firewood</td>
+      <td>40 Kg</td>
       <td>Other non-food</td>
       <td>1,471.809</td>
       <td>0.214</td>
@@ -1680,6 +1723,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>44</td>
       <td>Energy saver bulb (brand)</td>
+      <td>Each</td>
       <td>Other non-food</td>
       <td>413.412</td>
       <td>0.290</td>
@@ -1689,6 +1733,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>45</td>
       <td>Washing soap Sufi (brand)</td>
+      <td>Each</td>
       <td>Other non-food</td>
       <td>135.581</td>
       <td>0.046</td>
@@ -1698,6 +1743,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>46</td>
       <td>Match box</td>
+      <td>Each</td>
       <td>Other non-food</td>
       <td>6.297</td>
       <td>0.117</td>
@@ -1707,6 +1753,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>47</td>
       <td>Petrol super</td>
+      <td>Per Litre</td>
       <td>Administered/utility</td>
       <td>305.818</td>
       <td>0.003</td>
@@ -1716,6 +1763,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>48</td>
       <td>Hi-speed diesel</td>
+      <td>Per Litre</td>
       <td>Administered/utility</td>
       <td>326.530</td>
       <td>0.002</td>
@@ -1725,6 +1773,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>49</td>
       <td>LPG 11.67kg cylinder</td>
+      <td>Each</td>
       <td>Administered/utility</td>
       <td>3,921.730</td>
       <td>0.057</td>
@@ -1734,6 +1783,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>50</td>
       <td>Telephone call charges</td>
+      <td>Per Minute</td>
       <td>Administered/utility</td>
       <td>1.790</td>
       <td>0.000</td>
@@ -1743,6 +1793,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     <tr>
       <td>51</td>
       <td>Toilet soap Lifebuoy (brand)</td>
+      <td>Each</td>
       <td>Other non-food</td>
       <td>117.292</td>
       <td>0.034</td>

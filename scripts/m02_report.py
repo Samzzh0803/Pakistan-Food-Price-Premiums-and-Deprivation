@@ -80,6 +80,7 @@ city = pd.read_csv(PROC / "city_table.csv", dtype={"city_code": str})
 bannu = city.set_index("city").loc["Bannu"]
 bannu_urban = 100 * bannu.pop_urban / bannu.pop_total
 model_ready = pd.read_parquet(PROC / "model_ready_food.parquet")
+units = pd.read_parquet(PROC / "master_city_item_week.parquet", columns=["item_id", "unit"]).drop_duplicates("item_id").set_index("item_id")["unit"]
 dummy_cols = [c for c in model_ready.columns if c.startswith(("prov_", "cat_"))]
 
 spear = t("spearman", index_col=0)
@@ -92,9 +93,9 @@ cont = cont.rename(columns={"province": "province", "low": "low premium", "mid":
 
 cats = {"perishable": "Perishable", "storable_staple": "Storable staple", "branded_packaged": "Branded/packaged",
         "prepared_food": "Prepared food", "administered_utility": "Administered/utility", "other_nonfood": "Other non-food"}
-item_tab = item.assign(category=item.item_category.map(cats))[
-    ["item_id", "item_short", "category", "mean_price", "mean_cv", "share_unchanged", "share_single_quote"]].rename(
-    columns={"item_id": "PBS #", "item_short": "item", "mean_price": "mean price (PKR/unit)", "mean_cv": "mean CV",
+item_tab = item.assign(category=item.item_category.map(cats), unit=item.item_id.map(units))[
+    ["item_id", "item_short", "unit", "category", "mean_price", "mean_cv", "share_unchanged", "share_single_quote"]].rename(
+    columns={"item_id": "PBS #", "item_short": "item", "unit": "PBS unit", "mean_price": "mean price (PKR per PBS unit)", "mean_cv": "mean CV",
              "share_unchanged": "share unchanged wk/wk", "share_single_quote": "share MIN = MAX"})
 city_tab = city[["city", "province", "pop_urban", "fies_mod_sev_pct", "illiteracy10_pct", "out_of_school_pct",
                  "no_tap_water_pct", "deprivation_composite"]].assign(pop_urban=lambda d: d.pop_urban / 1e6).rename(
@@ -190,16 +191,15 @@ inv = pd.DataFrame([
 ], columns=["Source", "Role", "Coverage", "Access"])
 H.append(html_table(inv, f"Table 1. Master dataset: {g('panel.rows'):,} rows × {g('panel.cols')} columns. "
                     f"Observational unit: 1 row = 1 item's retail price in 1 city in 1 week ({g('panel.cities')} cities × "
-                    f"{g('panel.items')} items, {g('panel.food_items')} of them food × {g('panel.weeks')} weeks)."))
+                    f"{g('panel.items')} items × {g('panel.weeks')} weeks; {g('panel.food_items')} of the 51 items are food)."))
 
 H.append(f"""
 <h2>2. Data ingestion, cleaning and structural readiness</h2>
 <h3>2.1 Collection audit</h3>
 <p>Each PBS weekly release page (<code>/weekly-sensitive-price-indicator-spi-for-the-week-ended-on-DD-MM-YYYY/</code>) links an Annexure workbook.
 A rate-limited script tried the Thursday, Wednesday and Friday page for each of {g('backfill.thursdays_attempted')} weeks from
-{g('panel.first_week')} and logged every request, URL and SHA-256 hash. It found release pages for {g('backfill.weeks_found')} weeks. Combined with
-workbooks already retrieved for Milestone 01, after dropping {g('files.duplicates')} byte-identical duplicates, the panel holds {g('panel.weeks')}
-weeks. Other weeks may exist under URLs we did not try, so we do not treat the archive as complete. The week after our freeze date
+{g('panel.first_week')} and logged every request, URL and SHA-256 hash. It found release pages for {g('backfill.weeks_found')} weeks, most of them weeks already retrieved for Milestone 01 (the
+re-downloads were byte-identical). After dropping {g('files.duplicates')} duplicate files, the panel holds {g('panel.weeks')} weeks. Other weeks may exist under URLs we did not try, so we do not treat the archive as complete. The week after our freeze date
 ({g('backfill.holdout_weeks')}) was stored, unopened, as a holdout. External files were downloaded from pbs.gov.pk and are kept unchanged with
 their URLs and hashes.</p>
 <p><b>Validation.</b> The parser asserts, for every week: 3 blocks, 17 cities, 51 items, 867 rows; no duplicate key; MIN ≤ AVG ≤ MAX; and zeros only as
@@ -241,7 +241,7 @@ H.append(f"""
 20 kg flour bag. Within an item, the median skewness of prices falls from {f('normal.median_within_item_skew_raw', 2)} (raw) to
 {f('normal.median_within_item_skew_log', 2)} (log). Prices pooled across items in PKR are not a meaningful distribution (skewness
 {f('normal.pooled_raw_price_skew', 2)}), because they mix units. The main variable is
-<code>rel_price</code> = log(city price / national geometric mean), which sums to zero across cities in each item-week. City urban population
+<code>rel_price</code> = log(city price / national geometric mean), which sums to zero across cities in each item-week. District urban population
 is strongly right-skewed (skewness {f('summary.pop_urban_skew', 2)}, driven by Karachi). Its log (<code>log_pop_urban</code>) has skewness
 {f('summary.log_pop_urban_skew', 2)}. <b>Scaling.</b> The four deprivation indicators are min-max scaled to 0-1 (higher = more deprived) and averaged
 into <code>deprivation_composite</code>. Prices are z-scored within each item and week (<code>price_z_item_week</code>). All constants come from
@@ -258,7 +258,7 @@ H.append(f"""
 <p>Table 5 reports each variable at its own unit of analysis. City attributes take 17 values, so city-level relationships are always analysed with
 n = 17, never with the {g('panel.rows'):,} rows. <b>Skewed distributions</b> show up where the resistant and non-resistant measures disagree. The
 within-city price range has mean {f('summary.range_pct_mean')}% but median {f('summary.range_pct_median')}% (skewness
-{f('summary.range_pct_skew', 2)}). Urban population has mean {f('summary.pop_urban_mean_m', 2)} m but median {f('summary.pop_urban_median_m', 2)} m.
+{f('summary.range_pct_skew', 2)}). District urban population has mean {f('summary.pop_urban_mean_m', 2)} million but median {f('summary.pop_urban_median_m', 2)} million.
 For city premiums, {g('premium.max_mean_median_gap_city')}'s mean ({pc(g('premium.max_mean_median_gap_city'))}) and median
 ({f('premium.city.' + g('premium.max_mean_median_gap_city') + '.pct_median')}%) differ by {f('premium.max_mean_median_gap_pts')} points, because a few
 items drive the mean. We report medians alongside means wherever the two disagree. Weekly price changes are dominated by zeros:
@@ -292,7 +292,7 @@ priced identically everywhere, so the quartile fences sit close and flag {g('out
 by the extreme values themselves, which pulls the 3-SD fence outward and masks them: only {g('outliers.rel.sd_regular_3'):,} are flagged. On weekly
 changes the IQR is exactly 0, so the quartile rule flags every non-zero change and is unusable. We checked the eight most extreme relative prices
 against the raw workbooks. {g('outliers.top8_match_pbs_extremes')} equal PBS's own national minimum or maximum for that item-week, and the other is a
-genuine printed quote ({", ".join(f"{r.city} {r.item_short.lower()}, PKR {r.price_avg:g}" for r in nm.itertuples())}). They are therefore true
+genuine printed quote ({", ".join(f"{r.city} {r.item_short.lower()}, PKR {r.price_avg:g} per {units[r.item_id].lower()}" for r in nm.itertuples())}). They are therefore true
 prices: we keep and flag them rather than trim them, because large moves are what H3 studies.</p>
 """)
 H.append(html_table(outl_tab, "Table 6. Outliers by the quartile rule (beyond Q1 − k·IQR or Q3 + k·IQR) and the z-score rule (|z| > 2, 3). Units: log points.", digits=3))
@@ -337,8 +337,8 @@ food differs by place in a way the national figure hides.</li>
 &gt; μ<sub>CV, storable</sub>. Greater dispersion in perishables points to market-functioning frictions.</li>
 <li><b>H3, abnormal next-week movement (SDG 2.c, early warning).</b> H0: a classifier on lagged features achieves AUC = 0.5 on a time-ordered test
 set; H1: AUC &gt; 0.5. "Abnormal" means a change larger than the item's own 90th percentile of non-zero changes in the training weeks. We use
-non-zero changes because {pct('summary.dlog_share_zero_food', 0)} of weekly changes are zero, and the plain 90th percentile would be 0 for
-{g('h3.items_p90_zero')} items. Base rate: {pct('h3.base_rate_refined')}.</li>
+non-zero changes because {pct('summary.dlog_share_zero_food', 0)} of weekly food price changes are zero, and the plain 90th percentile would be 0
+for {g('h3.items_p90_zero')} of the 32 food items. Base rate: {pct('h3.base_rate_refined')}.</li>
 <li><b>H4, representation and model fairness (SDG 10).</b> H0: model error rates and data quality (share of MIN = MAX records) are equal across
 city groups (province, population tercile, deprivation tercile); H1: at least one group differs.</li>
 <li><b>H5, burden versus price (SDG 2.1, SDG 10).</b> H0: Spearman ρ(city premium, deprivation) = 0; H1: ρ ≠ 0, two-sided, n = 17. EDA already
@@ -382,10 +382,10 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
 """)
 half = (len(miss_tab) + 1) // 2
 H.append('<p class="cap">Table A1. Missing values (count and % of ' + f"{g('panel.rows'):,}" + ' rows) for every column of the master dataset, with Unit 02 attribute type. '
-         'Weekly-change columns are missing wherever the previous week is not 6-8 days earlier. Price columns are missing only for the structural non-quotes. price_z_item_week is undefined where every quoting city charges the same price (SD = 0).</p>'
+         'Weekly-change columns are missing wherever the previous week is not 6-8 days earlier. Price columns are missing only for the structural non-quotes. price_z_item_week is undefined where every quoting city charges the same price (SD = 0). days_since_prev is missing in the first week.</p>'
          '<div class="two">' + html_table(miss_tab.iloc[:half], "", cls="small", digits=2) + html_table(miss_tab.iloc[half:], "", cls="small", digits=2) + "</div>")
 H.append(html_table(city_tab, "Table A2. City attributes: Census 2023 district urban population and PSLM 2019-20 district deprivation indicators (higher = more deprived).", cls="small", digits=2))
-H.append(html_table(item_tab, "Table A3. Per-item summary over training weeks: mean price, mean cross-city CV, share of unchanged consecutive-week prices, share of records with MIN = MAX.", cls="small"))
+H.append(html_table(item_tab, "Table A3. Per-item summary over the 27 training weeks. Mean price = average of the quoting cities’ average prices in each week, then averaged over weeks, in PKR per the PBS unit shown (e.g. eggs per dozen, wheat flour per 20 kg bag). Mean CV = cross-city coefficient of variation, averaged over weeks. Share unchanged = share of consecutive-week price changes that are exactly 0. Share MIN = MAX = share of city-week records where all quotes were equal.", cls="small"))
 H.append("</body></html>")
 
 # Number figures and tables in order of appearance.

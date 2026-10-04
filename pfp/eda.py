@@ -233,7 +233,7 @@ def missing_table(m: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
          "options_considered": "interpolate weeks; impute from CPI (external); leave missing",
          "choice": "leave missing",
          "reason": "Interpolation would manufacture week-to-week changes nobody observed"},
-        {"kind": "Weeks absent from the PBS site", "rows": None,
+        {"kind": "Weeks not retrieved from the PBS site", "rows": None,
          "options_considered": "impute whole weeks; restrict to observed weeks",
          "choice": "treat as a coverage gap",
          "reason": "No source to impute from; stated as a limitation, not filled"},
@@ -502,14 +502,14 @@ def summary_table(m: pd.DataFrame, city: pd.DataFrame) -> pd.DataFrame:
         "rel_price (food; log points)": f.rel_price,
         "dlog_price (food; log points, consecutive weeks)": f.dlog_price.dropna(),
         "within_city_range_pct (food; %)": f.within_city_range_pct,
-        "single_quote (food; share MIN = MAX)": f.single_quote,
+        "single_quote (food; 1 if MIN = MAX, else 0)": f.single_quote,
         "fies_mod_sev_pct (17 cities; %)": city.fies_mod_sev_pct,
         "illiteracy10_pct (17 cities; %)": city.illiteracy10_pct,
         "out_of_school_pct (17 cities; %)": city.out_of_school_pct,
         "no_tap_water_pct (17 cities; %)": city.no_tap_water_pct,
         "deprivation_composite (17 cities; 0-1)": city.deprivation_composite,
-        "pop_urban (17 cities; millions)": city.pop_urban / 1e6,
-        "log_pop_urban (17 cities; log persons)": city.log_pop_urban,
+        "pop_urban (17 city districts; millions)": city.pop_urban / 1e6,
+        "log_pop_urban (17 city districts; log persons)": city.log_pop_urban,
     }
     rows = []
     for k, s_ in cols.items():
