@@ -359,7 +359,8 @@ H.append(f"""
 lower for storable staples ({f('variation.mean_cv.storable_staple', 3)}, {g('variation.n_items.storable_staple')} items), and lowest for branded
 packaged goods ({f('variation.mean_cv.branded_packaged', 3)}), which carry printed or distributor prices (Fig. 3). A one-tailed comparison of
 perishables against storables gives SE(A - B) = {f('h2.se_diff', 4)}, Welch t = {f('h2.t_welch', 2)}, p = {p('h2.p_one_tailed')}. The
-rank-based check gives p = {p('h2.mannwhitney_p_one_tailed')}. With about ten items a side this is marginal evidence, and we do not oversell it.
+rank-based check gives p = {p('h2.mannwhitney_p_one_tailed')}. With about ten items a side this is marginal evidence, and we do not oversell it. A Type I error here would send market-functioning attention (Target 2.c) to perishable supply chains without cause.
+A Type II error, more likely with so few items, would dismiss a real perishability gap.
 Items were classified on storability and pricing mechanism before looking at dispersion.</p>
 <div class="two">{fig('fig03_dispersion_by_category', 'Fig. 3. Mean cross-city CV per food item, by category. Branded goods barely vary across cities; perishables vary most.')}
 {fig('fig11_box_province_category', 'Fig. 11. Food relative prices by province and by item category (city x item x week).')}</div>
@@ -372,7 +373,8 @@ against 0.5 rejects decisively (t = {f('h1b.t_vs_half')}, p {p('h1b.p_one_tailed
 {pct('eval.share_unchanged.storable_staple', 0)} for storables, {pct('eval.share_unchanged.branded_packaged', 0)} for branded and
 {pct('eval.share_unchanged.prepared_food', 0)} for prepared items). Restricted to pairs where the price changed ({g('h1b.n_pairs_changed'):,} pairs),
 the stay-above rate is still {pct('h1b.overall_stay_rate_changed')} (t = {f('h1b.t_vs_half_changed')}, p {p('h1b.p_one_tailed_changed')}), with
-the lowest city at {pct('h1b.city_rate_changed_min', 0)}. That stickiness reshapes H3. Under the contracted rule (abnormal = |change| above the
+the lowest city at {pct('h1b.city_rate_changed_min', 0)}. A Type I error would treat chance week-to-week ordering as a durable premium. A Type II error would miss a premium that
+households keep paying. That stickiness reshapes H3. Under the contracted rule (abnormal = |change| above the
 item's own 90th percentile), the threshold is zero for {g('h3.items_p90_zero')} of 32 food items, so any movement at all would count as
 abnormal (§4.2).</p>
 

@@ -183,7 +183,7 @@ leave-one-out ranges.
 """)
 code("""h5 = eda.premium_vs_deprivation(cityx); display(h5); display(Image(eda.fig_premium_deprivation(cityx, h5)))""")
 md("### Unit 05: Covariance and correlation (Pearson and Spearman, city level, n = 17)")
-code("""cov, pear, spear = eda.correlations(cityx, m); display(pear.round(2)); display(Image(eda.fig_corr(spear)))""")
+code("""cov, pear, spear = eda.correlations(cityx, m); display(cov.round(4)); display(pear.round(2)); display(spear.round(2)); display(Image(eda.fig_corr(spear)))""")
 md("### Unit 05: Categorical by categorical (province by premium tercile)")
 code("""ct = eda.contingency(cityx); display(ct); display(Image(eda.fig_province_tercile(ct)))""")
 
