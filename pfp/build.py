@@ -182,6 +182,18 @@ def build_master(panel: pd.DataFrame, items: pd.DataFrame, city: pd.DataFrame, c
     return df
 
 
+def model_ready_food(master: pd.DataFrame) -> pd.DataFrame:
+    """Food rows only, provenance dropped, nominal strings expanded to 0/1 dummies (reference: Punjab, storable staple)."""
+    from .eda import encode_dummies
+
+    f = master[(master.is_food == 1) & master.price_avg.notna()]
+    drop = ["source_file", "sha256", "parser_version", "block", "item_label", "price_min", "price_max",
+            "is_structural_missing", "is_food"]
+    out = encode_dummies(f.drop(columns=drop))
+    assert len(out) == len(f)
+    return out.reset_index(drop=True)
+
+
 def build_all(write: bool = True) -> dict:
     panel, nat, inv, checks = load_panel(RAW_ANNEX_DIRS, TRAIN_CUTOFF)
     items = pd.read_csv(ITEM_MAP)
@@ -218,5 +230,6 @@ def build_all(write: bool = True) -> dict:
         city_item.reset_index().to_parquet(PROCESSED / "city_by_food_item_mean_rel_price.parquet", index=False)
         disp.to_csv(PROCESSED / "item_week_dispersion.csv", index=False)
         disp.to_parquet(PROCESSED / "item_week_dispersion.parquet", index=False)
+        model_ready_food(master).to_parquet(PROCESSED / "model_ready_food.parquet", index=False)
         write_external_manifest()
     return out

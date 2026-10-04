@@ -522,6 +522,13 @@
  },
  "summary": {
   "dlog_share_zero_food": 0.7507,
+  "log_pop_urban_skew": -0.7248,
+  "pop_urban_mean_m": 3.5241,
+  "pop_urban_median_m": 1.6193,
+  "pop_urban_skew": 2.2977,
+  "range_pct_mean": 6.8117,
+  "range_pct_median": 1.3954,
+  "range_pct_skew": 3.5489,
   "single_quote_share_food": 0.4861
  },
  "tidy": {

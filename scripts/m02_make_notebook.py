@@ -148,6 +148,12 @@ md("""### Unit 04: Encoding
 We use 0/1 dummy columns for province and item category. Cities use sum-to-zero (deviation) coding, so each city's
 coefficient is its premium relative to the average city.""")
 code("""display(eda.encoding_demo(m)); eda.sum_to_zero_matrix(eda.city_order(m)).iloc[[0, 1, 15, 16], :4]""")
+code("""
+# The model-ready food table written by build_all(): provenance dropped, strings expanded to 0/1 dummies.
+mr = pd.read_parquet(ROOT / "data/processed/m02/model_ready_food.parquet")
+print(mr.shape); print([c for c in mr.columns if c.startswith(("prov_", "cat_"))])
+mr.filter(regex="^(city|province|item_category|prov_|cat_)").drop_duplicates(["city", "item_category"]).head(6)
+""")
 
 md("""
 ### Unit 05: Central tendency, including the geometric mean

@@ -17,12 +17,13 @@ Primary goal: SDG 2 (Targets 2.1 and 2.c). Secondary goal: SDG 10.
 
 | Deliverable | Path |
 |---|---|
-| Manuscript draft (PDF and its HTML source) | `reports/m02/M02_report.pdf`, `reports/m02/M02_report.html` |
+| Manuscript draft, 8 pages with appendix (PDF and its HTML source) | `reports/m02/M02_report.pdf`, `reports/m02/M02_report.html` |
 | Executed notebook | `notebooks/M02_data_prep_eda.ipynb` |
 | Every statistic quoted in the manuscript | `reports/m02/m02_numbers.json` |
 | Result tables and figures | `reports/m02/tables/`, `reports/m02/figures/` |
 | Master dataset (one row = city x item x week) | `data/processed/m02/master_city_item_week.{csv,parquet}` |
 | Derived views | `city_table`, `city_by_food_item_mean_rel_price`, `item_week_dispersion` in `data/processed/m02/` |
+| Model-ready food table (provenance dropped, 0/1 dummies for province and item category) | `data/processed/m02/model_ready_food.parquet` |
 | Parser acceptance checks, per week | `data/processed/m02/acceptance_checks_by_week.csv` |
 | Correction note (the panel has 17 cities, not 7) | `reports/CORRECTION_2026-10-04_appendix_a_17_cities.md` |
 

@@ -424,9 +424,32 @@ def normalisation_demo(m: pd.DataFrame, city: pd.DataFrame) -> pd.DataFrame:
 
 
 def encoding_demo(m: pd.DataFrame) -> pd.DataFrame:
-    sample = m.drop_duplicates("city").sort_values("city_code").head(5)[["city", "province"]]
-    dummies = pd.get_dummies(sample.province, prefix="prov", dtype=int)
-    return pd.concat([sample.reset_index(drop=True), dummies.reset_index(drop=True)], axis=1)
+    """Before/after example of 0/1 dummy coding, one row per province, using the model-ready table's rule."""
+    pick = ["Islamabad", "Lahore", "Karachi", "Peshawar", "Quetta"]
+    wk = m[m.week_end == m.week_end.max()]
+    rows = pd.concat([wk[(wk.item_id == 5) & wk.city.isin(pick)],
+                      wk[wk.item_id.isin([13, 31]) & (wk.city == "Islamabad")]])
+    rows = rows.sort_values(["item_id", "city_code"])[["city", "province", "item_short", "item_category"]]
+    enc = encode_dummies(rows).filter(regex="^(prov_|cat_)").drop(columns=["cat_administered_utility", "cat_other_nonfood"])
+    return pd.concat([rows.reset_index(drop=True), enc.reset_index(drop=True)], axis=1)
+
+
+PROV_REF, CAT_REF = "Punjab", "storable_staple"
+
+
+def encode_dummies(df: pd.DataFrame) -> pd.DataFrame:
+    """0/1 dummies for province and item category with fixed reference levels (Punjab, storable staple).
+
+    Categories are fixed lists, so every subset encodes to the same columns.
+    """
+    out = df.copy()
+    for p_ in PROV_ORDER:
+        if p_ != PROV_REF:
+            out[f"prov_{p_}"] = (out.province == p_).astype(int)
+    for c in CAT_ORDER + ["administered_utility", "other_nonfood"]:
+        if c != CAT_REF:
+            out[f"cat_{c}"] = (out.item_category == c).astype(int)
+    return out
 
 
 def sum_to_zero_matrix(cities: list[str]) -> pd.DataFrame:
@@ -471,19 +494,35 @@ def variation_by_item(m: pd.DataFrame) -> pd.DataFrame:
 
 
 def summary_table(m: pd.DataFrame, city: pd.DataFrame) -> pd.DataFrame:
+    """Mean, median, SD, IQR and skewness of key numeric variables, each at its own unit of analysis."""
     f = food_rows(m)
-    cols = {"rel_price (food, log points)": f.rel_price, "dlog_price (food, consecutive weeks)": f.dlog_price.dropna(),
-            "within_city_range_pct (food)": f.within_city_range_pct, "single_quote (food, share)": f.single_quote,
-            "real_price_avg / price_avg (deflator ratio)": (f.real_price_avg / f.price_avg),
-            "deprivation_composite (17 cities)": city.deprivation_composite,
-            "fies_mod_sev_pct (17 cities)": city.fies_mod_sev_pct, "pop_urban, millions (17 cities)": city.pop_urban / 1e6}
+    lab = f.groupby("item_id")["price_avg"]
+    cols = {
+        "price_avg, within item (PKR; z-scored to pool items)": f.price_z_item_week,
+        "rel_price (food; log points)": f.rel_price,
+        "dlog_price (food; log points, consecutive weeks)": f.dlog_price.dropna(),
+        "within_city_range_pct (food; %)": f.within_city_range_pct,
+        "single_quote (food; share MIN = MAX)": f.single_quote,
+        "fies_mod_sev_pct (17 cities; %)": city.fies_mod_sev_pct,
+        "illiteracy10_pct (17 cities; %)": city.illiteracy10_pct,
+        "out_of_school_pct (17 cities; %)": city.out_of_school_pct,
+        "no_tap_water_pct (17 cities; %)": city.no_tap_water_pct,
+        "deprivation_composite (17 cities; 0-1)": city.deprivation_composite,
+        "pop_urban (17 cities; millions)": city.pop_urban / 1e6,
+        "log_pop_urban (17 cities; log persons)": city.log_pop_urban,
+    }
     rows = []
-    for k, s in cols.items():
-        rows.append({"variable": k, "n": int(s.notna().sum()), "mean": s.mean(), "median": s.median(), "sd": s.std(),
-                     "iqr": s.quantile(.75) - s.quantile(.25), "min": s.min(), "max": s.max()})
+    for k, s_ in cols.items():
+        s_ = s_.dropna()
+        rows.append({"variable": k, "n": int(len(s_)), "mean": s_.mean(), "median": s_.median(), "sd": s_.std(),
+                     "iqr": s_.quantile(.75) - s_.quantile(.25), "skew": stats.skew(s_), "min": s_.min(), "max": s_.max()})
     t = pd.DataFrame(rows)
     put("summary.dlog_share_zero_food", (f.dlog_price.dropna().abs() <= 1e-12).mean())
     put("summary.single_quote_share_food", f.single_quote.mean())
+    put("summary.pop_urban_skew", stats.skew(city.pop_urban)); put("summary.log_pop_urban_skew", stats.skew(city.log_pop_urban))
+    put("summary.pop_urban_mean_m", city.pop_urban.mean() / 1e6); put("summary.pop_urban_median_m", city.pop_urban.median() / 1e6)
+    put("summary.range_pct_mean", f.within_city_range_pct.mean()); put("summary.range_pct_median", f.within_city_range_pct.median())
+    put("summary.range_pct_skew", stats.skew(f.within_city_range_pct.dropna()))
     return t
 
 
@@ -895,7 +934,7 @@ def fig_single_quote(q: pd.DataFrame):
     d = q.sort_values("single_quote_share")
     ax.barh(d.city, 100 * d.single_quote_share, color=[PROVINCE_COLORS[p] for p in d.province])
     ax.set_xlabel("Food records where MIN = MAX (%)")
-    ax.set_title("Fig. 7. Share of food price records resting on a single quoted price, by city")
+    ax.set_title("Share of food price records where PBS's minimum and maximum quote are equal, by city")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c, label=p) for p, c in PROVINCE_COLORS.items()]
     ax.legend(handles=handles, loc="lower right", fontsize=7.5)
     return savefig(fig, "fig07_single_quote_share")
