@@ -1,0 +1,18 @@
+feature,why_it_might_matter
+abs_dlog,size of this week's change: prices that just moved may keep moving or snap back
+has_dlog,1 if this week's change is observed (previous week published); flag instead of guessing
+price_changed,1 if the price changed at all this week; most weeks prices are flat
+abs_dlog_lag1,size of last week's change: a longer momentum window
+has_lag1,1 if last week's change is observed
+rel_price,log price relative to the national geometric mean: a city far from the others may correct
+within_city_range_pct,(max - min) / avg across the city's outlets: disagreement may precede a move
+single_quote,1 if min = max (one effective quote): a data-quality flag (H4)
+cat_perishable,perishable item (reference: storable staple); expected to be most volatile (H2)
+cat_branded_packaged,branded / packaged item; printed prices change rarely
+cat_prepared_food,prepared food item
+prov_Sindh,province dummy (reference: Punjab)
+prov_KP,province dummy (reference: Punjab)
+prov_Balochistan,province dummy (reference: Punjab)
+prov_ICT,Islamabad Capital Territory dummy (reference: Punjab)
+log_pop_urban,log urban population of the city's district: market size
+deprivation_composite,PSLM 2019-20 district deprivation (0-1): do poorer places see more shocks?

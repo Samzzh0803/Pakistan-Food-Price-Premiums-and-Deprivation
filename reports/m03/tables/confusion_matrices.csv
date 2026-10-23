@@ -1,0 +1,8 @@
+matrix,TP,FN,FP,TN,recall (TP row %),specificity (TN row %)
+Majority class,0,54,0,1770,0,1
+"Logistic regression, threshold 0.5 (0.50)",41,13,772,998,0.759259,0.563842
+"Logistic regression, cost threshold, r = 20 (0.47)",45,9,892,878,0.833333,0.496045
+"Decision tree, threshold 0.5 (0.50)",7,47,194,1576,0.12963,0.890395
+"Decision tree, cost threshold, r = 20 (0.47)",54,0,1362,408,1,0.230508
+"KNN, threshold 0.5 (0.50)",0,54,0,1770,0,1
+"KNN, cost threshold, r = 20 (0.03)",38,16,863,907,0.703704,0.512429

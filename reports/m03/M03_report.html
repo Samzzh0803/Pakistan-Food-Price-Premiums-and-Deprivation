@@ -1,0 +1,2036 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Milestone 03 Report</title><style>
+@page { size: A4; margin: 17mm 17mm 17mm 17mm; }
+body { font-family: 'Cambria', 'Georgia', serif; font-size: 10.3pt; line-height: 1.36; color: #111; background: #fff; }
+h1 { font-size: 15.5pt; margin: 0 0 4px 0; line-height: 1.2; }
+h2 { font-size: 12.3pt; margin: 14px 0 5px 0; border-bottom: 1px solid #999; padding-bottom: 2px; }
+h3 { font-size: 10.7pt; margin: 10px 0 3px 0; }
+p { margin: 3px 0 6px 0; text-align: justify; }
+.meta { font-size: 9.5pt; color: #333; margin-bottom: 7px; }
+.abstract { border: 1px solid #bbb; padding: 6px 10px; background: #f7f7f7; font-size: 9.5pt; }
+figure { margin: 6px 0 9px 0; text-align: center; page-break-inside: avoid; }
+figcaption { font-size: 8.8pt; color: #222; text-align: left; margin-top: 2px; }
+.tbl { margin: 5px 0 9px 0; page-break-inside: avoid; }
+.tbl.small table { font-size: 7.3pt; }
+.cap { font-size: 8.8pt; font-weight: bold; margin: 0 0 2px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 8.2pt; }
+th { border-bottom: 1.2px solid #333; border-top: 1.2px solid #333; text-align: left; padding: 2px 4px; background: #f2f2f2; }
+td { border-bottom: 0.5px solid #ddd; padding: 1.5px 4px; vertical-align: top; }
+.two { display: flex; gap: 10px; align-items: flex-start; } .two > * { flex: 1; }
+.pb { page-break-before: always; }
+ul { margin: 3px 0 6px 18px; padding: 0; } li { margin-bottom: 2px; }
+.note { font-size: 8.8pt; color: #333; }
+code { font-size: 8.6pt; }
+.cols2 { column-count: 2; column-gap: 14px; } .cols2 .tbl { break-inside: avoid; }
+
+.hl { background: #fff6dc; border-left: 3px solid #E69F00; padding: 4px 8px; }
+</style></head><body>
+<h1>Who Pays More, and Who Can Least Afford It? Food Price Premiums, Deprivation and Abnormal Price Movements Across Selected Pakistani Urban Markets</h1>
+<div class="meta"><b>Milestone 03: Baseline models, evaluation and initial findings (manuscript draft: Sections 1-4 from Milestone 02, Sections 5-10 new)</b><br/>
+<b>Group 30</b> · Yousuf Uyghur (mu07486), Computer Science · Sameer Hassan (sh09036), Computer Science<br/>
+CS/SDP 312/314 L1 Data Science for Social Good, Habib University, Fall 2026 · Dr. Muhammad Usman Arif<br/>
+Notebook, code and data: github.com/Samzzh0803/Pakistan-Food-Price-Premiums-and-Deprivation (branch <code>milestone-03</code>;
+notebook <code>notebooks/M03_baseline_models.ipynb</code>)</div>
+
+<div class="abstract"><b>Summary.</b> Pakistan's weekly Sensitive Price Indicator (SPI) is reported as one national figure, but PBS publishes
+prices for 51 items in 17 cities. Milestone 02 built a 23,409-row city-item-week dataset and found that city food price premiums
+are negatively rank-correlated with district deprivation. Milestone 03 asks whether the same data can give <b>early warning</b> (SDG 2.c):
+using only what is known in week <i>t</i>, can we flag the city-item prices that will move abnormally by week <i>t</i>+1? Abnormal means a
+change above the item's own 90th percentile of non-zero changes, fitted on training weeks only. On 7,095 labelled rows
+(205 abnormal, 2.9%) we compare two naive benchmarks with logistic regression, a decision tree and KNN.
+We use a time-ordered split and forward-chaining cross-validation with purging. On the four held-out weeks, logistic regression reaches ROC-AUC
+0.692 [0.636, 0.746] against 0.5 for chance, so we reject H3's null. But a one-line rule that scores each item by its category's past abnormal rate does as
+well (0.708 [0.659, 0.753]), and precision stays near 5%. The models are useful as a <b>triage aid</b>, not
+an automatic trigger. A cost analysis shows alerts pay off only if a missed shock is judged to cost about 20 or more false alarms.</div>
+
+<h2>1. Project alignment and master dataset inventory</h2>
+<p><b>Team.</b> Both members are computer scientists. One owns acquisition, parsing and provenance; the other owns statistical framing,
+representation, ethics and policy interpretation. <b>Research question.</b> Beneath the single national weekly SPI figure, do persistent
+city-level food price differences exist, are the cities paying most the ones least able to absorb it, and is the published city detail
+enough to detect localised price stress? <b>SDGs:</b> primary SDG 2 (Target 2.1, access to food; Target 2.c, functioning food markets and
+market information); secondary SDG 10 (reduced inequalities).</p>
+<p><b>Changes since Milestone 01.</b> The 7-city panel reported in Milestone 01 was a parsing error: Appendix-A stacks three tables in one sheet,
+and the old script read only the first. The panel covers all 17 SPI cities (8 Punjab,
+4 Sindh, 2 KP, 2 Balochistan, plus
+Islamabad). A correction note is in the repository. Following the instructor's feedback, three external sources are now merged.</p>
+
+<div class="tbl "><p class="cap">Table 1. Master dataset: 23,409 rows × 46 columns. Observational unit: 1 row = 1 item's retail price in 1 city in 1 week (17 cities × 51 items × 27 weeks; 32 of the 51 items are food).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Source</th>
+      <th>Role</th>
+      <th>Coverage</th>
+      <th>Access</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PBS weekly SPI Annexure, Appendix-A</td>
+      <td>City-item prices (MIN/AVG/MAX): the panel</td>
+      <td>27 weeks, 2025-05-15 to 2026-09-24</td>
+      <td>xlsx from pbs.gov.pk release pages</td>
+    </tr>
+    <tr>
+      <td>PSLM District Level Survey 2019-20</td>
+      <td>District deprivation: FIES food insecurity, literacy, schooling, water</td>
+      <td>2019-20</td>
+      <td>PDF report tables (text extraction)</td>
+    </tr>
+    <tr>
+      <td>Digital Census 2023, Table 1</td>
+      <td>Total and urban population</td>
+      <td>2023</td>
+      <td>xlsx, one file per province</td>
+    </tr>
+    <tr>
+      <td>CPI (Urban), food and non-alcoholic beverages</td>
+      <td>Deflator only, not a regressor</td>
+      <td>monthly, 2025-05 to 2026-09</td>
+      <td>PDF and Monthly Review docx</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>2. Data ingestion, cleaning and structural readiness</h2>
+<h3>2.1 Collection audit</h3>
+<p>Each PBS weekly release page (<code>/weekly-sensitive-price-indicator-spi-for-the-week-ended-on-DD-MM-YYYY/</code>) links an Annexure workbook.
+A rate-limited script tried the Thursday, Wednesday and Friday page for each of 73 weeks from
+2025-05-15 and logged every request, URL and SHA-256 hash. It found release pages for 12 weeks, most of them weeks already retrieved for Milestone 01 (the
+re-downloads were byte-identical). After dropping 12 duplicate files, the panel holds 27 weeks. Other weeks may exist under URLs we did not try, so we do not treat the archive as complete. The week after our freeze date
+(2026-10-01) was stored, unopened, as a holdout. External files were downloaded from pbs.gov.pk and are kept unchanged with
+their URLs and hashes.</p>
+<p><b>Validation.</b> The parser asserts, for every week: 3 blocks, 17 cities, 51 items, 867 rows; no duplicate key; MIN ≤ AVG ≤ MAX; and zeros only as
+all-zero triples. Against PBS's own national columns, the cross-city minimum and maximum match PBS's national MIN and MAX in
+1,377 of 1,377 item-weeks. The <b>geometric mean</b> of the city averages matches PBS's national
+average within 0.1% in 1,377 of 1,377. The arithmetic mean misses by a median of
+0.42%. We therefore use the geometric mean as the reference price.</p>
+
+<h3>2.2 Reshaping and alignment</h3>
+<p>The raw sheet (179 rows × 25 columns) is not tidy. City names are column headers, each spanning MIN/AVG/MAX
+cells, and three tables are stacked in one sheet. We <b>melt</b> each block into one row per city × item, <b>concatenate</b> the blocks and weeks,
+and move PBS's national columns into a separate validation table. We then <b>join</b> the item classification (on <code>item_id</code>), the
+city attributes (on <code>city</code>) and the CPI (on the month of <code>week_end</code>). Every join is many-to-one, and the row count is
+asserted unchanged (Table 2).</p>
+<p><b>Key alignment decisions.</b>
+<ul>
+<li><b>Karachi:</b> one SPI market, but six PSLM districts and seven census districts. PSLM values are population-weighted.</li>
+<li><b>Islamabad and Rawalpindi:</b> one contiguous market, kept as two administrative units.</li>
+<li><b>District totals:</b> PSLM has no urban sample for Khuzdar and publishes FIES only for district totals, so all indicators use district
+totals. These are <b>deprivation measures, not income</b>.</li>
+</ul></p>
+
+<div class="tbl "><p class="cap">Table 2. Reshaping and merge steps with keys, cardinality and the asserted row count.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>operation</th>
+      <th>source</th>
+      <th>key</th>
+      <th>cardinality</th>
+      <th>rows_after</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>stack</td>
+      <td>3 Appendix-A blocks per workbook</td>
+      <td>same 51 item rows</td>
+      <td>rows: 7+7+3 cities x 51 = 867 per week</td>
+      <td>867</td>
+    </tr>
+    <tr>
+      <td>stack</td>
+      <td>27 weekly workbooks</td>
+      <td>week_end</td>
+      <td>867 x 27</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>item_mapping.csv</td>
+      <td>item_id</td>
+      <td>many-to-one (51 items)</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>city table (Census 2023 + PSLM 2019-20)</td>
+      <td>city</td>
+      <td>many-to-one (17 cities)</td>
+      <td>23409</td>
+    </tr>
+    <tr>
+      <td>merge</td>
+      <td>urban food CPI</td>
+      <td>calendar month of week_end</td>
+      <td>many-to-one (months)</td>
+      <td>23409</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>2.3 Cleaning and missing data</h3>
+<p>Nothing is deleted. Zero MIN/AVG/MAX triples (83 rows, 0.35%) are set to missing and
+flagged: rice IRRI-6/9 is never quoted in Gujranwala, Lahore or Sialkot, and Khuzdar has no gas quote in two weeks. PBS itself excludes these cities
+from its national mean. Missing counts and percentages for <b>every column</b> are in Appendix Table A1 of the Milestone 02 report. Most of the missingness is structural:
+weekly change columns are undefined across non-consecutive weeks (44.3% of rows), because only
+15 pairs of weeks are 6-8 days apart. Table 3 gives the choice made for each kind of missingness.
+<b>Selection bias:</b> we exclude structural non-quotes from price comparisons, so results describe quoting markets and may still
+reflect selection bias, because a missing quote does not prove an item is unavailable in that city. The gaps in weekly coverage also mean the
+volatility analysis sees only the weeks we could retrieve.</p>
+
+<div class="tbl "><p class="cap">Table 3. Kinds of missingness, the choice made for each, and why.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>kind</th>
+      <th>rows</th>
+      <th>choice</th>
+      <th>reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Structural non-quote (PBS printed 0/0/0)</td>
+      <td>83</td>
+      <td>set to missing, flag, do not impute</td>
+      <td>Imputing invents a market price PBS does not record; PBS itself excludes these cities from its national mean</td>
+    </tr>
+    <tr>
+      <td>Weekly change across a non-consecutive gap</td>
+      <td>10,367</td>
+      <td>leave missing</td>
+      <td>Interpolation would manufacture week-to-week changes nobody observed</td>
+    </tr>
+    <tr>
+      <td>Weeks not retrieved from the PBS site</td>
+      <td>–</td>
+      <td>treat as a coverage gap</td>
+      <td>No source to impute from; stated as a limitation, not filled</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>2.4 Transformations, scaling and encoding</h3>
+<p><b>Log transformation.</b> Prices are compared in logs because premiums are multiplicative: a 10% premium means the same thing for salt and for a
+20 kg flour bag. Within an item, the median skewness of prices falls from 0.22 (raw) to
+0.02 (log). Prices pooled across items in PKR are not a meaningful distribution (skewness
+2.13), because they mix units. The main variable is
+<code>rel_price</code> = log(city price / national geometric mean), which sums to zero across cities in each item-week. District urban population
+is strongly right-skewed (skewness 2.30, driven by Karachi). Its log (<code>log_pop_urban</code>) has skewness
+-0.72. <b>Scaling.</b> The four deprivation indicators are min-max scaled to 0-1 (higher = more deprived) and averaged
+into <code>deprivation_composite</code>. Prices are z-scored within each item and week (<code>price_z_item_week</code>). All constants come from
+the training weeks only. <b>Encoding.</b> Nominal strings become 0/1 dummy flags with fixed reference levels: Punjab for province, storable
+staple for item category (Table 4). The model-ready file <code>data/processed/m02/model_ready_food.parquet</code> (14,607 food rows ×
+44 columns) carries 7 dummy columns. Cities will enter H1 with sum-to-zero coding, so each coefficient is a
+premium relative to the average city.</p>
+
+<div class="tbl "><p class="cap">Table 4. Dummy encoding example: province and item_category strings (left) become 0/1 flags (right). Reference levels: Punjab and storable_staple (all zeros).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>city</th>
+      <th>province</th>
+      <th>item_category</th>
+      <th>prov_ICT</th>
+      <th>prov_Sindh</th>
+      <th>prov_KP</th>
+      <th>prov_Balochistan</th>
+      <th>cat_perishable</th>
+      <th>cat_branded_packaged</th>
+      <th>cat_prepared_food</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Islamabad</td>
+      <td>ICT</td>
+      <td>perishable</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Lahore</td>
+      <td>Punjab</td>
+      <td>perishable</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Karachi</td>
+      <td>Sindh</td>
+      <td>perishable</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Peshawar</td>
+      <td>KP</td>
+      <td>perishable</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Quetta</td>
+      <td>Balochistan</td>
+      <td>perishable</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Islamabad</td>
+      <td>ICT</td>
+      <td>branded_packaged</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Islamabad</td>
+      <td>ICT</td>
+      <td>prepared_food</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>3. Exploratory data analysis</h2>
+<h3>3.1 Univariate summary</h3>
+<p>Table 5 reports each variable at its own unit of analysis. City attributes take 17 values, so city-level relationships are always analysed with
+n = 17, never with the 23,409 rows. <b>Skewed distributions</b> show up where the resistant and non-resistant measures disagree. The
+within-city price range has mean 6.8% but median 1.4% (skewness
+3.55). District urban population has mean 3.52 million but median 1.62 million.
+For city premiums, Larkana's mean (-4.9%) and median
+(-0.2%) differ by 4.8 points, because a few
+items drive the mean. We report medians alongside means wherever the two disagree. Weekly price changes are dominated by zeros:
+75% of consecutive-week food changes are exactly 0, so their median and IQR are both 0.</p>
+
+<div class="tbl "><p class="cap">Table 5. Summary statistics for key numerical variables: central tendency (mean, median), spread (SD, IQR) and skewness.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable (unit of analysis; unit)</th>
+      <th>n</th>
+      <th>mean</th>
+      <th>median</th>
+      <th>sd</th>
+      <th>iqr</th>
+      <th>skew</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>price_z_item_week (food; z-score, unitless)</td>
+      <td>14539</td>
+      <td>-0.000</td>
+      <td>-0.043</td>
+      <td>0.970</td>
+      <td>1.227</td>
+      <td>0.189</td>
+      <td>-3.865</td>
+      <td>3.795</td>
+    </tr>
+    <tr>
+      <td>rel_price (food; log points)</td>
+      <td>14607</td>
+      <td>-0.000</td>
+      <td>0.000</td>
+      <td>0.130</td>
+      <td>0.110</td>
+      <td>-0.144</td>
+      <td>-1.239</td>
+      <td>0.708</td>
+    </tr>
+    <tr>
+      <td>dlog_price (food; log points, consecutive weeks)</td>
+      <td>8115</td>
+      <td>-0.003</td>
+      <td>0.000</td>
+      <td>0.072</td>
+      <td>0.000</td>
+      <td>-1.300</td>
+      <td>-0.981</td>
+      <td>0.709</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct (food; %)</td>
+      <td>14607</td>
+      <td>6.812</td>
+      <td>1.395</td>
+      <td>11.665</td>
+      <td>9.384</td>
+      <td>3.549</td>
+      <td>0.000</td>
+      <td>152.858</td>
+    </tr>
+    <tr>
+      <td>single_quote (food; 1 if MIN = MAX, else 0)</td>
+      <td>14607</td>
+      <td>0.486</td>
+      <td>0.000</td>
+      <td>0.500</td>
+      <td>1.000</td>
+      <td>0.056</td>
+      <td>0.000</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>fies_mod_sev_pct (17 cities; %)</td>
+      <td>17</td>
+      <td>15.314</td>
+      <td>16.380</td>
+      <td>5.926</td>
+      <td>8.310</td>
+      <td>0.647</td>
+      <td>7.930</td>
+      <td>29.260</td>
+    </tr>
+    <tr>
+      <td>illiteracy10_pct (17 cities; %)</td>
+      <td>17</td>
+      <td>35.756</td>
+      <td>34.000</td>
+      <td>15.262</td>
+      <td>20.155</td>
+      <td>1.080</td>
+      <td>15.000</td>
+      <td>78.000</td>
+    </tr>
+    <tr>
+      <td>out_of_school_pct (17 cities; %)</td>
+      <td>17</td>
+      <td>28.573</td>
+      <td>25.739</td>
+      <td>15.495</td>
+      <td>19.000</td>
+      <td>0.627</td>
+      <td>10.000</td>
+      <td>60.000</td>
+    </tr>
+    <tr>
+      <td>no_tap_water_pct (17 cities; %)</td>
+      <td>17</td>
+      <td>76.782</td>
+      <td>81.740</td>
+      <td>20.667</td>
+      <td>18.130</td>
+      <td>-1.121</td>
+      <td>31.680</td>
+      <td>100.000</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite (17 cities; 0-1)</td>
+      <td>17</td>
+      <td>0.427</td>
+      <td>0.349</td>
+      <td>0.217</td>
+      <td>0.261</td>
+      <td>0.840</td>
+      <td>0.138</td>
+      <td>0.974</td>
+    </tr>
+    <tr>
+      <td>pop_urban (17 city districts; millions)</td>
+      <td>17</td>
+      <td>3.524</td>
+      <td>1.619</td>
+      <td>4.940</td>
+      <td>2.485</td>
+      <td>2.298</td>
+      <td>0.048</td>
+      <td>18.868</td>
+    </tr>
+    <tr>
+      <td>log_pop_urban (17 city districts; log persons)</td>
+      <td>17</td>
+      <td>14.368</td>
+      <td>14.298</td>
+      <td>1.341</td>
+      <td>1.176</td>
+      <td>-0.725</td>
+      <td>10.787</td>
+      <td>16.753</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>3.2 City food price premiums</h3>
+<p>For each city we average <code>rel_price</code> over weeks for each food item. The item-level means are the observations, so n is 31-32 items,
+not thousands of rows. Islamabad's mean premium is +14.1% (95% t-interval [8.9, 19.6]), followed by Rawalpindi +10.2%
+and Karachi +5.2%. Sukkur (-7.1%) and Bannu (-7.4%) are lowest (Fig. 1). 8 of 17 cities differ from
+zero at α = 0.05. After a Bonferroni correction for 17 tests, 4 remain: Islamabad, Rawalpindi, Sukkur, Bannu. Premiums persist: of
+3,269 consecutive-week pairs in which a city was above the cross-city median, 92.7% stayed above it the next
+week. Restricting to pairs where the price actually changed, the figure is 84.1%.</p>
+<figure><img src="../m02/figures/fig02_city_premiums.png" style="width:74%"/><figcaption>Fig. 1. Mean food price premium of each city relative to the national geometric mean, with 95% t-intervals over food items (n = 31-32). Colour shows province; filled markers remain significant after Bonferroni correction (α = 0.05/17). Islamabad and Rawalpindi pay most; Sukkur and Bannu least.</figcaption></figure>
+
+<h3>3.3 Dispersion by food category</h3>
+<p>The coefficient of variation (CV) puts items priced in different units on one scale. Mean cross-city CV is highest for perishables
+(0.157, 11 items) and prepared food (0.144),
+lower for storable staples (0.107, 10 items), and lowest for branded
+packaged goods (0.026), which carry printed or distributor prices (Fig. 2). A one-tailed Welch comparison of
+perishables against storables gives p = 0.037, and a rank-based check gives p = 0.057. With about ten
+items per group this is suggestive, not conclusive. Categories were assigned on storability and pricing mechanism before any dispersion was
+computed.</p>
+<figure><img src="../m02/figures/fig03_dispersion_by_category.png" style="width:68%"/><figcaption>Fig. 2. Mean cross-city coefficient of variation (unitless) of each food item, grouped by category; one dot per item. Perishables are the most dispersed across cities; branded packaged goods barely differ.</figcaption></figure>
+
+<h3>3.4 Outlier diagnostic</h3>
+<p>We apply both rules taught in the course to <code>rel_price</code> and to weekly log changes, each at two tiers (Table 6, Fig. 3).
+<b>Masking and variance inflation:</b> the two rules disagree sharply. On <code>rel_price</code>, the IQR is narrow because many branded items are
+priced identically everywhere, so the quartile fences sit close and flag 3,649 values. The SD, by contrast, is inflated
+by the extreme values themselves, which pulls the 3-SD fence outward and masks them: only 434 are flagged. On weekly
+changes the IQR is exactly 0, so the quartile rule flags every non-zero change and is unusable. We checked the eight most extreme relative prices
+against the raw workbooks. 7 equal PBS's own national minimum or maximum for that item-week, and the other is a
+genuine printed quote (Sukkur tomatoes, PKR 20 per 1 kg). They are therefore true
+prices: we keep and flag them rather than trim them, because large moves are what H3 studies.</p>
+
+<div class="tbl "><p class="cap">Table 6. Outliers by the quartile rule (beyond Q1 − k·IQR or Q3 + k·IQR) and the z-score rule (|z| > 2, 3). Units: log points.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>variable</th>
+      <th>n</th>
+      <th>Q1</th>
+      <th>Q3</th>
+      <th>IQR</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>&gt; 1.5 IQR</th>
+      <th>&gt; 3 IQR</th>
+      <th>|z| &gt; 2</th>
+      <th>|z| &gt; 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>rel_price, all 51 items</td>
+      <td>23326</td>
+      <td>-0.037</td>
+      <td>0.046</td>
+      <td>0.084</td>
+      <td>0.000</td>
+      <td>0.133</td>
+      <td>3649</td>
+      <td>1251</td>
+      <td>1598</td>
+      <td>434</td>
+    </tr>
+    <tr>
+      <td>weekly log change, all items</td>
+      <td>12959</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.001</td>
+      <td>0.062</td>
+      <td>2502</td>
+      <td>2502</td>
+      <td>493</td>
+      <td>296</td>
+    </tr>
+  </tbody>
+</table></div>
+<figure><img src="../m02/figures/fig08_relprice_hist.png" style="width:74%"/><figcaption>Fig. 3. Distribution of relative prices (log points; all 51 items × 17 cities × 27 weeks) with the 1.5 IQR fences (dashed) and the ±3 SD fences (dotted), plus a normal curve with the same mean and SD. The spike at 0 and the heavy tails explain why the two rules disagree.</figcaption></figure>
+
+<h3>3.5 Relationships: premium, deprivation and data quality</h3>
+<p>Following Anscombe's advice, we plot before computing any coefficient (Fig. 4). The relationship runs <b>against</b> the "poor pay more"
+expectation. The three least deprived cities (Karachi, Islamabad, Rawalpindi) have the highest premiums, while several of the most deprived (Bannu,
+Sukkur, Larkana) pay below the national reference. The Spearman correlation between premium and the deprivation composite is ρ =
+-0.56 (p = 0.020, n = 17). Dropping each city in turn keeps ρ between -0.72 and
+-0.48. Against FIES food insecurity alone, ρ = -0.32 (p = 0.209), which is not
+significant. The tap-water indicator is a weak deprivation measure: it rates Gujranwala and Sialkot (95% and 94% of households without tap water) as worse off
+than Quetta or Peshawar, and Karachi and Hyderabad as best off. This mostly reflects reliance on motor pumps and filtration plants in Punjab cities. Without it, the composite gives ρ = -0.50 (p = 0.041).
+Khuzdar and Quetta are the exception: their premiums are above zero, though not individually significant, and they have the
+highest food insecurity in the panel, so burden concentrates there. These are associations across 17 cities, with deprivation data from 2019-20,
+and support no causal claim.</p>
+<figure><img src="../m02/figures/fig04_premium_vs_deprivation.png" style="width:100%"/><figcaption>Fig. 4. City mean food price premium (%) against the PSLM 2019-20 deprivation composite (left; 0-1, higher = more deprived) and moderate-or-severe food insecurity (right; % of population). Every city is labelled; colour shows province; n = 17.</figcaption></figure>
+
+<div class="two"><div class="tbl "><p class="cap">Table 7. Spearman correlation matrix of city-level variables (n = 17).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Spearman ρ (n = 17)</th>
+      <th>premium</th>
+      <th>deprivation composite</th>
+      <th>FIES food insecurity</th>
+      <th>log urban population</th>
+      <th>share MIN = MAX</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>premium</td>
+      <td>1.00</td>
+      <td>-0.56</td>
+      <td>-0.32</td>
+      <td>0.41</td>
+      <td>-0.74</td>
+    </tr>
+    <tr>
+      <td>deprivation composite</td>
+      <td>-0.56</td>
+      <td>1.00</td>
+      <td>0.76</td>
+      <td>-0.56</td>
+      <td>0.49</td>
+    </tr>
+    <tr>
+      <td>FIES food insecurity</td>
+      <td>-0.32</td>
+      <td>0.76</td>
+      <td>1.00</td>
+      <td>-0.41</td>
+      <td>0.14</td>
+    </tr>
+    <tr>
+      <td>log urban population</td>
+      <td>0.41</td>
+      <td>-0.56</td>
+      <td>-0.41</td>
+      <td>1.00</td>
+      <td>-0.41</td>
+    </tr>
+    <tr>
+      <td>share MIN = MAX</td>
+      <td>-0.74</td>
+      <td>0.49</td>
+      <td>0.14</td>
+      <td>-0.41</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table></div><div class="tbl "><p class="cap">Table 8. Contingency table: SPI cities by province and premium tercile.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>province</th>
+      <th>low premium</th>
+      <th>mid premium</th>
+      <th>high premium</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ICT</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Punjab</td>
+      <td>3</td>
+      <td>4</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Sindh</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>KP</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Balochistan</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table></div></div>
+
+<p><b>Data quality.</b> Table 7 also shows that the premium correlates negatively with the share of a city's food records where MIN = MAX
+(ρ = -0.74). MIN = MAX means every quote
+PBS collected for that item in that city was identical: either a single quote or several equal ones. The published average then carries no
+information about price spread within the city. This share ranges from 20% in Karachi to
+91% in Sukkur (Fig. 5), a measurement-quality disparity that H4 carries forward.
+<b>Representation.</b> The census districts that contain the 17 SPI cities hold 65% of the urban
+population of the four provinces and Islamabad. Because each city is smaller than its district, this is an upper bound on what the SPI markets
+represent. The panel includes no rural markets, AJK or Gilgit-Baltistan, and only two cities each for KP and Balochistan.</p>
+<figure><img src="../m02/figures/fig07_single_quote_share.png" style="width:68%"/><figcaption>Fig. 5. Share of each city’s food price records (%) in which PBS’s minimum and maximum quote are equal, coloured by province. High shares mean the published city average carries no information on within-city price spread.</figcaption></figure>
+
+
+<h2>4. Hypotheses and analytical plan</h2>
+<p>Each hypothesis is mapped to master-dataset columns in Table 9. Targets marked † are derived from existing columns,
+with the rule for each fixed in Milestone 02. Milestone 03 builds the final H3 label (Section 5) and tests H3 (Sections 6-8); the
+base rate and row count quoted for H3 below are the whole-period description from Milestone 02, which the models never use.</p>
+<ul>
+<li><b>H1, persistent premiums (SDG 2.1).</b> (a) In log p<sub>c,i,t</sub> = α<sub>i,t</sub> + β<sub>c</sub> + ε with Σβ<sub>c</sub> = 0:
+H0: β<sub>c</sub> = 0 for every city c; H1: β<sub>c</sub> ≠ 0 for at least one c. (b) H0: P(above median at t+1 | above at t) = 0.5;
+H1: &gt; 0.5, tested on consecutive weeks and repeated for changed prices only. If some cities persistently pay more for the same basket, access to
+food differs by place in a way the national figure hides.</li>
+<li><b>H2, perishability and dispersion (SDG 2.c).</b> H0: μ<sub>CV, perishable</sub> = μ<sub>CV, storable</sub>; H1: μ<sub>CV, perishable</sub>
+&gt; μ<sub>CV, storable</sub>. Greater dispersion in perishables points to market-functioning frictions.</li>
+<li><b>H3, abnormal next-week movement (SDG 2.c, early warning).</b> H0: a classifier on lagged features achieves AUC = 0.5 on a time-ordered test
+set; H1: AUC &gt; 0.5. "Abnormal" means a change larger than the item's own 90th percentile of non-zero changes in the training weeks. We use
+non-zero changes because 75% of weekly food price changes are zero, and the plain 90th percentile would be 0
+for 13 of the 32 food items. Base rate: 2.9%.</li>
+<li><b>H4, representation and model fairness (SDG 10).</b> H0: model error rates and data quality (share of MIN = MAX records) are equal across
+city groups (province, population tercile, deprivation tercile); H1: at least one group differs.</li>
+<li><b>H5, burden versus price (SDG 2.1, SDG 10).</b> H0: Spearman ρ(city premium, deprivation) = 0; H1: ρ ≠ 0, two-sided, n = 17. EDA already
+points to ρ &lt; 0 (§3.5). The test will be repeated under both deprivation definitions.</li>
+</ul>
+
+<div class="tbl "><p class="cap">Table 9. Variable mapping: target, predictors and controls for each hypothesis, with column names from the master dataset or its views.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Hypothesis</th>
+      <th>Target (Y)</th>
+      <th>Predictors (X)</th>
+      <th>Controls / confounders</th>
+      <th>Data</th>
+      <th>Effective n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>H1a premiums</td>
+      <td>log_price</td>
+      <td>city (sum-to-zero dummies of city_code)</td>
+      <td>item × week fixed effects (item_id, week_end)</td>
+      <td>master, food rows</td>
+      <td>17 cities; 32 items × 27 weeks</td>
+    </tr>
+    <tr>
+      <td>H1b persistence</td>
+      <td>above_median</td>
+      <td>above_median_prev</td>
+      <td>price_changed, item_category; rows with is_consecutive</td>
+      <td>master, food rows</td>
+      <td>17 cities (one rate each)</td>
+    </tr>
+    <tr>
+      <td>H2 dispersion</td>
+      <td>cv, averaged per item</td>
+      <td>item_category (perishable vs storable_staple)</td>
+      <td>n_quoting</td>
+      <td>item_week_dispersion view</td>
+      <td>11 vs 10 items</td>
+    </tr>
+    <tr>
+      <td>H3 abnormal move</td>
+      <td>abnormal_next_week † (final rule in §5)</td>
+      <td>|dlog_price|, |dlog_price_lag1| with observed flags, price_changed, rel_price, within_city_range_pct, single_quote, cat_* dummies</td>
+      <td>prov_* dummies, log_pop_urban, deprivation_composite</td>
+      <td>model_ready_food</td>
+      <td>7,095 labelled rows</td>
+    </tr>
+    <tr>
+      <td>H4 representation</td>
+      <td>model error † (M03); single_quote (now)</td>
+      <td>province; terciles of pop_urban and deprivation_composite †</td>
+      <td>item_category</td>
+      <td>master / city table</td>
+      <td>17 cities in 3-5 groups</td>
+    </tr>
+    <tr>
+      <td>H5 burden</td>
+      <td>city premium = city mean of rel_price †</td>
+      <td>deprivation_composite, fies_mod_sev_pct</td>
+      <td>log_pop_urban, city share of single_quote</td>
+      <td>city table (17 rows)</td>
+      <td>17</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<p><b>Analytical plan: what Milestone 03 did.</b> Milestone 03 is the classification milestone, so it tests H3.
+<ul>
+<li><b>Done:</b> logistic regression, a decision tree and KNN against two naive benchmarks. Validation uses a time-ordered split and
+forward-chaining cross-validation, because random folds leak later weeks of the same city-item series (§6.4 measures how much).
+Models are evaluated with ROC-AUC, PR-AUC and the full Unit 10 metrics, not accuracy alone: a model that always predicts "normal" is
+97% accurate on the test weeks. Errors are broken down by city group as a descriptive preview of H4 (§8).</li>
+<li><b>Moved to Milestone 04:</b> tree ensembles (beyond the methods covered so far), the formal H4 fairness test, and the fixed-effects
+estimate of H1. H2 and H5 were tested descriptively in Milestone 02.</li>
+<li><b>Still closed:</b> the post-cutoff holdout. It is opened once, in the Week 14 new-data milestone.</li>
+</ul></p>
+
+
+
+<h2>5. Baseline models and justification</h2>
+<h3>5.1 Prediction task, label and features</h3>
+<p><b>Unit and target.</b> One row is one city × food item × week <i>t</i>. The target <code>y</code> = 1 if the item's price in that city
+moves abnormally between week <i>t</i> and the next consecutive release <i>t</i>+1. "Abnormal" means |Δlog price| above the item's own
+90th percentile of <b>non-zero</b> weekly changes, because the plain 90th percentile is 0 for 13 of the 32 food items.
+Items with fewer than five non-zero changes in the training rows get no threshold and are dropped
+(5 items in the final split). The positive class is the abnormal move, the event a price monitor wants to catch.
+<b>Thresholds are fitted on training rows only</b>, separately in every fold and in the final split. If they were fitted on all weeks, the
+test weeks would help define what counts as abnormal.</p>
+<p><b>Why only 15 of 27 weeks carry a label.</b> A label needs the next week's price, and
+only 15 weeks are followed by a release 6-8 days later. This is a gap in PBS's published weekly archive, not in our
+method. Described with whole-period thresholds, the labelled data has 7,095 rows (473 per week), of
+which 205 are abnormal (2.9%). The models never see these whole-period thresholds.</p>
+<p><b>Features.</b> Every feature is known at week <i>t</i> (Table 10). A change that cannot be computed because the previous week was not published
+(40% of rows for this week's change, 73% for last week's) is set to 0 <i>and</i> flagged
+with a <code>has_</code> indicator. The model can then tell "no change" from "not observed" (the Milestone 02 rule: flag, don't impute).
+We deliberately do not add one dummy per item: with about 200 positives this would overfit, and it would swamp KNN's distances.</p>
+
+<div class="tbl "><p class="cap">Table 10. Model features and why each might matter. Reference levels: storable staple (category) and Punjab (province).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>feature</th>
+      <th>why it might matter (all known at week t)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>abs_dlog</td>
+      <td>size of this week's change: prices that just moved may keep moving or snap back</td>
+    </tr>
+    <tr>
+      <td>has_dlog</td>
+      <td>1 if this week's change is observed (previous week published); flag instead of guessing</td>
+    </tr>
+    <tr>
+      <td>price_changed</td>
+      <td>1 if the price changed at all this week; most weeks prices are flat</td>
+    </tr>
+    <tr>
+      <td>abs_dlog_lag1</td>
+      <td>size of last week's change: a longer momentum window</td>
+    </tr>
+    <tr>
+      <td>has_lag1</td>
+      <td>1 if last week's change is observed</td>
+    </tr>
+    <tr>
+      <td>rel_price</td>
+      <td>log price relative to the national geometric mean: a city far from the others may correct</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct</td>
+      <td>(max - min) / avg across the city's outlets: disagreement may precede a move</td>
+    </tr>
+    <tr>
+      <td>single_quote</td>
+      <td>1 if min = max (one effective quote): a data-quality flag (H4)</td>
+    </tr>
+    <tr>
+      <td>cat_perishable</td>
+      <td>perishable item (reference: storable staple); expected to be most volatile (H2)</td>
+    </tr>
+    <tr>
+      <td>cat_branded_packaged</td>
+      <td>branded / packaged item; printed prices change rarely</td>
+    </tr>
+    <tr>
+      <td>cat_prepared_food</td>
+      <td>prepared food item</td>
+    </tr>
+    <tr>
+      <td>prov_Sindh</td>
+      <td>province dummy (reference: Punjab)</td>
+    </tr>
+    <tr>
+      <td>prov_KP</td>
+      <td>province dummy (reference: Punjab)</td>
+    </tr>
+    <tr>
+      <td>prov_Balochistan</td>
+      <td>province dummy (reference: Punjab)</td>
+    </tr>
+    <tr>
+      <td>prov_ICT</td>
+      <td>Islamabad Capital Territory dummy (reference: Punjab)</td>
+    </tr>
+    <tr>
+      <td>log_pop_urban</td>
+      <td>log urban population of the city's district: market size</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>PSLM 2019-20 district deprivation (0-1): do poorer places see more shocks?</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h3>5.2 Benchmarks and models</h3>
+<p>Table 11 lists the five approaches. The two benchmarks set the floor. The <b>majority class</b> shows why accuracy is misleading here. The
+<b>category base-rate rule</b> encodes the domain view that perishables move more, which Milestone 02 supported (H2). It is a tough baseline: it
+needs no fitting beyond four rates, and any model that cannot beat it is not worth deploying. The three course models represent three different
+ideas: a linear probability model, axis-aligned rules and similarity. Logistic regression and the tree use <code>class_weight="balanced"</code>, which weights each
+positive row by n/(2 × positives) and each negative by n/(2 × negatives), so the rare class counts as much as the common one. KNN has no class weights;
+its min-max scaler, like the logistic model's z-score scaler, sits inside an sklearn <code>Pipeline</code>, so it is refitted on the training rows of each fold.</p>
+
+<div class="tbl small"><p class="cap">Table 11. Naive benchmarks and baseline models, with the reason each was chosen, its tuning grid and the setting selected in cross-validation.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Model</th>
+      <th>How it works</th>
+      <th>Why it fits this problem</th>
+      <th>Grid (tuned in forward-chaining CV)</th>
+      <th>Chosen</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Majority class (benchmark 1)</td>
+      <td>Always predicts 'normal'</td>
+      <td>Shows that accuracy misleads on rare events (Unit 10)</td>
+      <td>none</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule (benchmark 2)</td>
+      <td>Score = item category's abnormal rate in training weeks</td>
+      <td>One-line domain heuristic: 'perishables move more'. A model must beat it to be worth deploying</td>
+      <td>none</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>Linear log-odds; z-scored inputs; balanced class weights</td>
+      <td>Probabilities for ROC and cost thresholds; stable with few positives; odds ratios an analyst can read</td>
+      <td>C ∈ {0.01, 0.1, 1, 10}</td>
+      <td>C=0.01</td>
+    </tr>
+    <tr>
+      <td>Decision tree (CART)</td>
+      <td>Recursive if-then splits; balanced class weights</td>
+      <td>Rules a price committee can follow without software; captures interactions; no scaling</td>
+      <td>criterion ∈ {gini, entropy}; depth 2-6; min leaf ∈ {10, 30, 60}</td>
+      <td>criterion=gini, max_depth=2, min_samples_leaf=60</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>Vote of the K nearest rows; min-max scaling fitted on training rows</td>
+      <td>A different idea: similar city-item situations behave alike; no training step</td>
+      <td>K ∈ {5, 15, 25, 51, 101, 201}; uniform/distance; Euclidean/Manhattan; all vs continuous features</td>
+      <td>n_neighbors=201, weights=uniform, metric=manhattan, features=all</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>6. Experimental setup</h2>
+<h3>6.1 Time-ordered split, purge and stratification</h3>
+<p>We train on the first 11 labelled weeks (2025-07-17 to 2026-03-26) and test on the last
+4 (2026-04-02, 2026-06-04, 2026-08-13, 2026-08-20): 73% / 27% by weeks.
+<b>Purge rule:</b> a row at week <i>t</i> is labelled from week <i>t</i>+1, so a training row whose <i>t</i>+1 is an evaluation week
+is dropped. Here the last training week (2026-03-26) is followed by the first test week, so its 541
+candidate rows are purged, and the final models learn from 10 weeks. After purging and labelling, the training set has
+4,560 rows (135 abnormal, 2.96%) and the test set has 1,824 rows
+(54 abnormal, 2.96%): 71% / 29% by rows.
+The two base rates are nearly equal, so the test weeks are not unusually calm or volatile.</p>
+<p><b>Why not a random stratified split?</b> The brief's example is a random stratified split. Our rows are a panel: the same 17 × 28
+city-item series recur every week, and neighbouring weeks share shocks. A random split would train on later weeks to predict earlier ones, which PBS could never do
+in practice. It also lets the model learn week-specific shocks that appear on both sides of the split. We keep time order. The purpose of stratification,
+keeping the rare class represented in every part, is met differently: every validation fold and the test set are checked to contain positives
+(16-26 per validation week; 54 in test), and the models use balanced class weights.
+§6.4 measures the cost of ignoring time order.</p>
+
+<h3>6.2 Forward-chaining cross-validation</h3>
+<p>Within the training weeks we use an expanding window (Fig. 6). Fold 1 trains on labelled weeks 1-6 and validates on week 7. Fold 2 trains on weeks 1-7
+and validates on week 8, and so on, giving 5 folds. Each fold rebuilds its own label thresholds, scaler and model from its training weeks and
+applies the purge rule (3 folds lose their last training week to it). Each validation week holds only
+16-26 abnormal moves, so fold-to-fold variance is large. We report the mean ± SD across folds and every
+fold's AUC (Appendix Table A1).</p>
+<figure><img src="figures/fig15_split_design.png" style="width:86%"/><figcaption>Fig. 6. Forward-chaining folds and the final split, by labelled week t. Blue: training; orange: validation or test; grey ×: training week purged because its t+1 is an evaluation week.</figcaption></figure>
+
+<h3>6.3 Hyperparameter tuning</h3>
+<p>Each grid in Table 11 runs inside the five folds. Settings are compared by mean validation <b>ROC-AUC</b>, which does not depend on a threshold
+and is not fooled by the majority class. When several settings are within one fold-SD of the best, we take the simplest: smallest C, smallest
+depth with the largest leaves, or largest K. With so few positives per fold, the difference between near-equal settings is mostly noise (Fig. 7).
+<b>Logistic regression:</b> C hardly matters. C = 0.01, the strongest regularisation, has the best mean (0.637 ± 0.098).
+<b>Decision tree:</b> depth 4 had the best mean (0.640 ± 0.056), but depth 2 is within one SD,
+so we keep the simpler tree (0.611 ± 0.095); a depth-2 tree is also four readable rules.
+<b>KNN:</b> AUC rises steadily with K and peaks at the grid's edge (n_neighbors=201, weights=uniform, metric=manhattan, features=all; 0.656 ± 0.133). Using the four continuous
+features alone is clearly worse (best 0.591), so the category dummies carry most of what KNN finds.</p>
+<figure><img src="figures/fig16_tuning.png" style="width:100%"/><figcaption>Fig. 7. Tuning results: mean validation ROC-AUC over five forward-chaining folds for each setting (left panel shows ± 1 SD). The dotted line is chance (0.5).</figcaption></figure>
+
+<h3>6.4 Leakage checks</h3>
+<p><b>Random folds are over-optimistic.</b> For the chosen logistic model, ordinary shuffled <code>StratifiedKFold</code> (5 folds) on the training rows gives
+AUC 0.710 ± 0.038, against 0.637 for forward chaining: a gap
+of 0.073. That gap is the optimism a random split would have reported.
+<b>Shuffled labels give chance.</b> Refitting the final logistic model on permuted training labels and scoring the real test labels gives AUC
+0.583 for the seed-42 shuffle. Over 200 shuffles the mean is 0.503
+(5th-95th percentile 0.374-0.626), so nothing outside the features carries the label. No shuffle reached the
+real test AUC (share 0.00), which is also a permutation test of H3.
+<b>Asserts in the code:</b> no week after the cutoff is read; no evaluation week is in any training set; thresholds come from training rows; the
+purge is applied; the mean shuffled AUC is within 0.03 of 0.5.</p>
+
+<h2>7. Results</h2>
+<p>Table 12 reports the test set, scored once with the settings chosen in cross-validation. Table 13 reports the same metrics as mean ± SD
+across the five folds. Threshold-based metrics use 0.5. <b>PR-AUC</b> matters because, with about 3% positives, ROC-AUC can look respectable
+while precision stays tiny. A random model's PR-AUC equals the base rate (0.030 on test), so that is the bar to compare against.</p>
+
+<div class="tbl "><p class="cap">Table 12. Test-set metrics (4 weeks, 1,824 rows, 54 abnormal). Threshold 0.5 for accuracy to F1. ROC-AUC with a percentile bootstrap 95% CI (2,000 resamples of test rows, seed 42).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>accuracy</th>
+      <th>precision</th>
+      <th>recall</th>
+      <th>specificity</th>
+      <th>F1</th>
+      <th>ROC-AUC [95% CI]</th>
+      <th>PR-AUC</th>
+      <th>flagged at 0.5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Majority class</td>
+      <td>0.970</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>0.000</td>
+      <td>0.500 [0.500, 0.500]</td>
+      <td>0.030</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>0.970</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>0.000</td>
+      <td>0.708 [0.659, 0.753]</td>
+      <td>0.051</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>0.570</td>
+      <td>0.050</td>
+      <td>0.759</td>
+      <td>0.564</td>
+      <td>0.095</td>
+      <td>0.692 [0.636, 0.746]</td>
+      <td>0.052</td>
+      <td>813</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>0.868</td>
+      <td>0.035</td>
+      <td>0.130</td>
+      <td>0.890</td>
+      <td>0.055</td>
+      <td>0.610 [0.576, 0.650]</td>
+      <td>0.038</td>
+      <td>201</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>0.970</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1.000</td>
+      <td>0.000</td>
+      <td>0.599 [0.529, 0.665]</td>
+      <td>0.038</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table 13. Forward-chaining cross-validation metrics: mean ± SD over 5 validation weeks (threshold 0.5).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>accuracy</th>
+      <th>precision</th>
+      <th>recall</th>
+      <th>specificity</th>
+      <th>F1</th>
+      <th>ROC-AUC</th>
+      <th>PR-AUC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Majority class</td>
+      <td>0.951 ± 0.010</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>1.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.500 ± 0.000</td>
+      <td>0.049 ± 0.010</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>0.951 ± 0.010</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>1.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.596 ± 0.085</td>
+      <td>0.062 ± 0.017</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>0.596 ± 0.065</td>
+      <td>0.072 ± 0.016</td>
+      <td>0.629 ± 0.222</td>
+      <td>0.595 ± 0.080</td>
+      <td>0.127 ± 0.029</td>
+      <td>0.637 ± 0.098</td>
+      <td>0.088 ± 0.026</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>0.678 ± 0.294</td>
+      <td>0.033 ± 0.032</td>
+      <td>0.388 ± 0.420</td>
+      <td>0.696 ± 0.334</td>
+      <td>0.061 ± 0.059</td>
+      <td>0.611 ± 0.095</td>
+      <td>0.072 ± 0.030</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>0.951 ± 0.010</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>1.000 ± 0.000</td>
+      <td>0.000 ± 0.000</td>
+      <td>0.656 ± 0.133</td>
+      <td>0.086 ± 0.031</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<figure><img src="figures/fig17_roc_pr.png" style="width:100%"/><figcaption>Fig. 8. ROC curves (left; AUC in brackets) and precision-recall curves (right; PR-AUC in brackets; y-axis cut at 0.2) on the test set. The dotted lines are chance: the diagonal, and the base rate.</figcaption></figure>
+<div class="hl"><p><b>H3 decision.</b> For logistic regression, the decision tree and KNN, the lower bound of the test ROC-AUC confidence interval is above 0.5
+(logistic 0.692 [0.636, 0.746]; tree 0.610 [0.576, 0.650]; KNN 0.599 [0.529, 0.665]). We <b>reject H0</b>: information available at week <i>t</i> ranks next-week abnormal moves
+better than chance. The permutation test agrees (§6.4). The signal is modest: test PR-AUC is 0.052 for logistic regression,
+under twice the base rate.</p></div>
+<p><b>Does any ML model beat the simple rule?</b> In cross-validation, logistic regression is ahead of the category rule on average
+(0.637 ± 0.098 vs 0.596 ± 0.085; ahead in 4 of 5 folds). On the test weeks, the category rule is
+slightly ahead (0.708 vs 0.692). The paired bootstrap difference (logistic minus rule) is
+-0.015, 95% CI [-0.074, 0.041],
+so we cannot tell them apart. The depth-2 tree is significantly worse than the rule on test (difference CI
+[-0.154, -0.036]). KNN had the highest CV mean but also the largest SD, and it fell to
+0.599 on test. <b>The honest reading is that most of the usable signal is "what kind of food is it".</b> The ablation agrees.
+Logistic regression with only the three category dummies scores 0.596 in CV and 0.708 on test.
+The full feature set adds about 0.04 AUC in CV and nothing on test.</p>
+<p><b>Accuracy misleads.</b> The majority class is 97.0% accurate and catches nothing. The category rule and KNN never
+reach a score of 0.5, so at that threshold they flag nothing either, and their accuracy-to-F1 row looks the same as the majority class.
+Balanced class weights push logistic regression the other way: at 0.5 it flags 813 rows, with recall 76%
+but precision 5.0%. 0.5 is an arbitrary cut-off. §8 chooses thresholds from costs.</p>
+<p><b>Why KNN struggles</b> (Unit 11 limitations). With about 3% positives, most neighbourhoods of 5-25 rows contain no abnormal move at all, so the vote is 0
+almost everywhere. Binary dummies count as much in the distance as real price changes, and irrelevant features add noise. Many rows are identical
+(no change, not observed), which produces ties. Only very large neighbourhoods give a usable score, and then KNN is a smoothed local base rate,
+which explains its peak at the edge of the K grid.</p>
+<p><b>Label sensitivity.</b> Under the Milestone 02 "contract" rule (plain 90th percentile; any change counts for 13 items) the test base rate is
+7.2%. Logistic regression reaches 0.585 and the category rule 0.523, so the
+task is harder. The refined label is the one we defend.</p>
+
+<h2>8. Asymmetric error costs and confusion-matrix diagnostics</h2>
+<h3>8.1 Who bears each error</h3>
+<p>The alert is meant for a PBS analyst, or a district Price Control Committee or price magistrate deciding where to send inspectors or which
+items to watch next week.
+<ul>
+<li>A <b>false negative</b> (missed abnormal move) is a jump in tomatoes, onions, flour or ghee that nobody was warned about. No early stock release,
+inspection or public notice happens, and households absorb the shock. Households in more deprived districts spend a larger share of income on food,
+so the harm falls hardest on those least able to absorb it (H5).</li>
+<li>A <b>false positive</b> (false alarm) is an inspection visit or watch-list entry that was not needed. It costs staff time and may cause friction
+with traders. Repeated false alarms cause <i>alert fatigue</i>: if most alerts are wrong, people stop trusting the system.</li>
+</ul></p>
+<p><b>Cost matrix</b> (Provost and Fawcett, Ch. 7). cost(TP) = cost(TN) = 0, cost(FP) = 1 unit and cost(FN) = <i>r</i> units. We put the cost in one cell only,
+to avoid the double counting Provost and Fawcett warn about. We do not also credit a "benefit" for true positives.
+Flagging a row with probability <i>p</i> of being abnormal is worth it when <i>p</i>·<i>r</i> &gt; 1 − <i>p</i>, i.e. <i>p</i> &gt; 1/(1 + <i>r</i>).
+With a training base rate of 3.0%, an average row passes that test only when <i>r</i> exceeds about
+34 (the inverse base rate). That is where "flag everything" starts to look rational. <b><i>r</i> is a value judgment made by
+people, not something the data decides</b>, so we vary it over {1, 5, 10, 20, 35}. For each <i>r</i> and model, the threshold that minimises total cost is
+chosen on the pooled out-of-fold CV predictions and then applied to the test set once.</p>
+
+<div class="tbl "><p class="cap">Table 14. Test cost per 1,000 city-item-weeks (in false-alarm units) and, in brackets, the share of abnormal moves caught, for each cost ratio r. Thresholds were chosen on CV predictions only.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>policy</th>
+      <th>r = 1</th>
+      <th>r = 5</th>
+      <th>r = 10</th>
+      <th>r = 20</th>
+      <th>r = 35</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>30 (0%)</td>
+      <td>148 (0%)</td>
+      <td>296 (0%)</td>
+      <td>747 (100%)</td>
+      <td>747 (100%)</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>30 (0%)</td>
+      <td>148 (0%)</td>
+      <td>340 (20%)</td>
+      <td>588 (83%)</td>
+      <td>709 (94%)</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>30 (0%)</td>
+      <td>148 (0%)</td>
+      <td>296 (0%)</td>
+      <td>747 (100%)</td>
+      <td>805 (100%)</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>30 (0%)</td>
+      <td>148 (0%)</td>
+      <td>296 (0%)</td>
+      <td>649 (70%)</td>
+      <td>834 (74%)</td>
+    </tr>
+    <tr>
+      <td>Flag nothing (= majority class)</td>
+      <td>30 (0%)</td>
+      <td>148 (0%)</td>
+      <td>296 (0%)</td>
+      <td>592 (0%)</td>
+      <td>1036 (0%)</td>
+    </tr>
+    <tr>
+      <td>Flag everything</td>
+      <td>970 (100%)</td>
+      <td>970 (100%)</td>
+      <td>970 (100%)</td>
+      <td>970 (100%)</td>
+      <td>970 (100%)</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<figure><img src="figures/fig19_costs.png" style="width:64%"/><figcaption>Fig. 9. Test cost per 1,000 city-item-weeks against the cost ratio r. Below r ≈ 10 the cheapest policy is to issue no alerts; logistic regression is the cheapest policy at r = 35.</figcaption></figure>
+<p><b>Reading the sensitivity.</b> For <i>r</i> ≤ 10 no model is confident enough to be worth acting on: the cheapest policy is to flag nothing. At
+<i>r</i> = 10, the threshold logistic regression learned in CV flags a few rows, and on test that costs slightly more than staying silent.
+At <i>r</i> = 20, logistic regression (588) and flagging nothing (592) cost about the same.
+At <i>r</i> = 35, logistic regression is the cheapest policy (709, against 747 for the category rule
+and 970 for flagging everything). <b>The model pays off only if a missed shock is judged to be worth roughly 20 or more
+unnecessary inspections.</b> Our recommended threshold therefore depends on <i>r</i>. We use <i>r</i> = 20 below as a reference: it is the smallest value
+in our grid at which every model's CV-chosen threshold raises any alerts. At that threshold logistic regression flags
+51% of test rows, catches 83% of abnormal moves, and has precision
+4.8% (Appendix Table A2 has all models).</p>
+<p><b>Alert budget.</b> A decision-maker may think in terms of capacity rather than <i>r</i>: "we can check <i>N</i> city-items a week". Table 15 ranks each test
+week's 456 rows by score and takes the top <i>N</i>. With 50 checks a week, logistic regression puts
+11 of the 54 abnormal moves in front of an inspector (20%);
+the category rule, with random tie-breaking, puts 11.0 in front of them.
+Precision@<i>N</i> stays between 3% and 7%, against 3.0% for random checks.</p>
+
+<div class="tbl small"><p class="cap">Table 15. Alert budget on the test weeks: share of abnormal moves caught (recall) and share of checks that find one (precision) when only the top N rows per week are checked. Ties (category rule) are counted at their expected value.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>top 10/week: recall</th>
+      <th>top 10/week: precision</th>
+      <th>top 25/week: recall</th>
+      <th>top 25/week: precision</th>
+      <th>top 50/week: recall</th>
+      <th>top 50/week: precision</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>0.041</td>
+      <td>0.055</td>
+      <td>0.102</td>
+      <td>0.055</td>
+      <td>0.203</td>
+      <td>0.055</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>0.026</td>
+      <td>0.035</td>
+      <td>0.065</td>
+      <td>0.035</td>
+      <td>0.130</td>
+      <td>0.035</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>0.036</td>
+      <td>0.048</td>
+      <td>0.059</td>
+      <td>0.032</td>
+      <td>0.111</td>
+      <td>0.030</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>0.037</td>
+      <td>0.050</td>
+      <td>0.130</td>
+      <td>0.070</td>
+      <td>0.204</td>
+      <td>0.055</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<p><b>Equity weighting</b> (preview of the Milestone 04 fairness audit). If a missed shock counts 1, 1.5 or 2 times as much in low-, mid- and high-deprivation
+cities, the cost-minimising choices shift towards flagging. At <i>r</i> = 10 the logistic threshold falls to 0.59
+and recall rises to 46%, although on test flagging nothing is still cheapest. At <i>r</i> = 20 logistic regression
+becomes the cheapest policy. Weighting by need changes who gets protected, and that is a decision for policy-makers, not for us.</p>
+
+<h3>8.2 Confusion matrices</h3>
+<p>Fig. 10 uses the Unit 10 layout: actual class in rows, predicted in columns, positive (abnormal) class first, with counts and row percentages. So the
+top-left cell over its row is recall, and the bottom-right over its row is specificity. The majority class has an empty first column. Logistic regression
+at 0.5 catches 41 of 54 abnormal moves at the price of
+772 false alarms. The <i>r</i> = 20 threshold trades a little more recall for more false alarms. The
+depth-2 tree at its <i>r</i> = 20 threshold flags every non-branded item, which is the category rule in disguise.</p>
+<figure><img src="figures/fig18_confusion.png" style="width:100%"/><figcaption>Fig. 10. Test-set confusion matrices: counts and row percentages. Rows are the actual class, columns the predicted class, abnormal first. "cost threshold" is the threshold minimising cost at r = 20 on CV predictions; its value is in brackets.</figcaption></figure>
+
+<h3>8.3 Where the errors fall, and edge cases</h3>
+<p>Table 16 breaks down the logistic model's errors at the <i>r</i> = 20 threshold. This is descriptive only; the formal test is H4 in Milestone 04, and many cells
+hold under 20 positives. Two patterns stand out.
+<ul>
+<li><b>Flags concentrate in perishables.</b> The FP rate is 84% for perishables against
+0% for branded goods.</li>
+<li><b>Flags concentrate in high-deprivation cities.</b> The FP rate is 69% there against
+38% in low-deprivation cities. The miss rate runs the other way:
+10% in high- and 31% in low-deprivation cities.</li>
+</ul>
+By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
+10 were all caught. Both groups are tiny.</p>
+
+<div class="tbl small"><p class="cap">Table 16. Logistic regression errors on the test set at the r = 20 threshold, by group. FN rate = share of abnormal moves missed; FP rate = share of normal rows flagged. Terciles are over the 17 cities.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>grouping</th>
+      <th>group</th>
+      <th>rows</th>
+      <th>positives</th>
+      <th>base rate</th>
+      <th>flagged</th>
+      <th>FN rate</th>
+      <th>FP rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>item category</td>
+      <td>branded_packaged</td>
+      <td>408</td>
+      <td>0</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>–</td>
+      <td>0.000</td>
+    </tr>
+    <tr>
+      <td>item category</td>
+      <td>perishable</td>
+      <td>748</td>
+      <td>41</td>
+      <td>0.055</td>
+      <td>629</td>
+      <td>0.122</td>
+      <td>0.839</td>
+    </tr>
+    <tr>
+      <td>item category</td>
+      <td>storable_staple</td>
+      <td>668</td>
+      <td>13</td>
+      <td>0.019</td>
+      <td>308</td>
+      <td>0.308</td>
+      <td>0.456</td>
+    </tr>
+    <tr>
+      <td>city-size tercile</td>
+      <td>large</td>
+      <td>640</td>
+      <td>18</td>
+      <td>0.028</td>
+      <td>271</td>
+      <td>0.056</td>
+      <td>0.408</td>
+    </tr>
+    <tr>
+      <td>city-size tercile</td>
+      <td>medium</td>
+      <td>540</td>
+      <td>20</td>
+      <td>0.037</td>
+      <td>284</td>
+      <td>0.300</td>
+      <td>0.519</td>
+    </tr>
+    <tr>
+      <td>city-size tercile</td>
+      <td>small</td>
+      <td>644</td>
+      <td>16</td>
+      <td>0.025</td>
+      <td>382</td>
+      <td>0.125</td>
+      <td>0.586</td>
+    </tr>
+    <tr>
+      <td>deprivation tercile</td>
+      <td>high</td>
+      <td>648</td>
+      <td>20</td>
+      <td>0.031</td>
+      <td>449</td>
+      <td>0.100</td>
+      <td>0.686</td>
+    </tr>
+    <tr>
+      <td>deprivation tercile</td>
+      <td>low</td>
+      <td>644</td>
+      <td>16</td>
+      <td>0.025</td>
+      <td>247</td>
+      <td>0.312</td>
+      <td>0.376</td>
+    </tr>
+    <tr>
+      <td>deprivation tercile</td>
+      <td>mid</td>
+      <td>532</td>
+      <td>18</td>
+      <td>0.034</td>
+      <td>241</td>
+      <td>0.111</td>
+      <td>0.438</td>
+    </tr>
+    <tr>
+      <td>test week</td>
+      <td>2026-04-02</td>
+      <td>456</td>
+      <td>18</td>
+      <td>0.039</td>
+      <td>207</td>
+      <td>0.167</td>
+      <td>0.438</td>
+    </tr>
+    <tr>
+      <td>test week</td>
+      <td>2026-06-04</td>
+      <td>456</td>
+      <td>18</td>
+      <td>0.039</td>
+      <td>263</td>
+      <td>0.111</td>
+      <td>0.564</td>
+    </tr>
+    <tr>
+      <td>test week</td>
+      <td>2026-08-13</td>
+      <td>456</td>
+      <td>9</td>
+      <td>0.020</td>
+      <td>260</td>
+      <td>0.111</td>
+      <td>0.564</td>
+    </tr>
+    <tr>
+      <td>test week</td>
+      <td>2026-08-20</td>
+      <td>456</td>
+      <td>9</td>
+      <td>0.020</td>
+      <td>207</td>
+      <td>0.333</td>
+      <td>0.450</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<p><b>Edge cases</b> (Table 17; the full ten of each are in the notebook).
+<ul>
+<li><b>Every missed abnormal move had a flat or unobserved price at week <i>t</i></b>
+(100% of the 9 false negatives have <code>price_changed</code> = 0). Moves that come with no
+visible recent history are invisible to any model built on recent changes.</li>
+<li><b>The most confident false alarms</b> are perishables in Sukkur, Bannu and Larkana. Most are records where PBS's minimum and maximum quotes are
+equal (one effective quote), which changed this week and then did not move again. A single quote that jumps may reflect one shop rather than the
+market. That links model errors to the measurement-quality concern in H4.</li>
+<li><b>Timing.</b> The two earlier test weeks have about twice the base rate of the August weeks
+(4.0% and 4.0% against
+2.0% and 2.0%). Each early week falls within about two
+weeks after an Eid holiday: Eid al-Fitr was expected around 20 March 2026 and Eid al-Adha around 27 May 2026. Post-festival price adjustment is
+<i>one possible explanation that we have not tested</i>.</li>
+</ul></p>
+
+<div class="tbl small"><p class="cap">Table 17. The five most confident false negatives (lowest score among missed abnormal moves) and false positives (highest score among normal rows), logistic regression, r = 20 threshold. Changes are in log points.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>error</th>
+      <th>city</th>
+      <th>item</th>
+      <th>week</th>
+      <th>score</th>
+      <th>next-week change</th>
+      <th>threshold</th>
+      <th>|change| at t</th>
+      <th>changed at t</th>
+      <th>MIN = MAX</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FN</td>
+      <td>Quetta</td>
+      <td>Rice basmati broken</td>
+      <td>2026-08-20</td>
+      <td>0.272</td>
+      <td>-0.072</td>
+      <td>0.045</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>FN</td>
+      <td>Quetta</td>
+      <td>Rice IRRI-6/9</td>
+      <td>2026-08-20</td>
+      <td>0.278</td>
+      <td>-0.061</td>
+      <td>0.058</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>FN</td>
+      <td>Multan</td>
+      <td>Garlic</td>
+      <td>2026-04-02</td>
+      <td>0.328</td>
+      <td>-0.219</td>
+      <td>0.149</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>FN</td>
+      <td>Islamabad</td>
+      <td>Eggs (farm)</td>
+      <td>2026-06-04</td>
+      <td>0.377</td>
+      <td>-0.148</td>
+      <td>0.057</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>FN</td>
+      <td>Islamabad</td>
+      <td>Eggs (farm)</td>
+      <td>2026-08-13</td>
+      <td>0.378</td>
+      <td>-0.096</td>
+      <td>0.057</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>FP</td>
+      <td>Larkana</td>
+      <td>Onions</td>
+      <td>2026-08-20</td>
+      <td>0.854</td>
+      <td>-0.161</td>
+      <td>0.416</td>
+      <td>0.379</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>FP</td>
+      <td>Sukkur</td>
+      <td>Tomatoes</td>
+      <td>2026-04-02</td>
+      <td>0.844</td>
+      <td>0.000</td>
+      <td>0.624</td>
+      <td>0.061</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>FP</td>
+      <td>Sukkur</td>
+      <td>Potatoes</td>
+      <td>2026-04-02</td>
+      <td>0.843</td>
+      <td>0.000</td>
+      <td>0.187</td>
+      <td>0.182</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>FP</td>
+      <td>Sukkur</td>
+      <td>Tomatoes</td>
+      <td>2026-08-20</td>
+      <td>0.841</td>
+      <td>-0.288</td>
+      <td>0.624</td>
+      <td>0.223</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>FP</td>
+      <td>Bannu</td>
+      <td>Eggs (farm)</td>
+      <td>2026-08-20</td>
+      <td>0.837</td>
+      <td>0.000</td>
+      <td>0.057</td>
+      <td>0.077</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table></div>
+
+<h2>9. Drivers and initial policy insights</h2>
+<p><b>Logistic regression.</b> Inputs are z-scored inside the pipeline, so each coefficient is the change in log-odds per one standard deviation, and
+e<sup>coef</sup> is the odds ratio (OR) per SD (Table 18, Fig. 11). For a 0/1 feature, one SD is a fixed fraction of the switch from 0 to 1, so these
+ORs rank features rather than describe a full category change. They are associations, not causes. The top five:
+<ul><li><code>cat_branded_packaged</code> (OR 0.60): one SD more of being a branded/packaged item is associated with 40% lower odds of an abnormal move next week.</li><li><code>price_changed</code> (OR 1.47): one SD more of a price change this week is associated with about 1.47 times the odds of an abnormal move next week.</li><li><code>cat_perishable</code> (OR 1.33): one SD more of being a perishable is associated with about 1.33 times the odds of an abnormal move next week.</li><li><code>has_dlog</code> (OR 0.79): one SD more of having an observed change this week (previous week published) is associated with 21% lower odds of an abnormal move next week.</li><li><code>prov_ICT</code> (OR 0.80): one SD more of being in Islamabad is associated with 20% lower odds of an abnormal move next week.</li></ul>
+<code>abs_dlog</code> gets a small coefficient because it is correlated with <code>price_changed</code> (r = 0.50
+in the training rows), and the two share the credit (Unit 09). The <code>has_</code> flags are negative mostly because they mark <i>which weeks</i> had a
+published previous week, so they partly stand in for time period, not for a market effect.</p>
+<p><b>Decision tree.</b> The depth-2 tree splits first on branded/packaged, then on this week's change for other items, and on relative price for branded
+ones (Appendix Fig. A1). Its impurity importance is 0.58 for <code>cat_branded_packaged</code>,
+0.29 for <code>abs_dlog</code> and 0.12 for <code>rel_price</code>. Its leaves read as rules (Table 19).
+The top rule is: <b>IF the item is not branded/packaged AND its price moved by more than about 1% this week, THEN the training abnormal rate is
+6.9%</b>, against 3.0% overall. Branded items whose price is at or above the national reference
+had no abnormal move in training.
+<b>Worked Gini (root).</b> Unweighted, the root holds 135 positives in 4,560 rows (Gini 0.0575); the split sends
+130/3,540 left and 5/1,020 right, gain 0.0004. With balanced weights (positive
+16.9, negative 0.515), the root is exactly 50/50 (Gini 0.50), the children have Gini 0.494
+and 0.239, and the weighted gain is 0.040, the largest available.</p>
+<p><b>Cross-model check.</b> Both models put the branded/packaged flag first, and both give recent price movement a top role (<code>price_changed</code> in
+the logistic model, <code>abs_dlog</code> in the tree: two views of the same signal). These are the trustworthy drivers. Perishability, smaller markets and
+higher district deprivation are positive in the logistic model only. A depth-2 tree can use just three features, so its silence on them is not evidence
+against them.</p>
+
+<div class="two"><div class="tbl small"><p class="cap">Table 18. Top 10 features by |logistic coefficient| and their tree importance (blank = unused by the tree).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>feature</th>
+      <th>coef per SD</th>
+      <th>odds ratio per SD</th>
+      <th>rank (logistic)</th>
+      <th>tree importance</th>
+      <th>rank (tree)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>cat_branded_packaged</td>
+      <td>-0.513</td>
+      <td>0.599</td>
+      <td>1</td>
+      <td>0.584</td>
+      <td>1.000</td>
+    </tr>
+    <tr>
+      <td>price_changed</td>
+      <td>0.384</td>
+      <td>1.467</td>
+      <td>2</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>cat_perishable</td>
+      <td>0.284</td>
+      <td>1.328</td>
+      <td>3</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>has_dlog</td>
+      <td>-0.234</td>
+      <td>0.791</td>
+      <td>4</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>prov_ICT</td>
+      <td>-0.221</td>
+      <td>0.802</td>
+      <td>5</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>has_lag1</td>
+      <td>-0.186</td>
+      <td>0.831</td>
+      <td>6</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>log_pop_urban</td>
+      <td>-0.181</td>
+      <td>0.834</td>
+      <td>7</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>deprivation_composite</td>
+      <td>0.138</td>
+      <td>1.148</td>
+      <td>8</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>prov_Balochistan</td>
+      <td>-0.120</td>
+      <td>0.887</td>
+      <td>9</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>within_city_range_pct</td>
+      <td>-0.106</td>
+      <td>0.900</td>
+      <td>10</td>
+      <td>0.000</td>
+      <td>–</td>
+    </tr>
+  </tbody>
+</table></div><div class="tbl small"><p class="cap">Table 19. Decision-tree leaves as IF-THEN rules, with their actual abnormal rate on the training rows.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>rule</th>
+      <th>training rows</th>
+      <th>abnormal</th>
+      <th>abnormal rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>IF cat_branded_packaged &lt;= 0.5 AND abs_dlog &gt; 0.0101</td>
+      <td>798</td>
+      <td>55</td>
+      <td>0.069</td>
+    </tr>
+    <tr>
+      <td>IF cat_branded_packaged &lt;= 0.5 AND abs_dlog &lt;= 0.0101</td>
+      <td>2742</td>
+      <td>75</td>
+      <td>0.027</td>
+    </tr>
+    <tr>
+      <td>IF cat_branded_packaged &gt; 0.5 AND rel_price &lt;= -0.00741</td>
+      <td>287</td>
+      <td>5</td>
+      <td>0.017</td>
+    </tr>
+    <tr>
+      <td>IF cat_branded_packaged &gt; 0.5 AND rel_price &gt; -0.00741</td>
+      <td>733</td>
+      <td>0</td>
+      <td>0.000</td>
+    </tr>
+  </tbody>
+</table></div></div>
+
+<figure><img src="figures/fig20_importance.png" style="width:88%"/><figcaption>Fig. 11. Feature importance. Left: logistic regression coefficients per 1 SD (red raises the odds of an abnormal move next week, blue lowers them). Right: decision-tree impurity importance.</figcaption></figure>
+<p><b>Initial policy takeaways (SDG 2.c).</b> These are hedged: they rest on four test weeks and modest signal.
+<ol>
+<li><b>Where to look.</b> Concentrate weekly monitoring on perishables, especially those whose price already moved this week. Branded and packaged
+goods almost never move abnormally.</li>
+<li><b>A triage aid, not a trigger.</b> With test AUC around 0.7 and precision around 5%, most alerts will be false. A model score can rank where an
+inspector looks first; it should not trigger stock releases or penalties by itself.</li>
+<li><b>A simple rule already captures most of the signal.</b> "Watch perishables" matched the logistic model on the test weeks. Any data system PBS or a
+province builds should be benchmarked against that rule before it is trusted.</li>
+<li><b>Publish every week.</b> 40% of labelled rows have no previous consecutive week, because the published weekly archive has
+gaps. The moves we miss are exactly those with no visible recent history. Consistent publication of the weekly annexure is a cheap way to improve early warning.</li>
+<li><b>The threshold is a policy choice.</b> Whether alerts are worth issuing depends on how many false alarms one missed shock is worth. Below about 20,
+silence is cheaper. That judgment, and whether to weight misses in deprived districts more, belongs to decision-makers.</li>
+</ol></p>
+
+<h2>10. Limitations and Milestone 04 roadmap</h2>
+<p><b>Limitations.</b>
+<ul>
+<li><b>Sample size.</b> Only 205 positives over 15 labelled weeks. The test set has 54
+positives in four weeks, so every test number has a wide interval.</li>
+<li><b>Intervals and the archive.</b> The bootstrap and permutation tests treat rows as independent, but rows in the same week share shocks, so the
+true uncertainty is larger. PBS archive gaps cost 40% of rows their recent history and limit how many weeks can be labelled.</li>
+<li><b>Signal.</b> Class imbalance and modest signal. KNN is unsuitable for this data. Two tuned settings sit at the edge of their grids
+(C = 0.01, K = 201), which suggests the data favour very smooth models.</li>
+<li><b>Label.</b> The 90th-percentile threshold is a convention. A stricter or looser cut-off would change the base rate and the results (§7).</li>
+<li><b>Context variables.</b> City-level variables (population, deprivation from 2019-20) are constant within a city. Islamabad and Rawalpindi
+function as one market but are scored separately.</li>
+<li><b>Scope.</b> 17 urban SPI cities only, so possible place-based bias in who gets missed (§8.3). The Milestone 02 limitations on coverage,
+deprivation data and measurement still apply.</li>
+</ul></p>
+<p><b>Milestone 04 plan.</b>
+<ul>
+<li><b>Advanced models:</b> random forest and gradient boosting, compared against today's two benchmarks and three baselines under the same
+forward-chaining CV, purge and cost analysis.</li>
+<li><b>Fairness audit (H4):</b> recall, FN rate and calibration compared across province, population tercile and deprivation tercile, with a
+hypothesis test, and including whether the single-quote data-quality flag drives errors.</li>
+<li><b>Thresholds and ethics:</b> group-aware thresholds that equalise miss rates, and their cost. An ethical evaluation of who bears the false
+negatives and the false alarms.</li>
+<li><b>Week 14 new data:</b> the design already committed in Milestones 01-02. First, score the frozen model on the post-cutoff holdout weeks without
+refitting. Then retrain on the earlier part of the new data and test on a later, unseen part.</li>
+</ul></p>
+
+<h2>References</h2>
+<p class="note">Pakistan Bureau of Statistics. Weekly Sensitive Price Indicator, Annexure workbooks, weeks ended 2025-05-15 to
+2026-09-24. https://www.pbs.gov.pk/<br/>
+Pakistan Bureau of Statistics. Pakistan Social and Living Standards Measurement Survey 2019-20, District Level: Tables 2.14(a), 2.15, 7.1, 9.1.<br/>
+Pakistan Bureau of Statistics. 7th Population and Housing Census 2023 (Digital Census): Table 1, district results.<br/>
+Pakistan Bureau of Statistics. CPI (Urban) Group-wise Cumulative Indices, base 2015-16; Monthly Review on Price Indices, August and September 2026.<br/>
+Provost, F. and Fawcett, T. (2013). <i>Data Science for Business</i>. O'Reilly. Ch. 7 (expected value, cost-benefit matrix) and Ch. 8 (ROC, profit curves).<br/>
+Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. <i>Journal of Machine Learning Research</i>, 12, 2825-2830.<br/>
+Wickham, H. (2014). Tidy Data. <i>Journal of Statistical Software</i>, 59(10).<br/>
+Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statistician</i>, 27(1), 17-21.</p>
+
+<h2 class="pb">Appendix</h2>
+
+<div class="tbl small"><p class="cap">Table A1 (part 1). Forward-chaining folds: weeks, purged rows, and rows and positives after labelling. 'items w/o label' = items with fewer than five non-zero changes in that fold's training rows.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>fold</th>
+      <th>training weeks (t)</th>
+      <th>validation week</th>
+      <th>purged</th>
+      <th>train rows</th>
+      <th>train pos.</th>
+      <th>val. rows</th>
+      <th>val. pos.</th>
+      <th>items w/o label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>2025-07-17 to 2025-11-06</td>
+      <td>2025-11-13</td>
+      <td>541</td>
+      <td>1855</td>
+      <td>70</td>
+      <td>371</td>
+      <td>18</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2025-07-17 to 2025-11-13</td>
+      <td>2025-11-20</td>
+      <td>541</td>
+      <td>2328</td>
+      <td>87</td>
+      <td>388</td>
+      <td>16</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2025-07-17 to 2025-11-20</td>
+      <td>2025-12-11</td>
+      <td>0</td>
+      <td>3240</td>
+      <td>111</td>
+      <td>405</td>
+      <td>26</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>2025-07-17 to 2025-12-11</td>
+      <td>2025-12-18</td>
+      <td>541</td>
+      <td>3240</td>
+      <td>111</td>
+      <td>405</td>
+      <td>16</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>2025-07-17 to 2025-12-18</td>
+      <td>2026-03-26</td>
+      <td>0</td>
+      <td>4560</td>
+      <td>135</td>
+      <td>456</td>
+      <td>23</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A1 (part 2). Validation ROC-AUC per fold for the chosen settings.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>fold 1</th>
+      <th>fold 2</th>
+      <th>fold 3</th>
+      <th>fold 4</th>
+      <th>fold 5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Majority class</td>
+      <td>0.500</td>
+      <td>0.500</td>
+      <td>0.500</td>
+      <td>0.500</td>
+      <td>0.500</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>0.666</td>
+      <td>0.448</td>
+      <td>0.609</td>
+      <td>0.624</td>
+      <td>0.633</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>0.758</td>
+      <td>0.510</td>
+      <td>0.583</td>
+      <td>0.630</td>
+      <td>0.705</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>0.742</td>
+      <td>0.485</td>
+      <td>0.568</td>
+      <td>0.643</td>
+      <td>0.618</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>0.773</td>
+      <td>0.436</td>
+      <td>0.657</td>
+      <td>0.665</td>
+      <td>0.749</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A2. Test metrics at the cost-based threshold for r = 20 (chosen on pooled CV predictions, applied once to test).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>threshold (from CV)</th>
+      <th>accuracy</th>
+      <th>precision</th>
+      <th>recall</th>
+      <th>specificity</th>
+      <th>f1</th>
+      <th>tp</th>
+      <th>fp</th>
+      <th>fn</th>
+      <th>tn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>0.025</td>
+      <td>0.253</td>
+      <td>0.038</td>
+      <td>1.000</td>
+      <td>0.231</td>
+      <td>0.073</td>
+      <td>54</td>
+      <td>1362</td>
+      <td>0</td>
+      <td>408</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>0.469</td>
+      <td>0.506</td>
+      <td>0.048</td>
+      <td>0.833</td>
+      <td>0.496</td>
+      <td>0.091</td>
+      <td>45</td>
+      <td>892</td>
+      <td>9</td>
+      <td>878</td>
+    </tr>
+    <tr>
+      <td>Decision tree</td>
+      <td>0.471</td>
+      <td>0.253</td>
+      <td>0.038</td>
+      <td>1.000</td>
+      <td>0.231</td>
+      <td>0.073</td>
+      <td>54</td>
+      <td>1362</td>
+      <td>0</td>
+      <td>408</td>
+    </tr>
+    <tr>
+      <td>KNN</td>
+      <td>0.030</td>
+      <td>0.518</td>
+      <td>0.042</td>
+      <td>0.704</td>
+      <td>0.512</td>
+      <td>0.080</td>
+      <td>38</td>
+      <td>863</td>
+      <td>16</td>
+      <td>907</td>
+    </tr>
+  </tbody>
+</table></div>
+<figure><img src="figures/fig21_tree.png" style="width:100%"/><figcaption>Fig. A1. The chosen decision tree (depth 2, Gini, minimum leaf 60). 'value' shows class-weighted counts [normal, abnormal] because the tree was fitted with balanced class weights; Table 19 gives the unweighted abnormal rates.</figcaption></figure>
+</body></html>

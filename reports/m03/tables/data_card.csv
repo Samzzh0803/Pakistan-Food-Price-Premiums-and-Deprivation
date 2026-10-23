@@ -1,0 +1,4 @@
+part,weeks,rows,positives,base_rate,share_has_dlog_0,share_has_lag1_0
+all labelled weeks (data card only),15,7095,205,0.0288936,0.4,0.733333
+train (after purge),10,4560,135,0.0296053,0.3,0.6
+test,4,1824,54,0.0296053,0.5,1

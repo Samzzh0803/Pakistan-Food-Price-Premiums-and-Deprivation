@@ -1,0 +1,10 @@
+|--- cat_branded_packaged <= 0.50
+|   |--- abs_dlog <= 0.01
+|   |   |--- class: 0
+|   |--- abs_dlog >  0.01
+|   |   |--- class: 1
+|--- cat_branded_packaged >  0.50
+|   |--- rel_price <= -0.01
+|   |   |--- class: 0
+|   |--- rel_price >  -0.01
+|   |   |--- class: 0
