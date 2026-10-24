@@ -603,7 +603,7 @@ def fig_design(rows: pd.DataFrame, train_weeks: list, test_weeks: list, folds: l
     style()
     weeks = labelled_weeks(rows)
     lab = [pd.Timestamp(w).strftime("%d %b %y") for w in weeks]
-    fig, ax = plt.subplots(figsize=(8.6, 2.9))
+    fig, ax = plt.subplots(figsize=(7.0, 2.6))
     lines = [(f"CV fold {i}", tw, vw) for i, (tw, vw) in enumerate(folds, start=1)] + [("Final train / test", train_weeks, test_weeks)]
     for yi, (name, tw, vw) in enumerate(reversed(lines)):
         for xi, w in enumerate(weeks):
@@ -618,14 +618,14 @@ def fig_design(rows: pd.DataFrame, train_weeks: list, test_weeks: list, folds: l
                 continue
             ax.scatter(xi, yi, c=c, marker=mk, s=60)
     ax.set_yticks(range(len(lines)), [n for n, _, _ in reversed(lines)])
-    ax.set_xticks(range(len(weeks)), lab, rotation=60, ha="right", fontsize=7)
+    ax.set_xticks(range(len(weeks)), lab, rotation=60, ha="right", fontsize=7.5)
     ax.set_xlabel("Labelled week t (week ending)")
     ax.grid(False)
     from matplotlib.lines import Line2D
     ax.legend(handles=[Line2D([], [], marker="s", ls="", c="#0072B2", label="train"),
                        Line2D([], [], marker="s", ls="", c="#D55E00", label="validate / test"),
                        Line2D([], [], marker="x", ls="", c="#bbbbbb", label="purged (t+1 is an evaluation week)")],
-              loc="upper center", bbox_to_anchor=(0.5, 1.22), ncol=3)
+              loc="upper center", bbox_to_anchor=(0.5, 1.25), ncol=3, fontsize=8)
     return savefig(fig, "fig15_split_design")
 
 
@@ -658,7 +658,7 @@ def fig_tuning(tun: dict):
 
 def fig_roc_pr(y, test_scores: dict, base_rate: float):
     style()
-    fig, (a, b) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+    fig, (a, b) = plt.subplots(1, 2, figsize=(8.2, 3.6))
     for name, s in test_scores.items():
         fpr, tpr, _ = roc_curve(y, s)
         a.plot(fpr, tpr, c=MODEL_COLORS[name], lw=1.4, label=f"{MODEL_LABEL[name]} ({roc_auc_score(y, s):.2f})")
@@ -668,10 +668,10 @@ def fig_roc_pr(y, test_scores: dict, base_rate: float):
                label=f"{MODEL_LABEL[name]} ({average_precision_score(y, s):.3f})")
     a.plot([0, 1], [0, 1], c="k", ls=":", lw=0.8, label="random (0.50)")
     a.set_xlabel("False positive rate (1 − specificity)"); a.set_ylabel("True positive rate (recall)")
-    a.set_title("ROC curves, test set (AUC)"); a.legend(fontsize=7, loc="lower right")
+    a.set_title("ROC curves, test set (AUC)"); a.legend(fontsize=7.5, loc="lower right")
     b.axhline(base_rate, c="k", ls=":", lw=0.8, label=f"random = base rate ({base_rate:.3f})")
     b.set_xlabel("Recall"); b.set_ylabel("Precision"); b.set_title("Precision-recall curves, test set (PR-AUC)")
-    b.legend(fontsize=7, loc="upper right"); b.set_ylim(0, 0.2)
+    b.legend(fontsize=7.5, loc="upper right"); b.set_ylim(0, 0.2)
     return savefig(fig, "fig17_roc_pr")
 
 

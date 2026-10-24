@@ -128,7 +128,7 @@ and 35. Flagging a row is worth it when p > 1/(1 + r). For an average row (p = 2
 r = 20 is used in the confusion matrices only as an illustrative reference.
 
 A ministry or price committee should set r, not the analysts.
-*NB C.2; Table 14 of the report.*
+*NB C.2; Table 4 of the manuscript (Table 14 of the technical report).*
 
 **16. Did any ML model beat the simple category rule?**
 Not convincingly. In CV, logistic regression is ahead on average (0.641 vs 0.617), but only in 3 of 5 folds. On

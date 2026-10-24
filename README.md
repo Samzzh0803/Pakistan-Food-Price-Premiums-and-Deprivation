@@ -19,13 +19,15 @@ Baseline classifiers for H3: using only what is known in week *t*, will a city-i
 
 | Deliverable | Path |
 |---|---|
-| Manuscript (M02 Sections 1-4 plus new Sections 5-10), PDF and HTML source | `reports/m03/M03_report.pdf`, `reports/m03/M03_report.html` |
+| Submitted manuscript (8 pages: M02 findings condensed plus the M03 models, evaluation and costs), PDF and HTML source | `reports/m03/M03_report.pdf`, `reports/m03/M03_report.html` |
+| Extended technical report (15 pages, every table and appendix; not submitted, kept for reference and viva preparation) | `reports/m03/M03_technical_report.pdf`, `reports/m03/M03_technical_report.html` |
 | Executed notebook (Parts A-D follow the brief) | `notebooks/M03_baseline_models.ipynb` |
 | Modelling code: labels, features, split, forward-chaining CV with purge, models, tuning, metrics, costs, errors, importance | `pfp/model.py` |
 | Runner script | `scripts/m03_models.py` |
 | Every number quoted in the manuscript | `reports/m03/m03_numbers.json` |
 | Result tables and figures | `reports/m03/tables/`, `reports/m03/figures/` |
 | Viva preparation (likely questions, short answers, pointers into the code) | `reports/m03/VIVA_PREP.md` |
+| Independent review and our response | `reports/m03/CODEX_M03_REVIEW.md`, `reports/m03/REVIEW_RESPONSE.md` |
 
 Headline: on the four held-out weeks, logistic regression reaches ROC-AUC 0.69 (95% CI 0.64-0.75), so H3's null is rejected. A one-line
 "item category base rate" rule does as well (0.71). The models are a triage aid for inspectors, not an automatic trigger.
@@ -41,7 +43,8 @@ pip install -r requirements.txt
 python scripts/m03_models.py          # about 1-2 minutes; writes reports/m03/{m03_numbers.json,tables/,figures/}
 python scripts/m03_make_notebook.py
 cd notebooks && jupyter nbconvert --to notebook --execute --inplace M03_baseline_models.ipynb && cd ..
-python scripts/m03_report.py          # needs reports/m02/M02_report.html; PDF via headless Microsoft Edge if present
+python scripts/m03_report.py          # submitted manuscript; PDF via headless Microsoft Edge if present
+python scripts/m03_technical_report.py  # extended version; needs reports/m02/M02_report.html
 ```
 
 Outputs are byte-identical across reruns in the same environment (seed 42 throughout); PNG bytes may differ across machines. Milestone 03

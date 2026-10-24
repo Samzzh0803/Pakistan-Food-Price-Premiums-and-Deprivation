@@ -1,24 +1,33 @@
-"""Assemble the Milestone 03 manuscript (HTML -> PDF via headless Edge).
+"""Assemble the submitted Milestone 03 manuscript (condensed, about nine pages; HTML -> PDF via headless Edge).
 
-The brief asks for the M03 report to be embedded into the M02 manuscript draft. Sections 1-4 are therefore taken from
-reports/m02/M02_report.html (their numbers come from m02_numbers.json), with Section 4's plan updated to say what was
-done. Sections 5-10 are new. Every M03 number in the text is read from reports/m03/m03_numbers.json and every table
-is rendered from CSVs written by scripts/m03_models.py. Nothing is hand-typed.
+The extended version with every table and appendix is built by scripts/m03_technical_report.py. This script reads
+its numbers from reports/m03/m03_numbers.json (M03) and reports/m02/m02_numbers.json (the Milestone 02 sections), and
+its tables from CSVs the pipeline wrote. It redraws four figures with plain-language labels from those same tables,
+so no analysis is recomputed here. Qualitative claims in the text are checked against the numbers before writing.
 """
 from __future__ import annotations
 
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from pfp.config import PROVINCE_COLORS  # noqa: E402
+
 REP = ROOT / "reports" / "m03"
 TAB = REP / "tables"
-M02_HTML = ROOT / "reports" / "m02" / "M02_report.html"
+FIG = REP / "figures"
+M02TAB = ROOT / "reports" / "m02" / "tables"
 N = json.loads((REP / "m03_numbers.json").read_text(encoding="utf-8"))
 N2 = json.loads((ROOT / "reports" / "m02" / "m02_numbers.json").read_text(encoding="utf-8"))
 
@@ -30,519 +39,469 @@ def g(path, src=None):
     return d
 
 
-def f(path, d=3):
-    return f"{g(path):,.{d}f}"
+g2 = lambda path: g(path, N2)
+a2 = lambda path: f"{g(path):.2f}"                      # AUCs and other proportions: two decimals
+pc = lambda path, d=0: f"{100 * g(path):.{d}f}%"       # percentages: whole numbers unless d is given
+pc2 = lambda path, d=0: f"{100 * g2(path):.{d}f}%"
+ci = lambda m: f"{g(f'test.{m}.roc_auc'):.2f} [{g(f'test.{m}.auc_ci_lo'):.2f}, {g(f'test.{m}.auc_ci_hi'):.2f}]"
+t = lambda name: pd.read_csv(TAB / f"{name}.csv")
+LAB = {"majority": "Majority class", "category": "Category base-rate rule", "logistic": "Logistic regression",
+       "tree": "Decision tree", "knn": "K-nearest neighbours"}
+PLAIN = {"abs_dlog": "size of this week's change", "has_dlog": "this week's change observed", "price_changed": "price changed this week",
+         "abs_dlog_lag1": "size of last week's change", "has_lag1": "last week's change observed",
+         "rel_price": "price relative to national reference", "within_city_range_pct": "price spread across the city's outlets",
+         "single_quote": "single effective quote", "cat_perishable": "perishable item", "cat_branded_packaged": "branded or packaged item",
+         "cat_prepared_food": "prepared food", "prov_Sindh": "Sindh", "prov_KP": "Khyber Pakhtunkhwa", "prov_Balochistan": "Balochistan",
+         "prov_ICT": "Islamabad", "log_pop_urban": "urban population (log)", "deprivation_composite": "district deprivation"}
+
+# ---------------------------------------------------------------- claim checks (the text below relies on these)
+ML = ["logistic", "tree", "knn"]
+assert all(g(f"cost.r{r}.flag_nothing.cost") <= min(g(f"cost.r{r}.{m}.cost") for m in ["category", *ML, "flag_everything"]) for r in [1, 5, 10])
+assert all(g(f"cost.r10.{m}.cost") > g("cost.r10.flag_nothing.cost") for m in ML)
+assert abs(g("cost.r20.logistic.cost") - g("cost.r20.flag_nothing.cost")) < 10
+assert g("cost.r35.category.cost") < min(g(f"cost.r35.{m}.cost") for m in [*ML, "flag_nothing", "flag_everything"])
+assert max(["category", *ML], key=lambda m: g(f"cv.{m}.roc_auc_mean")) == "knn"
+assert g("test.category.roc_auc") > g("test.logistic.roc_auc") and g("test.diff_logistic_minus_category_ci_lo") < 0 < g("test.diff_logistic_minus_category_ci_hi")
+assert g("cv.logistic.roc_auc_mean") > g("cv.category.roc_auc_mean") and g("test.diff_tree_minus_category_ci_hi") < 0
+assert g("test.logistic.reject_h0") and g("test.tree.reject_h0") and not g("test.knn.reject_h0")
+assert g("test_week.n_above_05.logistic") == 4 and g("test.category.flagged_at_05") == 0 and g("test.knn.flagged_at_05") < 10
+assert g("errors.fn_share_flat_or_unobserved") == 1.0 and g("leak.shuffled_n_ge_real") == 0
+assert g("tune.logistic.chosen_params") == "C=0.01" and g("tune.knn.best_params").startswith("n_neighbors=201")
+assert g("imp.cat_branded_packaged.rank_logistic") == 1 and g("imp.price_changed.rank_logistic") == 2 and g("imp.cat_perishable.rank_logistic") == 3
+assert g("ablation.cat_only_test_auc") > g("test.logistic.roc_auc") and 0.045 < g("test.logistic.precision") < 0.055
+assert g("test_ref.logistic.flagged_share") > 0.45 and g("errors.by.test_week.2026-04-02.base_rate") >= 1.9 * g("errors.by.test_week.2026-08-13.base_rate")
+assert g2("h5.deprivation_composite.spearman_rho") < 0 and g2("h2.p_one_tailed") < 0.05 < g2("h2.mannwhitney_p_one_tailed")
 
 
-def pct(path, d=1):
-    return f"{100 * g(path):.{d}f}%"
+# ---------------------------------------------------------------- figures redrawn with plain labels
+def style():
+    plt.rcParams.update({"figure.dpi": 110, "savefig.dpi": 200, "font.size": 9, "axes.titlesize": 9.5,
+                         "axes.spines.top": False, "axes.spines.right": False, "axes.grid": True, "grid.alpha": 0.25,
+                         "legend.frameon": False})
 
 
-def n_(path):
-    return f"{g(path):,}"
+def save(fig, name):
+    fig.savefig(FIG / f"{name}.png", bbox_inches="tight", metadata={"Software": None})
+    plt.close(fig)
 
 
-def t(name, **kw):
-    return pd.read_csv(TAB / f"{name}.csv", **kw)
+style()
+# EDA: city premiums with intervals (left) and premium vs deprivation composite (right).
+prem = pd.read_csv(M02TAB / "premium.csv")
+city = pd.read_csv(ROOT / "data" / "processed" / "m02" / "city_table.csv")
+prem = prem.merge(city[["city", "deprivation_composite"]], on="city").sort_values("pct_mean")
+fig, (a, b) = plt.subplots(1, 2, figsize=(8.2, 3.6), gridspec_kw={"width_ratios": [1, 1.1]})
+lo, hi = 100 * (np.exp(prem.ci_lo) - 1), 100 * (np.exp(prem.ci_hi) - 1)
+for i, r in enumerate(prem.itertuples()):
+    c = PROVINCE_COLORS[r.province]
+    a.plot([lo.iloc[i], hi.iloc[i]], [i, i], c=c, lw=1.2)
+    a.scatter(r.pct_mean, i, c=c if r.bonferroni_sig else "white", edgecolors=c, s=22, zorder=3)
+a.axvline(0, c="k", lw=0.7)
+a.set_yticks(range(len(prem)), prem.city, fontsize=8)
+a.set_xlabel("Mean premium over national reference (%)")
+a.set_title("City food price premium, 95% interval")
+for prov, c in PROVINCE_COLORS.items():
+    a.scatter([], [], c=c, s=18, label=prov)
+a.legend(fontsize=6.5, loc="lower right")
+for r in prem.itertuples():
+    b.scatter(r.deprivation_composite, r.pct_mean, c=PROVINCE_COLORS[r.province], s=24)
+    if r.city in {"Islamabad", "Rawalpindi", "Karachi", "Quetta", "Khuzdar", "Sukkur", "Bannu", "Larkana", "Peshawar", "Multan"}:
+        b.annotate(r.city, (r.deprivation_composite, r.pct_mean), fontsize=7, textcoords="offset points",
+                   xytext=(3, -9) if r.city == "Bannu" else (3, 2))
+b.axhline(0, c="k", lw=0.7)
+b.set_xlabel("District deprivation composite (0-1, higher = more deprived)")
+b.set_ylabel("Mean premium (%)")
+b.set_title(f"Premium vs deprivation (Spearman ρ = {g2('h5.deprivation_composite.spearman_rho'):.2f}, n = 17)")
+fig.tight_layout()
+save(fig, "m03r_eda")
+
+# Tuning: one panel per model.
+tl, tt, tk = t("tuning_logistic"), t("tuning_tree"), t("tuning_knn")
+fig, axes = plt.subplots(1, 3, figsize=(8.4, 2.6))
+ax = axes[0]
+ax.errorbar(range(len(tl)), tl.mean_auc, yerr=tl.sd_auc, marker="o", capsize=3, c="#0072B2")
+ax.set_xticks(range(len(tl)), [f"{c:g}" for c in tl["clf__C"]])
+ax.set_xlabel("C (smaller = stronger regularisation)"); ax.set_ylabel("Mean CV ROC-AUC"); ax.set_title("Logistic regression (± 1 SD)")
+ax = axes[1]
+for leaf, d in tt[tt.criterion == "gini"].groupby("min_samples_leaf"):
+    ax.plot(d.max_depth, d.mean_auc, marker="o", ms=3.5, lw=1.2, label=f"Gini, leaf ≥ {leaf}")
+best_ent = tt[tt.criterion == "entropy"].groupby("max_depth").mean_auc.max()
+ax.plot(best_ent.index, best_ent.values, c="#777777", ls="--", lw=1.2, label="entropy (best leaf)")
+ax.set_xlabel("Maximum depth"); ax.set_title("Decision tree"); ax.legend(fontsize=7, loc="lower left")
+ax = axes[2]
+for fs, lab_, c in [("all", "all features", "#CC79A7"), ("continuous", "price features only", "#999999")]:
+    d = tk[tk.features == fs].groupby("clf__n_neighbors").mean_auc.max()
+    ax.plot(d.index, d.values, marker="o", ms=3.5, lw=1.2, c=c, label=lab_)
+ax.set_xscale("log"); ax.set_xlabel("K (neighbours, log scale)"); ax.set_title("KNN (best weighting and distance)")
+ax.legend(fontsize=7, loc="lower right")
+for ax in axes:
+    ax.axhline(0.5, c="k", lw=0.6, ls=":")
+fig.tight_layout()
+save(fig, "m03r_tuning")
+
+# Confusion matrices: four panels in the standard layout (actual rows, predicted columns, abnormal first).
+cm = t("confusion_matrices").set_index("matrix")
+pick = [("Majority class, (flags nothing)", "Majority class"),
+        ("Category base-rate rule, cost threshold, r = 20 (0.05)", "Category rule, cost threshold (r = 20)"),
+        ("Logistic regression, threshold 0.5 (0.50)", "Logistic regression, threshold 0.5"),
+        (f"Logistic regression, cost threshold, r = 20 ({g('test_ref.logistic.threshold'):.2f})", "Logistic regression, cost threshold (r = 20)")]
+fig, axes = plt.subplots(1, 4, figsize=(8.2, 2.3))
+for ax, (key, title) in zip(axes, pick):
+    r = cm.loc[key]
+    mat = np.array([[r.TP, r.FN], [r.FP, r.TN]]).astype(int)
+    rp = mat / mat.sum(axis=1, keepdims=True)
+    ax.imshow(rp, cmap="Blues", vmin=0, vmax=1)
+    for i in range(2):
+        for j in range(2):
+            ax.text(j, i, f"{mat[i, j]:,}\n{100 * rp[i, j]:.0f}%", ha="center", va="center", fontsize=9,
+                    color="white" if rp[i, j] > 0.6 else "black")
+    ax.set_xticks([0, 1], ["abnormal", "normal"], fontsize=7.5); ax.set_yticks([0, 1], ["abnormal", "normal"], fontsize=7.5)
+    ax.set_xlabel("predicted", fontsize=7.5); ax.set_ylabel("actual", fontsize=7.5)
+    ax.set_title(title.replace(", ", ",\n", 1), fontsize=8.5); ax.grid(False)
+fig.tight_layout()
+save(fig, "m03r_confusion")
+
+# Feature importance with plain names.
+imp = t("importance")
+imp["name"] = imp.feature.map(PLAIN)
+fig, (a, b) = plt.subplots(1, 2, figsize=(8.2, 3.9), gridspec_kw={"width_ratios": [1.25, 1]})
+d = imp.sort_values("coef_per_sd")
+a.barh(d.name, d.coef_per_sd, color=np.where(d.coef_per_sd > 0, "#D55E00", "#0072B2"))
+a.axvline(0, c="k", lw=0.7); a.tick_params(axis="y", labelsize=8)
+a.set_xlabel("Change in log-odds per 1 SD"); a.set_title("Logistic regression")
+d = imp[imp.tree_importance > 0].sort_values("tree_importance")
+b.barh(d.name, d.tree_importance, color="#009E73"); b.tick_params(axis="y", labelsize=8)
+b.set_xlabel("Share of impurity reduction"); b.set_title("Decision tree")
+fig.tight_layout()
+save(fig, "m03r_importance")
 
 
-def html_table(df: pd.DataFrame, caption: str, cls: str = "", digits: int = 3) -> str:
-    body = df.to_html(index=False, border=0, float_format=lambda x: f"{x:,.{digits}f}", escape=True, na_rep="–")
+# ---------------------------------------------------------------- tables
+def html_table(df: pd.DataFrame, caption: str, cls: str = "") -> str:
+    body = df.to_html(index=False, border=0, escape=True, na_rep="–")
     return f'<div class="tbl {cls}"><p class="cap">{caption}</p>{body}</div>'
 
 
 def fig(name: str, caption: str, width: str = "100%") -> str:
-    return (f'<figure><img src="figures/{name}.png" style="width:{width}"/>'
-            f'<figcaption>{caption}</figcaption></figure>')
+    return f'<figure><img src="figures/{name}.png" style="width:{width}"/><figcaption>{caption}</figcaption></figure>'
 
 
-LAB = {"majority": "Majority class", "category": "Category base-rate rule", "logistic": "Logistic regression",
-       "tree": "Decision tree", "knn": "KNN"}
-ci = lambda m: f"{f(f'test.{m}.roc_auc')} [{f(f'test.{m}.auc_ci_lo')}, {f(f'test.{m}.auc_ci_hi')}]"
-cv = lambda m, c="roc_auc": f"{f(f'cv.{m}.{c}_mean')} ± {f(f'cv.{m}.{c}_sd')}"
+sources = pd.DataFrame([
+    ("PBS weekly SPI annexure", "City-item prices (minimum, average, maximum)", f"{g2('panel.weeks')} weeks, {g2('panel.first_week')} to {g2('panel.last_week')}"),
+    ("PSLM district survey", "Deprivation: food insecurity, illiteracy, schooling, water", "2019-20"),
+    ("Census, Table 1", "Total and urban population by district", "2023"),
+    ("CPI (urban food)", "Deflator only", "Monthly"),
+], columns=["Source (all PBS)", "What it provides", "Coverage"])
 
-# ---------------------------------------------------------------- M02 sections 1-4, embedded
-m02 = M02_HTML.read_text(encoding="utf-8")
-css = re.search(r"<style>(.*?)</style>", m02, re.S).group(1)
-body = m02[m02.index("<h2>1. Project alignment"):m02.index("<h2>5. Limitations</h2>")]
-body = body.replace('src="figures/', 'src="../m02/figures/')
-body = body.replace("are in Appendix Table A1.", "are in Appendix Table A1 of the Milestone 02 report.")
-old_intro = body[body.index("<p>Each hypothesis is mapped"):body.index("<ul>", body.index("<p>Each hypothesis is mapped"))]
-body = body.replace(old_intro, f"""<p>Each hypothesis is mapped to master-dataset columns in Table 9. Targets marked † are derived from existing columns,
-with the rule for each fixed in Milestone 02. Milestone 03 builds the final H3 label (Section 5) and tests H3 (Sections 6-8); the
-base rate and row count quoted for H3 below are the whole-period description from Milestone 02, which the models never use.</p>
-""")
-body = body.replace("abnormal_next_week † (derived provisionally; final in M03)", "abnormal_next_week † (final rule in §5)")
-body = body.replace("dlog_price, dlog_price_lag1, price_changed, rel_price, within_city_range_pct, single_quote, cat_* dummies",
-                    "|dlog_price|, |dlog_price_lag1| with observed flags, price_changed, rel_price, within_city_range_pct, single_quote, cat_* dummies")
-body = body.replace("<td>prov_* dummies, log_pop_urban, iso_week</td>", "<td>prov_* dummies, log_pop_urban, deprivation_composite</td>")
-plan_start = body.index("<p><b>Analytical plan.</b>")
-plan_end = body.index("</p>", body.index("The notebook also contains exploratory")) + 4
-body = body[:plan_start] + f"""<p><b>Analytical plan: what Milestone 03 did.</b> Milestone 03 is the classification milestone, so it tests H3.
-<ul>
-<li><b>Done:</b> logistic regression, a decision tree and KNN against two naive benchmarks. Validation uses a time-ordered split and
-forward-chaining cross-validation, because random folds leak later weeks of the same city-item series (§6.4 measures how much).
-Models are evaluated with ROC-AUC, PR-AUC and the full Unit 10 metrics, not accuracy alone: a model that always predicts "normal" is
-{100 * (1 - g('split.test_rate')):.0f}% accurate on the test weeks. Errors are broken down by city group as a descriptive preview of H4 (§8).</li>
-<li><b>Moved to Milestone 04:</b> tree ensembles (beyond the methods covered so far), the formal H4 fairness test, and the fixed-effects
-estimate of H1. H2 and H5 were tested descriptively in Milestone 02.</li>
-<li><b>Still closed:</b> the post-cutoff holdout. It is opened once, in the Week 14 new-data milestone.</li>
-</ul></p>""" + body[plan_end:]
 
-# ---------------------------------------------------------------- tables from the pipeline
-feats = t("features").rename(columns={"why_it_might_matter": "why it might matter (all known at week t)"})
-card = t("data_card")
-card_tab = card.rename(columns={"part": "part", "share_has_dlog_0": "no change observed at t", "share_has_lag1_0": "no change observed at t−1",
-                                "base_rate": "base rate"})
-folds = t("folds")
-main = t("metrics_main")
-cvp = t("cv_per_fold")
-costs = t("costs")
-budget = t("alert_budget")
-errs = t("error_breakdown")
-fn_c, fp_c = t("edge_false_negatives"), t("edge_false_positives")
-imp = t("importance")
-rules = t("tree_rules")
-ablation = t("ablation")
-at_ref = t("metrics_at_cost_threshold")
-cm = t("confusion_matrices")
+def plain_params(m):
+    p = dict(kv.split("=") for kv in g(f"tune.{m}.chosen_params").split(", "))
+    if m == "logistic":
+        return f"C = {p['C']}"
+    if m == "tree":
+        return f"{p['criterion'].capitalize()}, depth {p['max_depth']}, leaf ≥ {p['min_samples_leaf']}"
+    return f"K = {p['n_neighbors']}, {p['weights']}-weighted, {p['metric'].capitalize()}, {p['features']} features"
 
-models_tab = pd.DataFrame([
-    ("Majority class (benchmark 1)", "Always predicts 'normal'", "Shows that accuracy misleads on rare events (Unit 10)", "none", "–"),
-    ("Category base-rate rule (benchmark 2)", "Score = item category's abnormal rate in training weeks",
-     "One-line domain heuristic: 'perishables move more'. A model must beat it to be worth deploying", "none", "–"),
-    ("Logistic regression", "Linear log-odds; z-scored inputs; balanced class weights",
-     "Probabilities for ROC and cost thresholds; stable with few positives; odds ratios an analyst can read", "C ∈ {0.01, 0.1, 1, 10}",
-     g("tune.logistic.chosen_params")),
-    ("Decision tree (CART)", "Recursive if-then splits; balanced class weights",
-     "Rules a price committee can follow without software; captures interactions; no scaling", "criterion ∈ {gini, entropy}; depth 2-6; min leaf ∈ {10, 30, 60}",
-     g("tune.tree.chosen_params")),
-    ("KNN", "Vote of the K nearest rows; min-max scaling fitted on training rows",
-     "A different idea: similar city-item situations behave alike; no training step", "K ∈ {5, 15, 25, 51, 101, 201}; uniform/distance; Euclidean/Manhattan; all vs continuous features",
-     g("tune.knn.chosen_params")),
-], columns=["Model", "How it works", "Why it fits this problem", "Grid (tuned in forward-chaining CV)", "Chosen"])
 
-test_tab = pd.DataFrame([{
-    "model": LAB[k], "accuracy": g(f"test.{k}.accuracy"), "precision": g(f"test.{k}.precision"), "recall": g(f"test.{k}.recall"),
-    "specificity": g(f"test.{k}.specificity"), "F1": g(f"test.{k}.f1"), "ROC-AUC [95% CI]": ci(k), "PR-AUC": g(f"test.{k}.pr_auc"),
-    "flagged at 0.5": g(f"test.{k}.flagged_at_05")} for k in LAB])
-cv_tab = pd.DataFrame([{"model": LAB[k], **{c: cv(k, m) for c, m in [("accuracy", "accuracy"), ("precision", "precision"),
-                        ("recall", "recall"), ("specificity", "specificity"), ("F1", "f1"), ("ROC-AUC", "roc_auc"), ("PR-AUC", "pr_auc")]}}
-                       for k in LAB])
+models = pd.DataFrame([
+    ("Majority class", "Shows how misleading accuracy is when events are rare", "–", "–"),
+    ("Category base-rate rule", "Encodes the view that perishables move more; a model must beat it to be worth using", "–", "–"),
+    ("Logistic regression", "Gives probabilities for cost-based thresholds and odds ratios an analyst can read; stable with few positives",
+     "C ∈ {0.01, 0.1, 1, 10}", plain_params("logistic")),
+    ("Decision tree", "Produces if-then rules a price committee can apply without software, and captures interactions",
+     "Gini or entropy; depth 2-6; minimum leaf 10, 30 or 60", plain_params("tree")),
+    ("K-nearest neighbours", "Tests a different idea: similar city-item situations behave alike",
+     "K from 5 to 201; uniform or distance weights; Euclidean or Manhattan; all or continuous features", plain_params("knn")),
+], columns=["Model", "Why it suits this problem", "Grid searched", "Chosen in CV"])
 
-pol_lab = {**LAB, "flag_nothing": "Flag nothing (= majority class)", "flag_everything": "Flag everything"}
-cost_tab = costs.pivot(index="policy", columns="r", values="test_cost_per_1000")
-rec_tab = costs.pivot(index="policy", columns="r", values="test_recall")
-order = ["category", "logistic", "tree", "knn", "flag_nothing", "flag_everything"]
-cost_show = pd.DataFrame({"policy": [pol_lab[p] for p in order]})
-for r in sorted(costs.r.unique()):
-    cost_show[f"r = {r}"] = [f"{cost_tab.loc[p, r]:.0f} ({100 * rec_tab.loc[p, r]:.0f}%)" for p in order]
+res = []
+for m in LAB:
+    res.append({"Model": LAB[m], "Accuracy": a2(f"test.{m}.accuracy"), "Precision": a2(f"test.{m}.precision"),
+                "Recall": a2(f"test.{m}.recall"), "Specificity": a2(f"test.{m}.specificity"), "F1": a2(f"test.{m}.f1"),
+                "Test ROC-AUC [95% CI]": ci(m) if m != "majority" else "0.50", "Test PR-AUC": a2(f"test.{m}.pr_auc"),
+                "CV ROC-AUC (mean ± SD)": f"{g(f'cv.{m}.roc_auc_mean'):.2f} ± {g(f'cv.{m}.roc_auc_sd'):.2f}"})
+res = pd.DataFrame(res)
 
-bud = budget.assign(model=budget.model.map(LAB)).pivot(index="model", columns="N_per_week", values="recall_at_N")
-bud_p = budget.assign(model=budget.model.map(LAB)).pivot(index="model", columns="N_per_week", values="precision_at_N")
-bud_show = pd.DataFrame({"model": bud.index})
-for n in bud.columns:
-    bud_show[f"top {n}/week: recall"] = bud[n].values
-    bud_show[f"top {n}/week: precision"] = bud_p[n].values
+pol = [("category", "Category base-rate rule"), ("logistic", "Logistic regression"), ("flag_nothing", "Flag nothing"),
+       ("flag_everything", "Flag everything")]
+costs = pd.DataFrame([{"Policy": lab, **{f"r = {r}": f"{g(f'cost.r{r}.{k}.cost'):.0f}" for r in [5, 10, 20, 35]}} for k, lab in pol])
 
-err_show = errs[errs.grouping.isin(["item category", "city-size tercile", "deprivation tercile", "test week"])].copy()
-err_show = err_show[["grouping", "group", "rows", "positives", "base_rate", "flagged", "fn_rate", "fp_rate"]].rename(
-    columns={"base_rate": "base rate", "fn_rate": "FN rate", "fp_rate": "FP rate"})
-prov_show = errs[errs.grouping == "province"][["group", "positives", "fn_rate", "fp_rate"]]
-edge_cols = ["city", "item_short", "week", "score", "dlog_next", "threshold", "abs_dlog", "price_changed", "single_quote"]
-edge = pd.concat([fn_c.head(5)[edge_cols].assign(error="FN"), fp_c.head(5)[edge_cols].assign(error="FP")])
-edge = edge[["error"] + edge_cols].rename(columns={"item_short": "item", "dlog_next": "next-week change", "abs_dlog": "|change| at t",
-                                                   "price_changed": "changed at t", "single_quote": "MIN = MAX"})
-imp_show = imp[["feature", "coef_per_sd", "odds_ratio_per_sd", "rank_logistic", "tree_importance", "rank_tree"]].rename(
-    columns={"coef_per_sd": "coef per SD", "odds_ratio_per_sd": "odds ratio per SD", "rank_logistic": "rank (logistic)",
-             "tree_importance": "tree importance", "rank_tree": "rank (tree)"})
-rules_show = rules[["rule", "train_rows", "train_positives", "abnormal_rate"]].rename(
-    columns={"train_rows": "training rows", "train_positives": "abnormal", "abnormal_rate": "abnormal rate"})
-cvp_show = cvp.pivot(index="model", columns="fold", values="roc_auc").reindex([LAB[k] for k in LAB])
-cvp_show.columns = [f"fold {c}" for c in cvp_show.columns]
-cvp_show = cvp_show.reset_index()
-folds_show = folds[["fold", "train_weeks", "val_week", "purged_rows", "train_rows", "train_pos", "val_rows", "val_pos", "items_unlabelled"]].rename(
-    columns={"train_weeks": "training weeks (t)", "val_week": "validation week", "purged_rows": "purged", "train_rows": "train rows",
-             "train_pos": "train pos.", "val_rows": "val. rows", "val_pos": "val. pos.", "items_unlabelled": "items w/o label"})
-
-top5 = imp.sort_values("rank_logistic").head(5)
-pretty = {"cat_branded_packaged": "being a branded/packaged item", "price_changed": "a price change this week",
-          "cat_perishable": "being a perishable", "has_dlog": "having an observed change this week (previous week published)",
-          "prov_ICT": "being in Islamabad", "has_lag1": "having an observed change last week", "log_pop_urban": "a larger urban population",
-          "deprivation_composite": "higher district deprivation"}
-or_sentences = "".join(
-    f"<li><code>{r.feature}</code> (OR {r.odds_ratio_per_sd:.2f}): one SD more of {pretty.get(r.feature, r.feature)} is associated with "
-    f"{'about ' + format(r.odds_ratio_per_sd, '.2f') + ' times the odds' if r.odds_ratio_per_sd > 1 else format(100 * (1 - r.odds_ratio_per_sd), '.0f') + '% lower odds'}"
-    f" of an abnormal move next week.</li>" for r in top5.itertuples())
-gx = N["gini_example"]
-prec_n = [v["precision"] for m_ in ["category", "logistic", "tree", "knn"] for v in N["budget"][m_].values()]
-
-# Every qualitative claim in the text is checked against the numbers here, so a rerun cannot silently contradict it.
-assert all(g(f"cost.r{r}.flag_nothing.cost") <= min(g(f"cost.r{r}.{m_}.cost") for m_ in ["category", "logistic", "tree", "knn", "flag_everything"])
-           for r in [1, 5, 10]), "text: flag nothing is cheapest for r <= 10"
-assert g("cost.r35.category.cost") < min(g(f"cost.r35.{m_}.cost") for m_ in ["logistic", "tree", "knn", "flag_nothing", "flag_everything"])
-assert g("cost.r35.logistic.cost") < g("cost.r35.flag_everything.cost") < g("cost.r35.flag_nothing.cost")
-assert all(g(f"cost.r10.{m_}.cost") > g("cost.r10.flag_nothing.cost") for m_ in ["logistic", "tree", "knn"])
-assert abs(g("cost.r20.logistic.cost") - g("cost.r20.flag_nothing.cost")) < 10
-assert g("cost_equity.r35.cheapest") == "logistic" and g("cost_equity.r20.cheapest") in ("category", "flag_nothing")
-assert max(["category", "logistic", "tree", "knn"], key=lambda m_: g(f"cv.{m_}.roc_auc_mean")) == "knn"
-assert g("tune.knn.best_params").startswith("n_neighbors=201") and g("tune.logistic.chosen_params") == "C=0.01"
-assert g("test.category.roc_auc") > g("test.logistic.roc_auc") and g("test.diff_logistic_minus_category_ci_lo") < 0 < g("test.diff_logistic_minus_category_ci_hi")
-assert g("test.diff_tree_minus_category_ci_hi") < 0 and g("cv.logistic.roc_auc_mean") > g("cv.category.roc_auc_mean")
-assert g("test.logistic.reject_h0") and g("test.tree.reject_h0") and not g("test.knn.reject_h0")
-assert g("test_week.n_above_05.logistic") == 4 and g("test_week.n_above_05.category") == 3
-assert g("test.category.flagged_at_05") == 0 and g("test.knn.flagged_at_05") < 10
-assert g("leak.shuffled_n_ge_real") == 0 and g("cv.dev_weeks") == 10
-assert g("errors.fn_share_flat_or_unobserved") == 1.0
-assert N["errors"]["by"]["province"]["ICT"]["fn_rate"] == 1.0 and N["errors"]["by"]["province"]["Sindh"]["fn_rate"] == 0.0
-assert g("test_ref.tree.recall") == 1.0 and g("ablation.cat_only_test_auc") >= g("test.logistic.roc_auc")
-assert g("imp.cat_branded_packaged.rank_logistic") == 1 and g("imp.price_changed.rank_logistic") == 2
 eb = N["errors"]["by"]
+err_rows = [("Perishable", "item_category", "perishable"), ("Storable staple", "item_category", "storable_staple"),
+            ("Branded or packaged", "item_category", "branded_packaged"), ("Low deprivation", "deprivation_tercile", "low"),
+            ("Mid deprivation", "deprivation_tercile", "mid"), ("High deprivation", "deprivation_tercile", "high")]
+errs = pd.DataFrame([{"Group": lab, "Abnormal moves": eb[k][v]["positives"],
+                      "Missed (FN rate)": "–" if eb[k][v]["fn_rate"] is None else f"{100 * eb[k][v]['fn_rate']:.0f}%",
+                      "False-alarm rate": f"{100 * eb[k][v]['fp_rate']:.0f}%"} for lab, k, v in err_rows])
+
+
+def plain_rule(rule: str) -> str:
+    out = []
+    for c in rule.replace("IF ", "").split(" AND "):
+        f_, op, v = c.split(" ")
+        v = float(v)
+        if f_ == "cat_branded_packaged":
+            out.append("not branded or packaged" if op == "<=" else "branded or packaged")
+        elif f_ == "abs_dlog":
+            out.append(f"this week's change {'at most' if op == '<=' else 'above'} {100 * v:.0f}%")
+        elif f_ == "rel_price":
+            out.append("priced below the national reference" if op == "<=" else "priced at or above the national reference")
+        else:
+            out.append(f"{PLAIN[f_]} {op} {v:g}")
+    return "; ".join(out)
+
+
+rules = t("tree_rules")
+rules_tab = pd.DataFrame({"Leaf (if ...)": rules.rule.map(plain_rule), "Training rows": rules.train_rows.map("{:,}".format),
+                          "Abnormal rate": (100 * rules.abnormal_rate).map("{:.1f}%".format)})
 
 # ---------------------------------------------------------------- document
-H = []
-H.append(f"""<!doctype html><html><head><meta charset="utf-8"><title>Milestone 03 Report</title><style>{css}
-.hl {{ background: #fff6dc; border-left: 3px solid #E69F00; padding: 4px 8px; }}
-</style></head><body>
+css = """
+@page { size: A4; margin: 20mm 20mm 20mm 20mm; }
+body { font-family: 'Cambria', 'Georgia', serif; font-size: 10.3pt; line-height: 1.34; color: #111; background: #fff; }
+h1 { font-size: 15pt; margin: 0 0 4px 0; line-height: 1.2; }
+h2 { font-size: 12pt; margin: 12px 0 4px 0; border-bottom: 1px solid #999; padding-bottom: 2px; break-after: avoid; }
+p { margin: 3px 0 6px 0; text-align: justify; }
+.meta { font-size: 9.6pt; color: #333; margin-bottom: 7px; }
+.abstract { border: 1px solid #bbb; padding: 6px 10px; background: #f7f7f7; font-size: 10pt; }
+figure { margin: 6px 0 8px 0; text-align: center; break-inside: avoid; }
+figcaption { font-size: 9pt; color: #222; text-align: left; margin-top: 2px; }
+.tbl { margin: 5px 0 8px 0; break-inside: avoid; }
+.cap { font-size: 9pt; font-weight: bold; margin: 0 0 2px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 8.6pt; }
+th { border-bottom: 1.2px solid #333; border-top: 1.2px solid #333; text-align: left; padding: 2px 4px; background: #f2f2f2; }
+td { border-bottom: 0.5px solid #ddd; padding: 1.5px 4px; vertical-align: top; }
+ol, ul { margin: 3px 0 6px 18px; padding: 0; } li { margin-bottom: 3px; }
+.refs { font-size: 9pt; }
+.two { display: flex; gap: 12px; align-items: flex-start; } .two > * { flex: 1; }
+"""
+ow = N["test_week"]
+H = [f"""<!doctype html><html><head><meta charset="utf-8"><title>Milestone 03 Report</title><style>{css}</style></head><body>
 <h1>Who Pays More, and Who Can Least Afford It? Food Price Premiums, Deprivation and Abnormal Price Movements Across Selected Pakistani Urban Markets</h1>
-<div class="meta"><b>Milestone 03: Baseline models, evaluation and initial findings (manuscript draft: Sections 1-4 from Milestone 02, Sections 5-10 new)</b><br/>
+<div class="meta"><b>Milestone 03: Baseline models, evaluation and initial findings</b><br/>
 <b>Group 30</b> · Yousuf Uyghur (mu07486), Computer Science · Sameer Hassan (sh09036), Computer Science<br/>
 CS/SDP 312/314 L1 Data Science for Social Good, Habib University, Fall 2026 · Dr. Muhammad Usman Arif<br/>
-Notebook, code and data: github.com/Samzzh0803/Pakistan-Food-Price-Premiums-and-Deprivation (branch <code>milestone-03</code>;
-notebook <code>notebooks/M03_baseline_models.ipynb</code>)</div>
+Code, data and the executed notebook: github.com/Samzzh0803/Pakistan-Food-Price-Premiums-and-Deprivation (branch milestone-03)</div>
 
-<div class="abstract"><b>Summary.</b> Pakistan's weekly Sensitive Price Indicator (SPI) is reported as one national figure, but PBS publishes
-prices for 51 items in 17 cities. Milestone 02 built a {N2['panel']['rows']:,}-row city-item-week dataset and found that city food price premiums
-are negatively rank-correlated with district deprivation. Milestone 03 asks whether the same data can give <b>early warning</b> (SDG 2.c):
-using only what is known in week <i>t</i>, can we flag the city-item prices that will move abnormally by week <i>t</i>+1? Abnormal means a
-change above the item's own 90th percentile of non-zero changes, fitted on training weeks only. On {n_('data.rows')} labelled rows
-({n_('data.positives')} abnormal, {pct('data.base_rate')}) we compare two naive benchmarks with logistic regression, a decision tree and KNN.
-We use a time-ordered split and forward-chaining cross-validation that never uses a label from the test period. On the four held-out weeks,
-logistic regression reaches ROC-AUC {ci('logistic')} (row-level bootstrap), and it is above 0.5 in each test week. We reject H3's null for these
-weeks, while noting that four weeks cannot establish a general result. A one-line rule that scores each item by its category's past abnormal rate
-does as well ({ci('category')}), and it is also the cheapest alerting policy in our cost analysis. Precision stays near
-{pct('test.logistic.precision', 0)}. The models are at most a <b>triage aid</b>, not an automatic trigger. In these test weeks, alerts pay off only
-if a missed shock is judged to cost about 20 or more false alarms.</div>
-""")
-H.append(body)
+<div class="abstract"><b>Abstract.</b> We ask whether Pakistan's weekly city-level food price data can warn of abnormal price moves a week
+ahead. Using {g2('panel.weeks')} weekly PBS releases for 17 cities, we label a city-item-week as abnormal when next week's price change exceeds
+the item's usual range ({pc('data.base_rate', 1)} of {g('data.rows'):,} rows). We compare two simple benchmarks with logistic regression, a
+decision tree and k-nearest neighbours, using a time-ordered split and forward-chaining cross-validation. On four held-out weeks,
+logistic regression reaches a ROC-AUC of {a2('test.logistic.roc_auc')}, better than chance in every week. A one-line rule that ranks items
+by their category's past rate of abnormal moves does as well ({a2('test.category.roc_auc')}) and is the cheapest alerting policy once a
+missed shock is valued highly. Weekly prices carry a modest early-warning signal, and most of it is the type of food.</div>
 
-H.append(f"""
-<h2>5. Baseline models and justification</h2>
-<h3>5.1 Prediction task, label and features</h3>
-<p><b>Unit and target.</b> One row is one city × food item × week <i>t</i>. The target <code>y</code> = 1 if the item's price in that city
-moves abnormally between week <i>t</i> and the next consecutive release <i>t</i>+1. "Abnormal" means |Δlog price| above the item's own
-90th percentile of <b>non-zero</b> weekly changes, because the plain 90th percentile is 0 for {N2['h3']['items_p90_zero']} of the 32 food items.
-Items with fewer than five non-zero changes in the training rows get no threshold and are dropped
-({g('split.items_unlabelled')} items in the final split). The positive class is the abnormal move, the event a price monitor wants to catch.
-<b>Thresholds are fitted on training rows only</b>, separately in every fold and in the final split. If they were fitted on all weeks, the
-test weeks would help define what counts as abnormal.</p>
-<p><b>Why only {g('data.labelled_weeks')} of {g('data.weeks_in_panel')} weeks carry a label.</b> A label needs the next week's price, and
-only {g('data.labelled_weeks')} weeks are followed by a release 6-8 days later. This is a gap in PBS's published weekly archive, not in our
-method. Described with whole-period thresholds, the labelled data has {n_('data.rows')} rows ({g('data.rows_per_week'):.0f} per week), of
-which {n_('data.positives')} are abnormal ({pct('data.base_rate')}). The models never see these whole-period thresholds.</p>
-<p><b>Features.</b> Every feature is known at week <i>t</i> (Table 10). A change that cannot be computed because the previous week was not published
-({pct('data.share_no_dlog', 0)} of rows for this week's change, {pct('data.share_no_lag1', 0)} for last week's) is set to 0 <i>and</i> flagged
-with a <code>has_</code> indicator. The model can then tell "no change" from "not observed" (the Milestone 02 rule: flag, don't impute).
-We deliberately do not add one dummy per item: with about 200 positives this would overfit, and it would swamp KNN's distances.</p>
-""")
-H.append(html_table(feats, "Table 10. Model features and why each might matter. Reference levels: storable staple (category) and Punjab (province).", cls="small"))
-H.append(f"""
-<h3>5.2 Benchmarks and models</h3>
-<p>Table 11 lists the five approaches. The two benchmarks set the floor. The <b>majority class</b> shows why accuracy is misleading here. The
-<b>category base-rate rule</b> encodes the domain view that perishables move more, which Milestone 02 supported (H2). It is a tough baseline: it
-needs no fitting beyond four rates, and any model that cannot beat it is not worth deploying. The three course models represent three different
-ideas: a linear probability model, axis-aligned rules and similarity. Logistic regression and the tree use <code>class_weight="balanced"</code>, which weights each
-positive row by n/(2 × positives) and each negative by n/(2 × negatives), so the rare class counts as much as the common one. KNN has no class weights;
-its min-max scaler, like the logistic model's z-score scaler, sits inside an sklearn <code>Pipeline</code>, so it is refitted on the training rows of each fold.</p>
-""")
-H.append(html_table(models_tab, "Table 11. Naive benchmarks and baseline models, with the reason each was chosen, its tuning grid and the setting selected in cross-validation.", cls="small"))
+<h2>1. Introduction and data</h2>
+<p>Pakistan's Sensitive Price Indicator is reported each week as one national figure, but the Pakistan Bureau of Statistics (PBS)
+also publishes the prices behind it for {g2('panel.items')} items in {g2('panel.cities')} cities. That city detail could show whether some
+places pay persistently more for food, whether those places are the ones least able to absorb it, and whether sudden local price
+moves can be seen coming. The first two questions concern access to food (SDG 2.1) and inequality (SDG 10); the third concerns
+functioning food markets and timely market information (SDG 2.c). Milestone 02 explored all three. This milestone builds and
+evaluates the first classifiers for the third.</p>
+""", html_table(sources, "Table 1. Data sources merged into the master dataset."),
+f"""
+<p>Each weekly annexure is an Excel sheet with three city tables stacked on top of each other. Our Milestone 01 parser read only the
+first table and so reported seven cities; the corrected parser reads all three, giving {g2('panel.rows'):,} rows (17 cities, 51 items,
+{g2('panel.weeks')} weeks, of which {g2('panel.food_items')} items are food). We validated every week against PBS's own national columns.
+The cross-city minimum and maximum match PBS's national figures in all {g2('validation.item_weeks_checked'):,} item-weeks, and the geometric
+mean of city prices reproduces PBS's national average in all of them, so we use the geometric mean as the national reference price.</p>
+<p>Item categories, census population, district deprivation and the urban food price index were joined on item, city and month,
+each by a many-to-one join whose row count we checked. Missing values were flagged rather than imputed. {g2('missing.structural_rows')} rows
+where a city never quotes an item are kept as missing. Weekly changes exist only between releases a week apart, and gaps in the
+published archive leave {g2('missing.lag_missing_pct'):.0f}% of rows without a previous week. Releases after 24 September 2026 were
+downloaded but not opened; they are reserved for the new-data milestone.</p>
 
-H.append(f"""
-<h2>6. Experimental setup</h2>
-<h3>6.1 Time-ordered split, purge and stratification</h3>
-<p>We train on the first {g('split.train_weeks')} labelled weeks ({g('split.train_first')} to {g('split.train_last')}) and test on the last
-{g('split.test_weeks')} ({g('split.test_list')}): {pct('split.week_share_train', 0)} / {100 - 100 * g('split.week_share_train'):.0f}% by weeks.
-<b>Purge rule:</b> a row at week <i>t</i> is labelled from week <i>t</i>+1, so a training row whose <i>t</i>+1 is an evaluation week
-is dropped. Here the last training week ({g('split.purged_week')}) is followed by the first test week, so its {g('split.purged_rows')}
-candidate rows are purged, and the final models learn from {g('split.train_weeks_after_purge')} weeks. After purging and labelling, the training set has
-{n_('split.train_rows')} rows ({g('split.train_pos')} abnormal, {pct('split.train_rate', 2)}) and the test set has {n_('split.test_rows')} rows
-({g('split.test_pos')} abnormal, {pct('split.test_rate', 2)}): {pct('split.row_share_train', 0)} / {100 - 100 * g('split.row_share_train'):.0f}% by rows.
-The two base rates are nearly equal, so the test weeks are not unusually calm or volatile. The fitted sample
-({g('split.train_rows') + g('split.test_rows'):,} rows) is smaller than the {n_('data.rows')}-row description in §5.1 for two reasons: the purged week is removed,
-and thresholds fitted on training rows alone leave {g('split.items_unlabelled')} items without a label, against
-{g('data.items_food') - g('data.items_labelled')} under whole-period thresholds.</p>
-<p><b>Why not a random stratified split?</b> The brief's example is a random stratified split. Our rows are a panel: the same 17 × {g('data.items_labelled')}
-city-item series recur every week, and neighbouring weeks share shocks. A random split would train on later weeks to predict earlier ones, which PBS could never do
-in practice. It also lets the model learn week-specific shocks that appear on both sides of the split. We keep time order. The purpose of stratification,
-keeping the rare class represented in every part, is met differently: every validation fold and the test set are checked to contain positives
-({g('cv.val_pos_min')}-{g('cv.val_pos_max')} per validation week; {g('split.test_pos')} in test), and logistic regression and the tree use balanced class weights. Class weights change what the model optimises; they are not a substitute for
-stratification, which is why the positive counts are checked. §6.4 compares random and time-ordered folds.</p>
+<h2>2. What the exploratory analysis showed</h2>
+""", fig("m03r_eda", "Fig. 1. City food price premiums with 95% intervals (left; filled markers stay significant after a Bonferroni correction) "
+         "and premium against district deprivation (right); the cities that pay most tend to be the least deprived."),
+f"""
+<p>For each city we averaged its log price relative to the national reference over the 32 food items. Islamabad pays
+{g2('premium.city.Islamabad.pct_mean'):.0f}% above the reference and Rawalpindi {g2('premium.city.Rawalpindi.pct_mean'):.0f}%, while Sukkur and
+Bannu pay about {abs(g2('premium.city.Bannu.pct_mean')):.0f}% less. {['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'][g2('premium.n_sig_bonferroni')]} cities remain significant after a
+Bonferroni correction for 17 tests. The pattern persists. In {pc2('h1b.overall_stay_rate')} of {g2('h1b.n_pairs'):,} cases where a city
+was above the cross-city median for an item, it was still above it the following week.</p>
+<p>Perishables vary more across cities than storable staples (mean coefficient of variation {g2('h2.mean_cv_perishable'):.2f} against
+{g2('h2.mean_cv_storable'):.2f}; one-tailed Welch p = {g2('h2.p_one_tailed'):.3f}). A rank-based test gives p = {g2('h2.mannwhitney_p_one_tailed'):.3f},
+and each group has only about ten items, so we treat this as suggestive.</p>
+<p>The cities paying the highest premiums are mostly the least deprived (Spearman ρ = {g2('h5.deprivation_composite.spearman_rho'):.2f},
+p = {g2('h5.deprivation_composite.spearman_p'):.2f}, n = 17). Khuzdar and Quetta are the exception, combining above-reference prices with the
+highest food insecurity in the panel. Data quality also varies by place. The share of records in which every quote PBS collected was
+identical ranges from {pc2('h4.single_quote_min')} in {g2('h4.single_quote_min_city')} to {pc2('h4.single_quote_max')} in
+{g2('h4.single_quote_max_city')}.</p>
 
-<h3>6.2 Forward-chaining cross-validation</h3>
-<p><b>Outer boundary.</b> Cross-validation may only use labels that end before the test period. The last training week ({g('split.purged_week')}) is
-labelled from the first test week, so it is excluded from CV as well as from final training. This leaves {g('cv.dev_weeks')} development weeks
-(to {g('cv.dev_last')}). An earlier version of our code used that week as a CV validation week, which let test-period prices shape its labels;
-an independent review caught this, and every result here comes from the corrected design. The code now asserts that every CV label, in training
-and validation, ends before the first test week.
-<b>Folds.</b> Within the development weeks we use an expanding window (Fig. 6). Fold 1 trains on labelled weeks 1-5 and validates on week 6. Fold 2 trains on weeks 1-6
-and validates on week 7, and so on, giving {g('cv.folds')} folds. Each fold rebuilds its own label thresholds, scaler and model from its training weeks and
-applies the purge rule ({g('cv.purged_folds')} folds lose their last training week to it). Each validation week holds only
-{g('cv.val_pos_min')}-{g('cv.val_pos_max')} abnormal moves, so fold-to-fold variance is large. We report the mean ± SD across folds and every
-fold's AUC (Appendix Table A1).</p>
-{fig('fig15_split_design', 'Fig. 6. Forward-chaining folds and the final split, by labelled week t. Blue: training; orange: validation or test; grey ×: training week purged because its t+1 is an evaluation week.', '70%')}
-
-<h3>6.3 Hyperparameter tuning</h3>
-<p>Each grid in Table 11 runs inside the five folds; no test-period information enters this step. Settings are compared by mean validation <b>ROC-AUC</b>, which does not depend on a threshold
-and is not fooled by the majority class. When several settings are within one fold-SD of the best, we take the simplest: smallest C, smallest
-depth with the largest leaves, or largest K. With so few positives per fold, the difference between near-equal settings is mostly noise (Fig. 7).
-<b>Logistic regression:</b> C hardly matters. C = 0.01, the strongest regularisation, has the best mean ({cv('logistic')}).
-<b>Decision tree:</b> depth 4 had the best mean ({f('tune.tree.best_mean_auc')} ± {f('tune.tree.best_sd_auc')}), but depth 2 is within one SD,
-so we keep the simpler tree ({cv('tree')}); a depth-2 tree is also four readable rules.
-<b>KNN:</b> AUC rises steadily with K and peaks at the grid's edge ({g('tune.knn.chosen_params')}; {cv('knn')}). Using the four continuous
-features alone is clearly worse (best {f('tune.knn.best_auc_continuous')}), so the category dummies carry most of what KNN finds.</p>
-{fig('fig16_tuning', 'Fig. 7. Tuning results: mean validation ROC-AUC over five forward-chaining folds for each setting (left panel shows ± 1 SD). The dotted line is chance (0.5).')}
-
-<h3>6.4 Leakage checks</h3>
-<p><b>Random folds are over-optimistic.</b> For the chosen logistic model, ordinary shuffled <code>StratifiedKFold</code> (5 folds) on the training rows gives
-AUC {f('leak.random_kfold_auc_mean')} ± {f('leak.random_kfold_auc_sd')}, against {f('leak.forward_auc_mean')} for forward chaining: a gap
-of {f('leak.gap')}. This is a comparison, not a controlled measurement of leakage: the two schemes also differ in training size, and the random folds
-reuse labels fitted on all training rows. But it points the way we expected: ignoring time order makes the model look better than it is.
-<b>Shuffled-label sanity check.</b> Refitting the final logistic model on permuted training labels and scoring the real test labels gives AUC
-{f('leak.shuffled_label_test_auc')} for the seed-42 shuffle. Over {g('leak.shuffled_reps')} shuffles the mean is {f('leak.shuffled_mean')}
-(5th-95th percentile {f('leak.shuffled_p05')}-{f('leak.shuffled_p95')}), and {g('leak.shuffled_n_ge_real')} of {g('leak.shuffled_reps')} reached the real test AUC.
-This is consistent with the pipeline behaving correctly, but it is a sanity check, not proof that nothing leaks (it could not have detected the
-CV boundary problem above). It is also not a formal test of H3, because rows in the same week are not exchangeable and tuning is not repeated
-under the null.
-<b>Asserts in the code:</b> no week after the cutoff is read; no evaluation week is in any training set; every CV label ends before the test period;
-thresholds come from training rows; the purge is applied; the mean shuffled AUC is within 0.03 of 0.5.</p>
-
-<h2>7. Results</h2>
-<p>Table 12 reports the test set: one final evaluation of each model, with settings fixed in cross-validation. The diagnostics in §8 reuse
-these same test predictions; nothing on the test set was used to choose a model, setting or threshold. Table 13 reports the same metrics as mean ± SD
-across the five folds. Threshold-based metrics use 0.5. <b>PR-AUC</b> (computed as average precision, sklearn's step-wise estimate of the area under the PR curve) matters because, with about 3% positives, ROC-AUC can look respectable
-while precision stays tiny. A random model's PR-AUC equals the base rate ({f('test.majority.pr_auc')} on test), so that is the bar to compare against.</p>
-""")
-H.append(html_table(test_tab, "Table 12. Test-set metrics (4 weeks, " + n_('split.test_rows') + " rows, " + str(g('split.test_pos')) +
-                    " abnormal). Threshold 0.5 for accuracy to F1. ROC-AUC with a percentile bootstrap 95% CI (2,000 resamples of test rows, seed 42)."))
-H.append(html_table(cv_tab, "Table 13. Forward-chaining cross-validation metrics: mean ± SD over 5 validation weeks (threshold 0.5).", cls="small"))
-H.append(f"""
-{fig('fig17_roc_pr', 'Fig. 8. ROC curves (left; AUC in brackets) and precision-recall curves (right; PR-AUC in brackets; y-axis cut at 0.2) on the test set. The dotted lines are chance: the diagonal, and the base rate.', '84%')}
-<div class="hl"><p><b>H3 decision.</b> For logistic regression and the decision tree, the lower bound of the row-level bootstrap 95% CI for test
-ROC-AUC is above 0.5 (logistic {ci('logistic')}; tree {ci('tree')}); for KNN it is not ({ci('knn')}). The bootstrap treats rows as independent,
-but rows in the same week share shocks, so these intervals are too narrow. As a check that respects weeks, we score each test week separately (Appendix
-Table A3): logistic regression is above 0.5 in all {g('test_week.n_above_05.logistic')} weeks (range {f('test_week.min.logistic')}-{f('test_week.max.logistic')}),
-the category rule in {g('test_week.n_above_05.category')}. We therefore <b>reject H0 for logistic regression in these test weeks</b>: information
-available at week <i>t</i> ranked next-week abnormal moves better than chance. With only four weeks this is evidence of a modest signal, not an
-established general result; the Week 14 holdout is the next test. Test PR-AUC is {f('test.logistic.pr_auc')}, under twice the base rate.</p></div>
-<p><b>Does any ML model beat the simple rule?</b> In cross-validation, logistic regression is ahead of the category rule on average
-({cv('logistic')} vs {cv('category')}), but only in {g('cv.folds_logistic_beats_category')} of {g('cv.folds')} folds. On the test weeks, the category rule is
-slightly ahead ({f('test.category.roc_auc')} vs {f('test.logistic.roc_auc')}). The paired bootstrap difference (logistic minus rule) is
-{f('test.diff_logistic_minus_category')}, 95% CI [{f('test.diff_logistic_minus_category_ci_lo')}, {f('test.diff_logistic_minus_category_ci_hi')}],
-so we cannot tell them apart. The depth-2 tree scores below the rule on test (row-bootstrap difference CI
-[{f('test.diff_tree_minus_category_ci_lo')}, {f('test.diff_tree_minus_category_ci_hi')}], with the same independence caveat). KNN had the highest CV mean
-but also the largest SD, and it fell to {f('test.knn.roc_auc')} on test. <b>The honest reading is that most of the usable signal is "what kind of food is it".</b> The ablation agrees.
-Logistic regression with only the three category dummies scores {f('ablation.cat_only_cv_auc')} in CV and {f('ablation.cat_only_test_auc')} on test.
-The full feature set adds about {g('leak.forward_auc_mean') - g('ablation.cat_only_cv_auc'):.2f} AUC in CV and nothing on test.</p>
-<p><b>Accuracy misleads.</b> The majority class is {pct('test.majority.accuracy')} accurate and catches nothing. The category rule never reaches
-a score of 0.5 and KNN does so for only {g('test.knn.flagged_at_05')} rows, so at that threshold they flag (almost) nothing, and their accuracy-to-F1 rows
-look like the majority class.
-Balanced class weights push logistic regression the other way: at 0.5 it flags {g('test.logistic.flagged_at_05')} rows, with recall {pct('test.logistic.recall', 0)}
-but precision {pct('test.logistic.precision', 1)}. 0.5 is an arbitrary cut-off. §8 chooses thresholds from costs.</p>
-<p><b>Why KNN struggles</b> (Unit 11 limitations). With about 3% positives, most neighbourhoods of 5-25 rows contain no abnormal move at all, so the vote is 0
-almost everywhere. Binary dummies count as much in the distance as real price changes, and irrelevant features add noise. Many rows are identical
-(no change, not observed), which produces ties. Only very large neighbourhoods give a usable score, and then KNN is a smoothed local base rate,
-which explains its peak at the edge of the K grid.</p>
-<p><b>Label sensitivity.</b> Under the Milestone 02 "contract" rule (plain 90th percentile; any change counts for 13 items) the test base rate is
-{pct('contract.test_rate')}. Logistic regression reaches {f('contract.logistic_test_auc')} and the category rule {f('contract.category_test_auc')}, so the
-task is harder. The refined label is the one we defend.</p>
-
-<h2>8. Asymmetric error costs and confusion-matrix diagnostics</h2>
-<h3>8.1 Who bears each error</h3>
-<p>The alert is meant for a PBS analyst, or a district Price Control Committee or price magistrate deciding where to send inspectors or which
-items to watch next week.
+<h2>3. Hypotheses</h2>
 <ul>
-<li>A <b>false negative</b> (missed abnormal move) is, at its most harmful, a jump in tomatoes, onions, flour or ghee that nobody was warned about
-(abnormal moves also include sharp falls, which matter to producers and traders but less to consumers). No early stock release,
-inspection or public notice happens, and households absorb the shock. Households in more deprived districts spend a larger share of income on food,
-so the harm falls hardest on those least able to absorb it (H5).</li>
-<li>A <b>false positive</b> (false alarm) is an inspection visit or watch-list entry that was not needed. It costs staff time and may cause friction
-with traders. Repeated false alarms cause <i>alert fatigue</i>: if most alerts are wrong, people stop trusting the system.</li>
-</ul></p>
-<p><b>Cost matrix</b> (Provost and Fawcett, Ch. 7). cost(TP) = cost(TN) = 0, cost(FP) = 1 unit and cost(FN) = <i>r</i> units. We put the cost in one cell only,
-to avoid the double counting Provost and Fawcett warn about. We do not also credit a "benefit" for true positives.
-Flagging a row with probability <i>p</i> of being abnormal is worth it when <i>p</i>·<i>r</i> &gt; 1 − <i>p</i>, i.e. <i>p</i> &gt; 1/(1 + <i>r</i>).
-For an average row, <i>p</i> is the training base rate ({pct('split.train_rate', 2)}), so "flag everything" beats "flag nothing" exactly when
-<i>r</i> &gt; (1 − <i>p</i>)/<i>p</i> = {f('cost.flag_all_breakeven_r', 1)}, close to the inverse base rate ({f('cost.inverse_base_rate', 1)}). <b><i>r</i> is a value judgment made by
-people, not something the data decides</b>, so we vary it over {{1, 5, 10, 20, 35}}. For each <i>r</i> and model, the threshold that minimises total cost is
-chosen on the pooled out-of-fold CV predictions (all from development weeks) and then applied to the test predictions.</p>
-""")
-H.append(html_table(cost_show, "Table 14. Test cost per 1,000 city-item-weeks (in false-alarm units) and, in brackets, the share of abnormal moves caught, for each cost ratio r. Thresholds were chosen on CV predictions only."))
-H.append(f"""
-{fig('fig19_costs', 'Fig. 9. Test cost per 1,000 city-item-weeks against the cost ratio r. For r ≤ 10 the cheapest policy is to issue no alerts; at r = 35 the category rule is cheapest.', '64%')}
-<p><b>Reading the sensitivity</b> (test weeks only). For <i>r</i> ≤ 10 the cheapest policy is to flag nothing. At <i>r</i> = 10 the three ML models'
-CV thresholds raise some alerts, and on test each costs more than staying silent. At <i>r</i> = 20, logistic regression
-({f('cost.r20.logistic.cost', 1)}) and flagging nothing ({f('cost.r20.flag_nothing.cost', 1)}) are essentially tied. At <i>r</i> = 35 the
-<b>category rule</b> is cheapest ({f('cost.r35.category.cost', 0)}), ahead of logistic regression ({f('cost.r35.logistic.cost', 0)}), flagging
-everything ({f('cost.r35.flag_everything.cost', 0)}) and flagging nothing ({f('cost.r35.flag_nothing.cost', 0)}). So, in these test weeks, <b>no ML model beats
-the simple rule on cost, and alerting only pays off at all when a missed shock is judged to be worth roughly 20 or more unnecessary inspections.</b>
-These are the points we chose to try, not a measured break-even, and the recommended threshold depends on <i>r</i>. We use <i>r</i> = {g('cost.r_ref')} below
-as an illustrative reference (a value judgment, not chosen from the data). At that threshold logistic regression flags
-{pct('test_ref.logistic.flagged_share', 0)} of test rows, catches {pct('test_ref.logistic.recall', 0)} of abnormal moves, and has precision
-{pct('test_ref.logistic.precision', 1)} (Appendix Table A2 has all models).</p>
-<p><b>Alert budget.</b> A decision-maker may think in terms of capacity rather than <i>r</i>: "we can check <i>N</i> city-items a week". Table 15 ranks each test
-week's {g('split.test_rows_per_week'):.0f} rows by score and takes the top <i>N</i>. With 50 checks a week, logistic regression puts
-{f('budget.logistic.n50.caught', 0)} of the {g('budget.test_positives')} abnormal moves in front of an inspector ({pct('budget.logistic.n50.recall', 0)});
-the category rule, with random tie-breaking, puts {f('budget.category.n50.caught', 1)} in front of them.
-Precision@<i>N</i> stays between {100 * min(prec_n):.0f}% and {100 * max(prec_n):.0f}%, against {pct('budget.random_precision', 1)} for random checks.</p>
-""")
-H.append(html_table(bud_show, "Table 15. Alert budget, pooled over the four test weeks: share of abnormal moves caught (recall) and share of checks that find one (precision) when only the top N rows per week are checked. Ties (category rule) are counted at their expected value. Per-week results are in Appendix Table A4.", cls="small"))
-H.append(f"""
-<p><b>Equity weighting</b> (preview of the Milestone 04 fairness audit). If a missed shock counts 1, 1.5 or 2 times as much in low-, mid- and high-deprivation
-cities, the cost-minimising choices shift towards flagging. At <i>r</i> = 10 the logistic threshold falls to {f('cost_equity.r10.logistic_threshold', 2)}
-and recall rises to {pct('cost_equity.r10.logistic_recall', 0)}, although on test flagging nothing is still cheapest. At <i>r</i> = 35 logistic regression
-becomes the cheapest policy. Weighting by need changes who gets protected, and that is a decision for policy-makers, not for us.</p>
-
-<h3>8.2 Confusion matrices</h3>
-<p>Fig. 10 uses the Unit 10 layout: actual class in rows, predicted in columns, positive (abnormal) class first, with counts and row percentages. So the
-top-left cell over its row is recall, and the bottom-right over its row is specificity. The majority class and the category rule (at <i>r</i> = 20) have an empty first column. Logistic regression
-at 0.5 catches {g('test.logistic.tp_at_05')} of {g('split.test_pos')} abnormal moves at the price of
-{n_('test.logistic.fp_at_05')} false alarms. The <i>r</i> = 20 threshold trades a little more recall for more false alarms. The
-depth-2 tree at its <i>r</i> = 20 threshold flags every non-branded item, which is the category rule in disguise.</p>
-{fig('fig18_confusion', 'Fig. 10. Test-set confusion matrices: counts and row percentages. Rows are the actual class, columns the predicted class, abnormal first. "cost threshold" is the threshold minimising cost at r = 20 on CV predictions; its value is in brackets.', '58%')}
-
-<h3>8.3 Where the errors fall, and edge cases</h3>
-<p>Table 16 breaks down the logistic model's errors at the <i>r</i> = 20 threshold. This is descriptive only; the formal test is H4 in Milestone 04, and many cells
-hold under 20 positives. Two patterns stand out.
-<ul>
-<li><b>Flags concentrate in perishables.</b> The FP rate is {pct('errors.by.item_category.perishable.fp_rate', 0)} for perishables against
-{pct('errors.by.item_category.branded_packaged.fp_rate', 0)} for branded goods.</li>
-<li><b>Flags concentrate in high-deprivation cities.</b> The FP rate is {pct('errors.by.deprivation_tercile.high.fp_rate', 0)} there against
-{pct('errors.by.deprivation_tercile.low.fp_rate', 0)} in low-deprivation cities. The miss rate runs the other way:
-{pct('errors.by.deprivation_tercile.high.fn_rate', 0)} in high- and {pct('errors.by.deprivation_tercile.low.fn_rate', 0)} in low-deprivation cities.</li>
+<li>H1, persistent premiums (SDG 2.1): some cities pay more than the national reference for the same items, and stay above the median week to week.</li>
+<li>H2, perishability and dispersion (SDG 2.c): perishables vary more across cities than storable staples.</li>
+<li>H3, abnormal next-week movement (SDG 2.c): a classifier using only information available in week <i>t</i> ranks next week's abnormal
+moves better than chance (H0: ROC-AUC = 0.5 on a time-ordered test set).</li>
+<li>H4, representation and fairness (SDG 10): model errors and data quality differ across provinces, city sizes and deprivation levels.</li>
+<li>H5, burden (SDG 2.1, SDG 10): city premiums are correlated with deprivation.</li>
 </ul>
-By province, Islamabad's {eb['province']['ICT']['positives']} abnormal moves were all missed, while Sindh's
-{eb['province']['Sindh']['positives']} were all caught. Both groups are tiny.</p>
-""")
-H.append(html_table(err_show, "Table 16. Logistic regression errors on the test set at the r = 20 threshold, by group. FN rate = share of abnormal moves missed; FP rate = share of normal rows flagged. Terciles are over the 17 cities.", cls="small"))
-H.append(f"""
-<p><b>Edge cases</b> (Table 17; the full ten of each are in the notebook).
-<ul>
-<li><b>Every missed abnormal move had a flat or unobserved price at week <i>t</i></b>
-({pct('errors.fn_share_flat_or_unobserved', 0)} of the {g('errors.n_fn')} false negatives have <code>price_changed</code> = 0). Moves that come with no
-visible recent history are invisible to any model built on recent changes.</li>
-<li><b>The most confident false alarms</b> are perishables in Sukkur, Bannu and Larkana. Most are records where PBS's minimum and maximum quotes are
-equal (one effective quote), which changed this week and then did not move again. A single quote that jumps may reflect one shop rather than the
-market. That links model errors to the measurement-quality concern in H4.</li>
-<li><b>Timing.</b> The two earlier test weeks have about twice the base rate of the August weeks
-({pct('errors.by.test_week.2026-04-02.base_rate', 1)} and {pct('errors.by.test_week.2026-06-04.base_rate', 1)} against
-{pct('errors.by.test_week.2026-08-13.base_rate', 1)} and {pct('errors.by.test_week.2026-08-20.base_rate', 1)}). The 2 April week comes about 12 days after
-Eid-ul-Fitr, observed in Pakistan on 21 March 2026, and the 4 June week about a week after Eid-ul-Adha, observed on 27 May 2026 (APP, 2026; Radio
-Pakistan, 2026). Post-festival price adjustment is <i>one possible explanation that we have not tested</i>; the dates alone are not evidence of a
-holiday effect, and some of these abnormal moves are falls rather than rises.</li>
-</ul></p>
-""")
-H.append(html_table(edge, "Table 17. The five most confident false negatives (lowest score among missed abnormal moves) and false positives (highest score among normal rows), logistic regression, r = 20 threshold. Changes are in log points.", cls="small"))
+<p>This report tests H3. H1, H2 and H5 were examined in Milestone 02, and the formal H4 audit is planned for Milestone 04.</p>
 
-H.append(f"""
-<h2>9. Drivers and initial policy insights</h2>
-<p><b>Logistic regression.</b> Inputs are z-scored inside the pipeline, so each coefficient is the change in log-odds per one standard deviation, and
-e<sup>coef</sup> is the odds ratio (OR) per SD (Table 18, Fig. 11). For a 0/1 feature, one SD is a fixed fraction of the switch from 0 to 1, so these
-ORs rank features rather than describe a full category change. They are associations, not causes. The top five:
-<ul>{or_sentences}</ul>
-<code>abs_dlog</code> gets a small coefficient because it is correlated with <code>price_changed</code> (r = {f('imp.corr_abs_dlog_price_changed', 2)}
-in the training rows), and the two share the credit (Unit 09). The <code>has_</code> flags are negative mostly because they mark <i>which weeks</i> had a
-published previous week, so they partly stand in for time period, not for a market effect.</p>
-<p><b>Decision tree.</b> The depth-2 tree splits first on branded/packaged, then on this week's change for other items, and on relative price for branded
-ones; the diagram is in the notebook (Part D.2) and <code>reports/m03/figures/fig21_tree.png</code>. Its impurity importance is {f('imp.cat_branded_packaged.tree', 2)} for <code>cat_branded_packaged</code>,
-{f('imp.abs_dlog.tree', 2)} for <code>abs_dlog</code> and {f('imp.rel_price.tree', 2)} for <code>rel_price</code>. Its leaves read as rules (Table 19).
-The top rule is: <b>IF the item is not branded/packaged AND its price moved by more than about 1% this week, THEN the training abnormal rate is
-{pct('rules.top1.rate', 1)}</b>, against {pct('split.train_rate', 1)} overall. Branded items whose price is at or above the national reference
-had no abnormal move in training.
-<b>Worked Gini (root).</b> Unweighted, the root holds {gx['pos']} positives in {gx['n']:,} rows (Gini {gx['gini_parent']:.4f}); the split sends
-{gx['pos_left']}/{gx['n_left']:,} left and {gx['pos_right']}/{gx['n_right']:,} right, gain {gx['gini_gain']:.4f}. With balanced weights (positive
-{gx['w_pos']:.1f}, negative {gx['w_neg']:.3f}), the root is exactly 50/50 (Gini {gx['wgini_parent']:.2f}), the children have Gini {gx['wgini_left']:.3f}
-and {gx['wgini_right']:.3f}, and the weighted gain is {gx['wgini_gain']:.3f}, the largest available.</p>
-<p><b>Cross-model check.</b> Both models put the branded/packaged flag first, and both give recent price movement a top role (<code>price_changed</code> in
-the logistic model, <code>abs_dlog</code> in the tree: two views of the same signal). These are the trustworthy drivers. Perishability, smaller markets and
-higher district deprivation are positive in the logistic model only. A depth-2 tree can use just three features, so its silence on them is not evidence
-against them.</p>
-""")
-H.append('<div class="two">' + html_table(imp_show.head(10), "Table 18. Top 10 features by |logistic coefficient| and their tree importance (blank = unused by the tree).", cls="small")
-         + html_table(rules_show, "Table 19. Decision-tree leaves as IF-THEN rules, with their actual abnormal rate on the training rows.", cls="small") + "</div>")
-H.append(f"""
-{fig('fig20_importance', 'Fig. 11. Feature importance. Left: logistic regression coefficients per 1 SD (red raises the odds of an abnormal move next week, blue lowers them). Right: decision-tree impurity importance.', '76%')}
-<p><b>Initial policy takeaways (SDG 2.c).</b> These are hedged: they rest on four test weeks and modest signal.
+<h2>4. Prediction task, features and models</h2>
+<p>Each row is one city, one food item and one week <i>t</i>. The target is 1 when the item's price in that city changes between week
+<i>t</i> and the following week by more than the 90th percentile of that item's non-zero weekly changes. We use non-zero changes because
+{pc2('summary.dlog_share_zero_food')} of weekly food price changes are exactly zero; for {g2('h3.items_p90_zero')} of the 32 food items an
+ordinary 90th percentile would be zero and every change would count as abnormal. The percentiles are fitted on the training weeks of
+each split and fold, so the evaluation weeks never help define their own labels. Items with fewer than five non-zero changes in
+training get no label. Because a label needs a release exactly one week later, only {g('data.labelled_weeks')} of the
+{g('data.weeks_in_panel')} weeks can be labelled.</p>
+<p>All features are known in week <i>t</i>. Recent movement is described by whether the price changed this week and by the size of this
+week's and last week's changes. When the previous week was not published, the change is set to zero and a separate indicator records
+that it was unobserved. Position relative to other cities is the log price against the national reference. Data quality enters
+through the price spread across a city's outlets and whether only one effective quote was recorded. Item type is a set of category
+indicators (perishable, branded or packaged, prepared food; storable staples are the reference), and place is described by province
+indicators, log urban population and the district deprivation composite. We left out one indicator per item because, with about
+200 positive rows, it would overfit and dominate the distances used by k-nearest neighbours.</p>
+""", html_table(models, "Table 2. Benchmarks and models, why each suits the problem, and the settings searched and chosen in cross-validation."),
+f"""
+<p>Logistic regression and the tree use balanced class weights, so that the rare abnormal rows carry as much total weight as the
+normal ones. Logistic regression inputs are standardised and k-nearest-neighbour inputs are scaled to 0-1; both scalers are fitted on
+the training rows of each fold. All models were fitted with scikit-learn (Pedregosa et al., 2011).</p>
+
+<h2>5. Experimental setup</h2>
+<p>We train on the first {g('split.train_weeks')} labelled weeks ({g('split.train_first')} to {g('split.train_last')}) and test on the last
+{g('split.test_weeks')} ({g('split.test_list')}). After labelling, training has {g('split.train_rows'):,} rows with {g('split.train_pos')} abnormal moves and
+the test set has {g('split.test_rows'):,} rows with {g('split.test_pos')}. That is a {pc('split.row_share_train')}/{100 - 100 * g('split.row_share_train'):.0f}% split by rows,
+and the base rate is {pc('split.test_rate', 1)} in both parts. A row in week <i>t</i> takes its label from week <i>t</i>+1, so any training row
+whose <i>t</i>+1 falls in an evaluation week is removed. Here that purges the last training week, and the final models learn from
+{g('split.train_weeks_after_purge')} weeks.</p>
+<p>We did not use a random stratified split. The same 17 × {g('data.items_labelled')} city-item series appear every week and items in the
+same week share shocks, so a random split would let the model learn from later weeks to predict earlier ones, which no price monitor
+could do. Stratification exists to keep the rare class present in every part. We checked it directly. Every validation week holds
+between {g('cv.val_pos_min')} and {g('cv.val_pos_max')} abnormal moves and the test set {g('split.test_pos')}. Balanced class weights then keep
+the rare class from being ignored during training.</p>
+<p>Cross-validation uses only labels that end before the test period, which leaves {g('cv.dev_weeks')} development weeks. Within them,
+fold 1 trains on the first five labelled weeks and validates on the sixth, and each later fold adds one week, giving
+{g('cv.folds')} folds. Label percentiles, scalers and models are refitted inside every fold. Each validation week has only {g('cv.val_pos_min')} to {g('cv.val_pos_max')}
+abnormal moves, so we report the mean and standard deviation across folds.</p>
+""", fig("fig15_split_design", "Fig. 2. Forward-chaining folds and the final split by labelled week; each fold trains only on weeks before "
+         "the one it validates, and grey crosses mark weeks removed because their label comes from an evaluation week.", "70%"),
+f"""
+
+""", fig("m03r_tuning", "Fig. 3. Mean validation ROC-AUC for every setting searched; the regularisation strength barely matters, "
+         "shallow trees do about as well as deep ones, and KNN only improves as K grows."),
+f"""
+<p>Settings were compared by mean validation ROC-AUC, which ranks predictions without needing a threshold. When several settings fell
+within one fold-SD of the best, we chose the simplest. The strongest regularisation (C = 0.01) did best for logistic regression. A depth-2
+tree was within one SD of the best depth-4 tree, so we kept the shallower one. KNN peaked at the largest K in the grid.</p>
+<p>Two checks support the design. Ordinary shuffled five-fold cross-validation on the training rows gives a mean AUC of
+{a2('leak.random_kfold_auc_mean')} for logistic regression, against {a2('leak.forward_auc_mean')} with forward chaining, which suggests
+random folds would have overstated performance. When we refit the final logistic model on randomly permuted training labels
+{g('leak.shuffled_reps')} times, the test AUC averages {a2('leak.shuffled_mean')}, and none of the permutations reaches the real AUC.</p>
+
+<h2>6. Results</h2>
+""", html_table(res, "Table 3. Test-set metrics for every model (threshold-based metrics at 0.5; ROC-AUC with a bootstrap 95% interval) "
+                "and the cross-validation ROC-AUC used for model selection."),
+fig("fig17_roc_pr", "Fig. 4. ROC curves (left) and precision-recall curves (right) on the test weeks; logistic regression and the "
+    f"category rule sit close together, and all precision-recall curves stay near the {pc('test.majority.pr_auc')} base rate.", "96%"),
+f"""
+<p><b>We reject H0 for logistic regression on these four test weeks.</b> Its test ROC-AUC is {ci('logistic')}, and
+it stays above 0.5 when each week is scored separately, ranging from {ow['min']['logistic']:.2f} to {ow['max']['logistic']:.2f}. The
+decision tree's interval also excludes 0.5; that of k-nearest neighbours does not. The bootstrap interval treats rows as independent,
+so the per-week check is the more trustworthy evidence, and four weeks are too few to call the result general (Section 9).</p>
+<p>No model clearly beats the category rule. In cross-validation logistic regression averaged {a2('cv.logistic.roc_auc_mean')} against
+{a2('cv.category.roc_auc_mean')} for the rule, but won only {g('cv.folds_logistic_beats_category')} of the {g('cv.folds')} folds. On the test
+weeks the rule was slightly ahead, and the bootstrap interval for the difference between them includes zero. A logistic model given
+only the three category indicators reaches a test AUC of {a2('ablation.cat_only_test_auc')}, slightly above the full model, so recent price
+movement adds little to knowing what kind of food it is. Even logistic regression finds an abnormal move in only about
+{pc('test.logistic.precision')} of the rows it flags.</p>
+<p>Accuracy is misleading here. The majority class is {pc('test.majority.accuracy')} accurate while catching nothing, and the category
+rule and k-nearest neighbours almost never produce a score above 0.5, so at that threshold they look the same. Balanced class weights
+push logistic regression the other way. At 0.5 it flags {g('test.logistic.flagged_at_05')} rows to catch {g('test.logistic.tp_at_05')} of
+{g('split.test_pos')} abnormal moves. K-nearest neighbours had the best cross-validation mean but the widest spread, and it fell to
+{a2('test.knn.roc_auc')} on test. With about one abnormal row in {g('cost.inverse_base_rate'):.0f}, most small neighbourhoods contain none. The category indicators
+also count as much in the distance as real price changes, and many rows are identical. Only very large neighbourhoods give a usable
+score, and those amount to a smoothed local base rate.</p>
+
+<h2>7. Error costs and diagnostics</h2>
+<p>We have in mind a PBS analyst or a district price control committee deciding where to send inspectors next week. A false negative
+is an abnormal move nobody was warned about. When the move is a jump in tomatoes, onions, flour or ghee, no inspection or public
+notice happens and households absorb it, and households in more deprived districts spend a larger share of their income on food.</p>
+<p>A false positive is an unnecessary inspection or watch-list entry. Each one costs staff time and goodwill with traders, and a
+system whose alerts are mostly wrong soon stops being trusted.</p>
+<p>Following Provost and Fawcett (2013), we give correct decisions zero cost, a false alarm a cost of 1 and a missed move a cost of
+<i>r</i>, placing each cost in one cell only to avoid counting it twice. Flagging a row whose chance of being abnormal is <i>p</i> pays when
+<i>p</i>·<i>r</i> &gt; 1 − <i>p</i>, so for an average row flagging everything beats flagging nothing only once <i>r</i> exceeds about
+{g('cost.flag_all_breakeven_r'):.0f}. The value of <i>r</i> is a judgment for decision-makers, so we vary it. For each <i>r</i> the threshold
+is chosen on the cross-validation predictions and then applied to the test weeks.</p>
+""", html_table(costs, "Table 4. Test cost per 1,000 city-item-weeks, in units of one false alarm, for each cost ratio r (thresholds chosen "
+                "in cross-validation)."),
+f"""
+<p>For <i>r</i> up to 10, issuing no alerts is cheapest. At <i>r</i> = 20 logistic regression and flagging nothing cost the same to the
+nearest unit, and at <i>r</i> = 35 the category rule is cheapest. In these test weeks, alerting pays only when a missed move is judged to
+be worth about 20 or more needless inspections, and even then the simple rule does at least as well. If inspectors can check only the
+50 highest-scoring city-items each week, logistic regression puts {pc('budget.logistic.n50.recall')} of the abnormal moves in front of them,
+with {pc('budget.logistic.n50.precision', 1)} of checks finding one, against {pc('budget.random_precision', 1)} for random checks.</p>
+""", fig("m03r_confusion", "Fig. 5. Test-set confusion matrices in the standard layout (actual class in rows, abnormal first); the cost "
+         "threshold at r = 20 catches most abnormal moves at the price of flagging about half of all rows.", "100%"),
+html_table(errs, "Table 5. Logistic regression errors at the r = 20 threshold by item category and city deprivation tercile."),
+f"""
+<p>Table 5 shows where the errors fall. Branded and packaged goods had no abnormal moves in the test weeks and are never flagged,
+while about {100 * eb['item_category']['perishable']['fp_rate']:.0f}% of normal perishable rows are flagged. More deprived cities receive more
+false alarms and fewer misses than less deprived ones. The error analysis also shows what the model cannot see. Every abnormal move it
+missed at this threshold came after a week with no observed price change. Quetta's broken basmati rice in the last test week is one
+such case, with a flat price followed by a fall beyond the item's usual range. The most confident false alarms are perishables in Sukkur, Bannu
+and Larkana that had just changed price on a single effective quote and then stayed put, such as onions in Larkana. A single shop's
+quote can move without the market moving, which ties model errors to the data-quality gap noted in Section 2. The two earlier test
+weeks had twice the abnormal rate of the August weeks; both fell within two weeks after an Eid holiday (21 March and 27 May 2026;
+APP, 2026), which is a possible but untested explanation.</p>
+
+<h2>8. Drivers and policy implications</h2>
+""", fig("m03r_importance", "Fig. 6. Standardised logistic regression coefficients (left) and decision-tree importance (right); "
+         "item type and recent price movement lead in both models.", "92%"),
+f"""
+<p>Both models put item type first. In the logistic model, a one-SD step towards a branded or packaged item multiplies the odds of an
+abnormal move next week by {g('imp.cat_branded_packaged.odds_ratio'):.2f}, while a price change this week multiplies them by
+{g('imp.price_changed.odds_ratio'):.2f} and being perishable by {g('imp.cat_perishable.odds_ratio'):.2f}. The size of this week's change gets a small
+coefficient because it is correlated with whether the price changed at all, and the two share the credit. The tree uses the same
+two ideas, splitting first on branded or packaged items and then on this week's change. Its four leaves read as rules (Table 6).</p>
+""", html_table(rules_tab, "Table 6. The decision tree's leaves as rules, with each leaf's actual abnormal rate in the training weeks."),
+f"""
+<p>The root split shows how the tree chose. Without weights, separating branded items reduces Gini impurity only from
+{g('gini_example.gini_parent'):.3f} to {g('gini_example.gini_weighted_children'):.3f}, because abnormal rows are so rare. With balanced weights
+the root has a Gini of {g('gini_example.wgini_parent'):.1f}, and the same split lowers it to {g('gini_example.wgini_weighted_children'):.2f}, the
+largest reduction available.</p>
 <ol>
-<li><b>Where to look.</b> Concentrate weekly monitoring on perishables, especially those whose price already moved this week. Branded and packaged
-goods almost never move abnormally.</li>
-<li><b>At most a triage aid, not a trigger.</b> With test AUC around 0.7 and precision around 5%, most alerts will be false. A model score can rank where an
-inspector looks first; it should not trigger stock releases or penalties by itself.</li>
-<li><b>A simple rule already captures most of the signal.</b> "Watch perishables" matched the logistic model on the test weeks. Any data system PBS or a
-province builds should be benchmarked against that rule before it is trusted.</li>
-<li><b>Publish every week.</b> {pct('data.share_no_dlog', 0)} of labelled rows have no previous consecutive week, because the published weekly archive has
-gaps. The moves we miss are exactly those with no visible recent history. Consistent publication of the weekly annexure is a cheap way to improve early warning.</li>
-<li><b>The threshold is a policy choice.</b> Whether alerts are worth issuing depends on how many false alarms one missed shock is worth. Below about 20,
-silence is cheaper. That judgment, and whether to weight misses in deprived districts more, belongs to decision-makers.</li>
-</ol></p>
+<li>Weekly monitoring should concentrate on perishables, especially those whose price moved this week. Branded and packaged goods
+almost never move abnormally.</li>
+<li>A model score is useful for deciding where an inspector looks first. With precision near {pc('test.logistic.precision')}, it should
+never trigger stock releases or penalties on its own.</li>
+<li>Any system PBS or a province builds should first be compared with the simple rule of watching perishables, which matched the
+models here.</li>
+<li>Publishing the weekly annexure every week would itself improve early warning, since {pc('data.share_no_dlog')} of labelled rows have no
+observed previous week and the moves we miss are those without visible recent history.</li>
+</ol>
 
-<h2>10. Limitations and Milestone 04 roadmap</h2>
-<p><b>Limitations.</b>
-<ul>
-<li><b>Sample size.</b> Only {n_('data.positives')} positives over {g('data.labelled_weeks')} labelled weeks. The test set has {g('split.test_pos')}
-positives in four weeks, so every test number has a wide interval.</li>
-<li><b>Intervals and the archive.</b> The bootstrap treats rows as independent, but rows in the same week share shocks, so the true uncertainty is
-larger; the per-week check uses only four weeks. Several diagnostics (costs, alert budget, error breakdown) reuse the same test predictions. PBS archive gaps cost {pct('data.share_no_dlog', 0)} of rows their recent history and limit how many weeks can be labelled.</li>
-<li><b>Signal.</b> Class imbalance and modest signal. KNN is unsuitable for this data. Two tuned settings sit at the edge of their grids
-(C = 0.01, K = 201), which suggests the data favour very smooth models.</li>
-<li><b>Label.</b> The 90th-percentile threshold is a convention. A stricter or looser cut-off would change the base rate and the results (§7).</li>
-<li><b>Context variables.</b> City-level variables (population, deprivation from 2019-20) are constant within a city. Islamabad and Rawalpindi
-function as one market but are scored separately.</li>
-<li><b>Scope.</b> 17 urban SPI cities only, so possible place-based bias in who gets missed (§8.3). The Milestone 02 limitations on coverage,
-deprivation data and measurement still apply.</li>
-</ul></p>
-<p><b>Milestone 04 plan.</b>
-<ul>
-<li><b>Advanced models:</b> random forest and gradient boosting, compared against today's two benchmarks and three baselines under the same
-forward-chaining CV, purge and cost analysis.</li>
-<li><b>Fairness audit (H4):</b> recall, FN rate and calibration compared across province, population tercile and deprivation tercile, with a
-hypothesis test, and including whether the single-quote data-quality flag drives errors.</li>
-<li><b>Thresholds and ethics:</b> group-aware thresholds that equalise miss rates, and their cost. An ethical evaluation of who bears the false
-negatives and the false alarms.</li>
-<li><b>Week 14 new data:</b> the design already committed in Milestones 01-02. First, score the frozen model on the post-cutoff holdout weeks without
-refitting. Then retrain on the earlier part of the new data and test on a later, unseen part.</li>
-</ul></p>
+<h2>9. Limitations and Milestone 04 plan</h2>
+<p>The test set covers four weeks and {g('split.test_pos')} abnormal moves, and rows within a week share shocks, so every test figure has
+wide uncertainty and the bootstrap intervals understate it. All results describe associations, not causes. Deprivation data come from
+2019-20 district totals that include rural areas, population and deprivation are constant within each city, and Islamabad and
+Rawalpindi are scored separately although they form one market. The 90th-percentile label is a convention, the archive gaps limit how
+many weeks can be labelled, and the 17 urban SPI cities do not represent rural markets. The signal is modest throughout.</p>
+<p>Milestone 04 will compare random forests and gradient boosting with today's benchmarks under the same cross-validation and cost
+analysis. It will test H4 by comparing recall, miss rates and calibration across provinces, city sizes and deprivation terciles, and
+will examine whether weighting misses in deprived districts more heavily, or using group-specific thresholds, changes who is
+protected and at what cost. Finally, the frozen model will be scored on the unopened post-cutoff weeks, then retrained on the earlier
+part of the new data and tested on the later part.</p>
 
 <h2>References</h2>
-<p class="note">Pakistan Bureau of Statistics. Weekly Sensitive Price Indicator, Annexure workbooks, weeks ended {N2['panel']['first_week']} to
-{N2['panel']['last_week']}. https://www.pbs.gov.pk/<br/>
+<p class="refs">Associated Press of Pakistan (2026, 19 March). Eid-ul-Fitr on Saturday as Shawwal moon not sighted. app.com.pk.<br/>
+Pakistan Bureau of Statistics. Weekly Sensitive Price Indicator, annexure workbooks, weeks ended {g2('panel.first_week')} to {g2('panel.last_week')}. pbs.gov.pk.<br/>
 Pakistan Bureau of Statistics. Pakistan Social and Living Standards Measurement Survey 2019-20, District Level: Tables 2.14(a), 2.15, 7.1, 9.1.<br/>
-Pakistan Bureau of Statistics. 7th Population and Housing Census 2023 (Digital Census): Table 1, district results.<br/>
-Pakistan Bureau of Statistics. CPI (Urban) Group-wise Cumulative Indices, base 2015-16; Monthly Review on Price Indices, August and September 2026.<br/>
-Provost, F. and Fawcett, T. (2013). <i>Data Science for Business</i>. O'Reilly. Ch. 7 (expected value, cost-benefit matrix) and Ch. 8 (ROC, profit curves).<br/>
-Associated Press of Pakistan (2026, 19 March). Eid-ul-Fitr on Saturday as Shawwal moon not sighted. https://www.app.com.pk/national/eid-ul-fitr-on-saturday-as-shawwal-moon-not-sighted/<br/>
-Radio Pakistan (2026, 17 May). Moon sighted, Eid-ul-Adha to be celebrated on 27 May. https://radio.gov.pk/17-05-2026/moon-sighted-eid-ul-adha-to-be-celebrated-on-27-may<br/>
-Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. <i>Journal of Machine Learning Research</i>, 12, 2825-2830.<br/>
-Wickham, H. (2014). Tidy Data. <i>Journal of Statistical Software</i>, 59(10).<br/>
-Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statistician</i>, 27(1), 17-21.</p>
-
-<h2>Appendix</h2>
-""")
-H.append(html_table(folds_show, "Table A1 (part 1). Forward-chaining folds: weeks, purged rows, and rows and positives after labelling. 'items w/o label' = items with fewer than five non-zero changes in that fold's training rows.", cls="small"))
-H.append(html_table(cvp_show, "Table A1 (part 2). Validation ROC-AUC per fold for the chosen settings.", cls="small"))
-H.append(html_table(at_ref.rename(columns={"threshold": "threshold (from CV)"}), "Table A2. Test metrics at the cost-based threshold for r = 20 (chosen on pooled CV predictions, applied once to test).", cls="small"))
-wk = t("test_auc_by_week").rename(columns={"category": "category rule", "logistic": "logistic", "tree": "tree", "knn": "KNN"})
-H.append(html_table(wk, "Table A3. Test ROC-AUC computed separately for each test week (the dependence check used in §7).", cls="small"))
-bw = t("alert_budget_weekly")
-bw = bw[bw.model.isin(["category", "logistic"])].assign(model=lambda d: d.model.map(LAB))
-bw_show = bw.pivot_table(index=["model", "N_per_week"], columns="week", values="caught").reset_index()
-bw_show.columns = [str(c) for c in bw_show.columns]
-pos_w = t("alert_budget_weekly").drop_duplicates("week").set_index("week").positives
-H.append(html_table(bw_show.rename(columns={"N_per_week": "checks per week"}),
-                    "Table A4. Alert budget per test week: abnormal moves caught (expected count under random tie-breaking) by the category rule and logistic regression. "
-                    "Abnormal moves per week: " + ", ".join(f"{w} {int(v)}" for w, v in pos_w.items()) + ".", cls="small", digits=1))
-H.append("</body></html>")
+Pakistan Bureau of Statistics. 7th Population and Housing Census 2023: Table 1, district results.<br/>
+Pakistan Bureau of Statistics. CPI (Urban) group-wise indices, base 2015-16; Monthly Review on Price Indices, August and September 2026.<br/>
+Pedregosa, F. et al. (2011). Scikit-learn: Machine learning in Python. <i>Journal of Machine Learning Research</i>, 12, 2825-2830.<br/>
+Provost, F. and Fawcett, T. (2013). <i>Data Science for Business</i>. O'Reilly, Chapters 7 and 8.</p>
+</body></html>"""]
 
 doc = "\n".join(H)
+# Prose must not contain code names (identifiers with underscores) or file names.
+prose = re.sub(r"<[^>]+>", " ", re.sub(r"<style>.*?</style>", "", doc, flags=re.S))
+leftovers = sorted(set(re.findall(r"\b\w+_\w+\b", prose)))
+assert not leftovers, f"code names left in the manuscript: {leftovers}"
 out_html = REP / "M03_report.html"
 out_html.write_text(doc, encoding="utf-8")
 print("wrote", out_html)
