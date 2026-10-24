@@ -13,7 +13,8 @@ Leakage rules enforced here (each has an assert):
   2. Label thresholds are fitted on the training rows of each split / fold only.
   3. Purge: a training row at week t whose t+1 week is an evaluation week is dropped.
   4. Scalers and the category base rates are fitted on training rows only (Pipelines / fit()).
-  5. Hyperparameters and decision thresholds are chosen from cross-validation only.
+  5. Hyperparameters and decision thresholds are chosen from cross-validation only, and every CV label
+     (training and validation) ends before the first test week.
 """
 from __future__ import annotations
 
@@ -78,9 +79,9 @@ MODEL_LABEL = {"majority": "Majority class", "category": "Category base-rate rul
                "tree": "Decision tree", "knn": "KNN"}
 MODEL_COLORS = {"majority": "#999999", "category": "#E69F00", "logistic": "#0072B2", "tree": "#009E73", "knn": "#CC79A7"}
 R_VALUES = [1, 5, 10, 20, 35]
-# Reference cost ratio for the confusion matrices and error analysis. It is a value judgment (Section 7). We use the
-# smallest r in R_VALUES at which every model's CV-chosen threshold raises any alerts; at r <= 10 most models' cheapest
-# CV policy is to flag nothing, which leaves no errors of the second kind to analyse.
+# Reference cost ratio for the confusion matrices and error analysis. It is an illustrative value judgment
+# (Section 7), not chosen from the data: at r <= 5 every CV-chosen threshold flags nothing, so there is no trade-off
+# to analyse. Every r in R_VALUES is reported in the cost tables.
 R_REF = 20
 ALERT_N = [10, 25, 50]
 TERCILE_WEIGHT = {"low": 1.0, "mid": 1.5, "high": 2.0}
@@ -187,7 +188,17 @@ def time_split(rows: pd.DataFrame, n_test: int = 4) -> tuple[list, list]:
     return w[:-n_test], w[-n_test:]
 
 
-def forward_chain_folds(train_weeks: list, first: int = 6) -> list[tuple[list, list]]:
+def development_weeks(rows: pd.DataFrame, train_weeks: list, test_weeks: list) -> list:
+    """Training weeks whose label endpoint (t+1) is before the first test week.
+
+    Cross-validation may only use outcomes that end before the test period. The last training week (t = 26 Mar 2026)
+    is labelled from 2 Apr 2026, the first test week, so it cannot serve as a CV validation week either.
+    """
+    nxt = rows.groupby("week_end").next_week.max()
+    return [w for w in train_weeks if nxt[w] < min(test_weeks)]
+
+
+def forward_chain_folds(train_weeks: list, first: int = 5) -> list[tuple[list, list]]:
     """Expanding-window folds: train on weeks 1..k, validate on week k+1, for k = first .. len-1."""
     return [(train_weeks[:k], [train_weeks[k]]) for k in range(first, len(train_weeks))]
 
@@ -322,12 +333,18 @@ def bootstrap_auc(y, scores: dict, reps: int = 2000, seed: int = SEED) -> pd.Dat
 
 
 # ------------------------------------------------------------------ cross-validation and tuning
-def make_fold_data(rows: pd.DataFrame, folds: list, rule: str = "refined") -> list[dict]:
-    """Labels, purge and thresholds are rebuilt inside every fold."""
+def make_fold_data(rows: pd.DataFrame, folds: list, rule: str = "refined", test_start=None) -> list[dict]:
+    """Labels, purge and thresholds are rebuilt inside every fold.
+
+    If test_start is given, every CV row (training and validation) must have its label endpoint before it,
+    so no test-period price can influence tuning or threshold choice.
+    """
     out = []
     for i, (tw, vw) in enumerate(folds, start=1):
         d = split_data(rows, tw, vw, rule)
         assert d["eval"].y.sum() > 0, f"fold {i} has no positives"
+        if test_start is not None:
+            assert d["train"].next_week.max() < test_start and d["eval"].next_week.max() < test_start,                 f"fold {i} uses a label that ends in the test period"
         d["fold"] = i
         out.append(d)
     return out
@@ -389,7 +406,8 @@ def shuffled_label_test(spec: dict, params: dict, train: pd.DataFrame, test: pd.
     """Sanity check: refit on randomly permuted training labels and score the real test labels.
 
     If nothing leaks, these AUCs scatter around 0.5. One shuffle is noisy with ~40 test positives, so we repeat it.
-    The first entry uses seed 42; the share of shuffled AUCs >= the real AUC is a permutation p-value for H3.
+    The first entry uses seed 42. This is a sanity check on the pipeline, not a formal test of H3: rows in the same
+    week are not exchangeable, and tuning is not repeated under the null.
     """
     rng = np.random.default_rng(SEED)
     out = []
@@ -458,29 +476,30 @@ def cost_analysis(cv_pooled: dict, test: pd.DataFrame, test_scores: dict, weight
     return pd.DataFrame(rows)
 
 
-def alert_budget(test: pd.DataFrame, test_scores: dict, ns=ALERT_N) -> pd.DataFrame:
+def alert_budget(test: pd.DataFrame, test_scores: dict, ns=ALERT_N) -> tuple[pd.DataFrame, pd.DataFrame]:
     """If an analyst can check only the top N city-items each week, how many real abnormal moves are caught?
 
     Rows tied at the cut-off score are taken at random, so we report the expected count: the tied block contributes
     (places left / tied rows) x (positives in the tied block). This matters for the category rule, whose scores tie.
+    Returns the pooled table (all test weeks together) and the per-week table.
     """
-    rows = []
+    weekly = []
     for name, s in test_scores.items():
         d = test.assign(score=np.asarray(s))
         for n in ns:
-            caught = pos = 0.0
-            for _, wk in d.groupby("week_end"):
-                sc = wk.score.sort_values(ascending=False)
-                cut = sc.iloc[n - 1]
-                above = wk[wk.score > cut]
-                tied = wk[wk.score == cut]
-                left = n - len(above)
-                caught += above.y.sum() + left / len(tied) * tied.y.sum()
-                pos += wk.y.sum()
-            weeks = d.week_end.nunique()
-            rows.append({"model": name, "N_per_week": n, "caught": caught, "positives": int(pos),
-                         "recall_at_N": caught / pos, "precision_at_N": caught / (n * weeks)})
-    return pd.DataFrame(rows)
+            for wk_end, wk in d.groupby("week_end"):
+                cut = wk.score.sort_values(ascending=False).iloc[n - 1]
+                above, tied = wk[wk.score > cut], wk[wk.score == cut]
+                caught = above.y.sum() + (n - len(above)) / len(tied) * tied.y.sum()
+                weekly.append({"model": name, "N_per_week": n, "week": wk_end.strftime("%Y-%m-%d"), "caught": caught,
+                               "positives": int(wk.y.sum()), "recall_at_N": caught / wk.y.sum() if wk.y.sum() else np.nan,
+                               "precision_at_N": caught / n})
+    weekly = pd.DataFrame(weekly)
+    pooled = weekly.groupby(["model", "N_per_week"], sort=False).agg(caught=("caught", "sum"), positives=("positives", "sum"),
+                                                                     weeks=("week", "nunique")).reset_index()
+    pooled["recall_at_N"] = pooled.caught / pooled.positives
+    pooled["precision_at_N"] = pooled.caught / (pooled.N_per_week * pooled.weeks)
+    return pooled.drop(columns="weeks"), weekly
 
 
 # ------------------------------------------------------------------ error analysis and importance
@@ -659,7 +678,12 @@ def fig_roc_pr(y, test_scores: dict, base_rate: float):
 def fig_confusion(cms: list[tuple[str, dict]]):
     """2 x 2 matrices in the Unit 10 layout: actual in rows, predicted in columns, positive class first."""
     style()
-    fig, axes = plt.subplots(1, len(cms), figsize=(2.3 * len(cms), 2.5))
+    ncol = 3
+    nrow = int(np.ceil(len(cms) / ncol))
+    fig, axes = plt.subplots(nrow, ncol, figsize=(7.4, 2.45 * nrow))
+    axes = axes.ravel()
+    for ax in axes[len(cms):]:
+        ax.set_visible(False)
     for ax, (title, m) in zip(axes, cms):
         mat = np.array([[m["tp"], m["fn"]], [m["fp"], m["tn"]]])
         rowpct = mat / mat.sum(axis=1, keepdims=True)
@@ -739,7 +763,9 @@ def run_all(write: bool = True) -> dict:
     put("data.share_price_changed", allw.price_changed.mean())
 
     train_weeks, test_weeks = time_split(rows)
-    folds = forward_chain_folds(train_weeks)
+    dev_weeks = development_weeks(rows, train_weeks, test_weeks)
+    folds = forward_chain_folds(dev_weeks)
+    put("cv.dev_weeks", len(dev_weeks)); put("cv.dev_last", str(dev_weeks[-1])[:10])
     final = split_data(rows, train_weeks, test_weeks)
     train, test = final["train"], final["eval"]
     put("split.train_weeks", len(train_weeks)); put("split.test_weeks", len(test_weeks))
@@ -766,7 +792,7 @@ def run_all(write: bool = True) -> dict:
     per_week["week_end"] = per_week.week_end.dt.strftime("%Y-%m-%d")
 
     # Forward-chaining CV folds (labels, purge and thresholds rebuilt in each).
-    fold_data = make_fold_data(rows, folds)
+    fold_data = make_fold_data(rows, folds, test_start=min(test_weeks))
     fold_tab = pd.DataFrame([{"fold": d["fold"], "train_weeks": f"{str(d['train_weeks'][0])[:10]} to {str(d['train_weeks'][-1])[:10]}",
                               "n_train_weeks": len(d["train_weeks"]), "val_week": str(d["eval_weeks"][0])[:10],
                               "purged_rows": d["n_purged"], "train_rows": len(d["train"]),
@@ -821,6 +847,20 @@ def run_all(write: bool = True) -> dict:
         put(f"test.{name}.flagged_at_05", te["flagged"]); put(f"test.{name}.tp_at_05", te["tp"]); put(f"test.{name}.fp_at_05", te["fp"]); put(f"test.{name}.reject_h0", bool(lo > 0.5))
         main_rows.append(row)
     main = pd.DataFrame(main_rows)
+    # Dependence check: rows in one week share shocks, so also look at each test week on its own.
+    wk_auc = []
+    for wk_end, idx in test.groupby("week_end").groups.items():
+        yy = test.y.loc[idx]
+        row = {"week": wk_end.strftime("%Y-%m-%d"), "rows": len(idx), "positives": int(yy.sum())}
+        for name in ["category", "logistic", "tree", "knn"]:
+            row[name] = roc_auc_score(yy, pd.Series(test_scores[name], index=test.index).loc[idx])
+            put(f"test_week.{row['week']}.{name}", row[name])
+        wk_auc.append(row)
+    wk_auc = pd.DataFrame(wk_auc)
+    for name in ["category", "logistic", "tree", "knn"]:
+        put(f"test_week.n_above_05.{name}", int((wk_auc[name] > 0.5).sum()))
+        put(f"test_week.min.{name}", wk_auc[name].min()); put(f"test_week.max.{name}", wk_auc[name].max())
+    put("test_week.n_logistic_beats_category", int((wk_auc.logistic > wk_auc.category).sum()))
     diff = boots["logistic"] - boots["category"]
     put("test.diff_logistic_minus_category", roc_auc_score(test.y, test_scores["logistic"]) - roc_auc_score(test.y, test_scores["category"]))
     put("test.diff_logistic_minus_category_ci_lo", np.percentile(diff, 2.5))
@@ -845,7 +885,8 @@ def run_all(write: bool = True) -> dict:
     put("leak.shuffled_label_test_auc", perm[0]); put("leak.shuffled_reps", len(perm))
     put("leak.shuffled_mean", perm.mean()); put("leak.shuffled_sd", perm.std(ddof=1))
     put("leak.shuffled_p05", np.percentile(perm, 5)); put("leak.shuffled_p95", np.percentile(perm, 95))
-    put("leak.shuffled_share_ge_real", (perm >= N["test"]["logistic"]["roc_auc"]).mean())
+    b = int((perm >= N["test"]["logistic"]["roc_auc"]).sum())
+    put("leak.shuffled_n_ge_real", b); put("leak.shuffled_mc_p", (b + 1) / (len(perm) + 1))  # Monte Carlo (b+1)/(B+1)
     assert abs(perm.mean() - 0.5) < 0.03, "shuffled labels still predict on average: something leaks"
     # Transparency: what the purge costs. Same model, trained without dropping the purged week.
     nopurge_train, _ = make_labels(rows[rows.week_end.isin(train_weeks)], rows[rows.week_end.isin(train_weeks)])
@@ -887,6 +928,7 @@ def run_all(write: bool = True) -> dict:
         sub = costs[(costs.r == r) & costs.policy.isin(["category", "logistic", "tree", "knn", "flag_nothing", "flag_everything"])]
         put(f"cost.r{r}.cheapest", sub.loc[sub.test_cost_per_1000.idxmin(), "policy"])
     put("cost.inverse_base_rate", 1 / train.y.mean())
+    put("cost.flag_all_breakeven_r", (1 - train.y.mean()) / train.y.mean())  # flag everything beats flag nothing when r > (1-p)/p
     put("cost.r_ref", R_REF)
     for r in [10, 20, 35]:
         sub = costs_eq[costs_eq.r == r]
@@ -908,7 +950,7 @@ def run_all(write: bool = True) -> dict:
     at_ref = pd.DataFrame(at_ref)
 
     # Alert budget.
-    budget = alert_budget(test, {k: test_scores[k] for k in ["category", "logistic", "tree", "knn"]})
+    budget, budget_weekly = alert_budget(test, {k: test_scores[k] for k in ["category", "logistic", "tree", "knn"]})
     for r_ in budget.itertuples():
         put(f"budget.{r_.model}.n{r_.N_per_week}.recall", r_.recall_at_N)
         put(f"budget.{r_.model}.n{r_.N_per_week}.precision", r_.precision_at_N)
@@ -916,10 +958,10 @@ def run_all(write: bool = True) -> dict:
     put("budget.test_positives", int(test.y.sum()))
     put("budget.random_precision", test.y.mean())
 
-    # Confusion matrices: logistic / tree / KNN at 0.5 and at the r = R_REF threshold, plus the majority class.
-    cms = [("Majority class", evaluate(test.y, test_scores["majority"], 0.5))]
+    # Confusion matrices: every scoring model at 0.5 and at the r = R_REF threshold, plus the majority class.
+    cms = [("Majority class\n(flags nothing)", evaluate(test.y, test_scores["majority"], 0.5))]
     cm_rows = []
-    for name in ["logistic", "tree", "knn"]:
+    for name in ["category", "logistic", "tree", "knn"]:
         for lab, t in [("threshold 0.5", 0.5), (f"cost threshold, r = {R_REF}", ref_thr[name])]:
             m_ = evaluate(test.y, test_scores[name], t)
             cms.append((f"{MODEL_LABEL[name]}\n{lab} ({t:.2f})", m_))
@@ -968,8 +1010,8 @@ def run_all(write: bool = True) -> dict:
     out = {"rows": rows, "train": train, "test": test, "final": final, "folds": folds, "fold_data": fold_data,
            "fold_tab": fold_tab, "card": card, "per_week": per_week, "specs": specs, "tuning": tuning, "chosen": chosen,
            "cv_per": cv_per, "cv_pool": cv_pool, "per_fold": per_fold, "fitted": fitted, "test_scores": test_scores,
-           "main": main, "boots": boots, "random_kfold": rk, "ablation": ablation, "costs": costs, "costs_eq": costs_eq,
-           "ref_thr": ref_thr, "at_ref": at_ref, "budget": budget, "cm_tab": cm_tab, "cms": cms, "errors": errs,
+           "main": main, "wk_auc": wk_auc, "boots": boots, "random_kfold": rk, "ablation": ablation, "costs": costs, "costs_eq": costs_eq,
+           "ref_thr": ref_thr, "at_ref": at_ref, "budget": budget, "budget_weekly": budget_weekly, "cm_tab": cm_tab, "cms": cms, "errors": errs,
            "fn_cases": fn_cases, "fp_cases": fp_cases, "importance": imp, "rules": rules, "rules_text": rules_text,
            "gini_example": gex, "train_weeks": train_weeks, "test_weeks": test_weeks, "shuffled_aucs": perm}
     if write:
@@ -983,9 +1025,9 @@ def write_outputs(o: dict):
     for name, t in o["tuning"].items():
         if len(t) > 1:
             save_table(t, f"tuning_{name}")
-    save_table(o["per_fold"], "cv_per_fold"); save_table(o["main"], "metrics_main"); save_table(o["random_kfold"], "random_kfold")
+    save_table(o["per_fold"], "cv_per_fold"); save_table(o["main"], "metrics_main"); save_table(o["wk_auc"], "test_auc_by_week"); save_table(o["random_kfold"], "random_kfold")
     save_table(o["ablation"], "ablation"); save_table(o["costs"], "costs"); save_table(o["costs_eq"], "costs_equity")
-    save_table(o["at_ref"], "metrics_at_cost_threshold"); save_table(o["budget"], "alert_budget")
+    save_table(o["at_ref"], "metrics_at_cost_threshold"); save_table(o["budget"], "alert_budget"); save_table(o["budget_weekly"], "alert_budget_weekly")
     save_table(o["cm_tab"], "confusion_matrices"); save_table(o["errors"], "error_breakdown")
     save_table(o["fn_cases"], "edge_false_negatives"); save_table(o["fp_cases"], "edge_false_positives")
     save_table(o["importance"], "importance"); save_table(o["rules"], "tree_rules")
@@ -995,7 +1037,7 @@ def write_outputs(o: dict):
     fig_design(o["rows"], o["train_weeks"], o["test_weeks"], o["folds"], o["final"]["purged_weeks"])
     fig_tuning(o["tuning"])
     fig_roc_pr(o["test"].y, o["test_scores"], o["test"].y.mean())
-    fig_confusion([c for c in o["cms"] if c[0] == "Majority class" or "Logistic" in c[0] or "tree" in c[0]])
+    fig_confusion(o["cms"])
     fig_costs(o["costs"])
     fig_importance(o["importance"])
     fig_tree(o["fitted"]["tree"], FEATURES)

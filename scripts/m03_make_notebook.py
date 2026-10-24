@@ -174,23 +174,30 @@ as abnormal. The label is now defined only by the past, as it would be in real u
 
 md("""
 ### B.2 Forward-chaining ("expanding-window") cross-validation
-Inside the 11 training weeks: fold 1 trains on labelled weeks 1–6 and validates on week 7, fold 2 trains on weeks 1–7
-and validates on week 8, and so on: **5 folds**. Each fold re-fits label thresholds, scaler and model on its own
-training weeks and applies the purge rule. Each validation week has only 16–26 positives, so fold-to-fold variance
-will be large. We report the mean ± SD.
+**Outer boundary first.** Cross-validation may only use labels that end before the test period. The last training
+week (26 Mar 2026) is labelled from 2 Apr 2026, a test week, so it is not used as a CV week at all. That leaves 10
+development weeks (17 Jul to 18 Dec 2025).
+
+Within them: fold 1 trains on labelled weeks 1–5 and validates on week 6, fold 2 trains on weeks 1–6 and validates on
+week 7, and so on: **5 folds**. Each fold re-fits label thresholds, scaler and model on its own training weeks and
+applies the purge rule. Each validation week has only 16–28 positives, so fold-to-fold variance will be large. We
+report the mean ± SD.
 """)
 code("""
-folds = model.forward_chain_folds(train_weeks)
-fold_data = model.make_fold_data(rows, folds)
-for d in fold_data:  # leakage asserts per fold
+dev_weeks = model.development_weeks(rows, train_weeks, test_weeks)
+print("development weeks for CV:", [str(w)[:10] for w in dev_weeks])
+folds = model.forward_chain_folds(dev_weeks)
+fold_data = model.make_fold_data(rows, folds, test_start=min(test_weeks))
+for d in fold_data:  # leakage asserts per fold, including the outer test boundary
     assert d["train"].week_end.max() < min(d["eval_weeks"]) and not d["train"].next_week.isin(d["eval_weeks"]).any()
+    assert d["train"].next_week.max() < min(test_weeks) and d["eval"].next_week.max() < min(test_weeks)
 display(Image(model.fig_design(rows, train_weeks, test_weeks, folds, final["purged_weeks"])))
 """)
 
 md("""
 ### B.3 Run everything
-`run_all` performs the whole pipeline with exactly the folds and split shown above: tuning, CV, the single
-test-set scoring, leakage checks, costs, errors and importance. It also writes all tables, figures and the numbers
+`run_all` performs the whole pipeline with exactly the folds and split shown above: tuning, CV, one final
+test-set evaluation of each fixed model (several pre-declared diagnostics below also read the test set), leakage checks, costs, errors and importance. It also writes all tables, figures and the numbers
 JSON. It takes about two minutes. The cells after it display and explain each piece.
 """)
 code("""
@@ -236,8 +243,9 @@ md("""
 ### B.6 Leakage demonstration: random K-fold is over-optimistic here
 We repeat CV for the chosen logistic model with ordinary `StratifiedKFold(5, shuffle=True, random_state=42)` on the
 training rows. Random folds put later weeks of the same city-item series into training and earlier weeks into
-validation, so the model "knows" about periods it is validated on. The gap below is the optimism that a random
-split would have reported.
+validation, so the model "knows" about periods it is validated on. The gap below is a comparison, not a controlled
+measurement of leakage: the two schemes also differ in training size and in how labels are fitted. It is still the
+direction we expected: random folds look better than time-ordered ones.
 """)
 code("""
 print(f"random stratified 5-fold AUC: {N['leak']['random_kfold_auc_mean']:.3f} ± {N['leak']['random_kfold_auc_sd']:.3f}")
@@ -249,25 +257,29 @@ md("""
 ### B.7 Sanity check: shuffled training labels
 We refit the final logistic model on randomly permuted training labels and score the real test labels. If nothing
 leaks, AUC should sit near 0.5. One shuffle is noisy with only 54 test positives, so we repeat it 200 times.
-The first shuffle uses seed 42. The share of shuffled AUCs that reach the real AUC is also a permutation p-value
-for H3.
+The first shuffle uses seed 42. This is a **sanity check on the pipeline**, not a formal test of H3: rows from the
+same week are not exchangeable, and tuning is not repeated under the null. It also cannot detect every kind of
+leakage (it would not have caught the CV boundary problem fixed in B.2).
 """)
 code("""
 pa = o["shuffled_aucs"]
 print(f"seed-42 shuffle AUC {pa[0]:.3f}; mean over {len(pa)} shuffles {pa.mean():.3f} (SD {pa.std(ddof=1):.3f}); "
       f"5th-95th percentile {np.percentile(pa, 5):.3f}-{np.percentile(pa, 95):.3f}")
-print(f"real logistic test AUC {N['test']['logistic']['roc_auc']:.3f}; share of shuffles >= real: {N['leak']['shuffled_share_ge_real']:.3f}")
+print(f"real logistic test AUC {N['test']['logistic']['roc_auc']:.3f}; shuffles reaching it: {N['leak']['shuffled_n_ge_real']} of {len(pa)}")
 assert abs(pa.mean() - 0.5) < 0.03
 """)
 
 md("""
 ## Part C. Metrics, asymmetric costs and confusion matrices
 
-### C.1 Main metrics: CV (mean ± SD over 5 folds) and test (scored once)
-Threshold 0.5 for the threshold-based metrics. **PR-AUC** matters here because, with 3% positives, ROC-AUC can look
+### C.1 Main metrics: CV (mean ± SD over 5 folds) and test (one final evaluation per fixed model)
+Threshold 0.5 for the threshold-based metrics. **PR-AUC** (computed as sklearn's average precision, a step-wise
+estimate of the area under the PR curve) matters here because, with 3% positives, ROC-AUC can look
 decent while precision stays tiny. A random model's PR-AUC equals the base rate (0.03), so compare against that, not
 against 0.5. The **bootstrap 95% CI** for test ROC-AUC uses 2,000 resamples of test rows (seed 42). If its lower
-bound is above 0.5, we reject H0 for that model.
+bound is above 0.5, we reject H0 for that model, **conditionally**: the bootstrap treats rows as independent,
+but rows in the same week share shocks, so the intervals are too narrow. We therefore also look at each test week
+on its own.
 """)
 code("""
 mm = o["main"].set_index("model")
@@ -279,19 +291,23 @@ mm["test ROC-AUC [95% CI]"] = mm.test_roc_auc.map("{:.3f}".format) + " [" + mm.t
 display(mm[cols])
 display(mm[["test_accuracy", "test_precision", "test_recall", "test_specificity", "test_f1", "test ROC-AUC [95% CI]", "test_pr_auc", "test_flagged_at_0.5"]].round(3))
 """)
-code("""display(Image(model.FIGURES / "fig17_roc_pr.png"))""")
+code("""display(Image(model.FIGURES / "fig17_roc_pr.png")); o["wk_auc"].round(3)""")
 code("""
 t = N["test"]
 print(f"logistic minus category test AUC: {t['diff_logistic_minus_category']:.3f}, paired bootstrap 95% CI "
       f"[{t['diff_logistic_minus_category_ci_lo']:.3f}, {t['diff_logistic_minus_category_ci_hi']:.3f}]")
 print("folds where logistic beats the category rule:", N["cv"]["folds_logistic_beats_category"], "of", N["cv"]["folds"])
-print("H3 rejected for", N["h3"]["n_models_reject"], "of 3 ML models (CI lower bound > 0.5)")
+print("row-bootstrap CI above 0.5 for", N["h3"]["n_models_reject"], "of 3 ML models")
+print("test weeks with AUC > 0.5:", N["test_week"]["n_above_05"])
 """)
 md("""
 **Reading the table.**
-* *Accuracy.* The majority class is about 97% accurate and catches nothing. The category rule and KNN never produce
-  a score of 0.5 or more, so at that threshold they also flag nothing.
-* *H3.* All three ML models have a test ROC-AUC confidence interval above 0.5, so H0 is rejected.
+* *Accuracy.* The majority class is about 97% accurate and catches nothing. The category rule never produces a score
+  of 0.5 or more, and KNN almost never does, so at that threshold they flag (almost) nothing.
+* *H3.* Logistic regression and the tree have a row-bootstrap CI above 0.5; KNN's CI includes 0.5. Logistic
+  regression is above 0.5 in each of the four test weeks taken separately. We reject H0 for logistic regression in
+  these test weeks. Because there are only four weeks, this is evidence of a modest signal, not an established
+  general result.
 * *The simple rule.* The **category base-rate rule is as good as logistic regression on the test set**: their
   difference has a confidence interval spanning 0. On average across CV folds, logistic regression was ahead.
 * *Practical lesson.* Most of the usable signal is "what kind of food is it". Recent price movement adds a little
@@ -329,8 +345,8 @@ send inspectors or which items to watch next week.
 
 *r* is a value judgment made by people, not something the data decides, so we run a sensitivity analysis over
 *r* ∈ {1, 5, 10, 20, 35}. **Intuition.** Flagging a row with probability *p* of being abnormal is worth it when
-*p*·*r* > (1 − *p*), i.e. when *p* > 1/(1 + *r*). With a base rate near 3%, an average row passes that test only when
-*r* is about 32 or more, roughly the inverse base rate. So around *r* ≈ 35 "flag everything" starts to look rational.
+*p*·*r* > (1 − *p*), i.e. when *p* > 1/(1 + *r*). For an average row (*p* = the training base rate, 2.96%), "flag
+everything" beats "flag nothing" exactly when *r* > (1 − *p*)/*p* ≈ 32.8, close to the inverse base rate.
 
 **Procedure.** For each *r*, we pick each model's threshold to minimise cost on the **pooled CV out-of-fold
 predictions**, then apply that threshold to the test set once.
@@ -343,16 +359,18 @@ display(Image(model.FIGURES / "fig19_costs.png"))
 """)
 md("""
 **Reading the cost results.**
-* *r ≤ 10.* The cheapest policy is to **flag nothing**: no model is confident enough. At *r* = 10 the logistic
-  model's CV threshold flags a few rows, and on test that costs slightly more than flagging nothing.
-* *r = 20.* Logistic regression and "flag nothing" cost about the same.
-* *r = 35.* Logistic regression is the cheapest policy.
+* *r ≤ 10.* In these test weeks, the cheapest policy is to **flag nothing**. At *r* = 10 the ML models' CV
+  thresholds flag some rows, and on test that costs more than staying silent.
+* *r = 20.* Logistic regression and "flag nothing" are essentially tied.
+* *r = 35.* The **category rule** (flag perishables) is the cheapest policy, ahead of logistic regression; flagging
+  everything is costlier still.
 
-So the model only pays off if a missed shock is judged to cost roughly 20 or more false alarms. Whoever deploys it
-has to make that call; we cannot.
+So, in these test weeks, no model beats the simple rule on cost, and alerts only pay off at all when a missed shock
+is judged to cost roughly 20 or more false alarms. The 20, 35 and so on are points we chose to try, not a measured
+break-even. Whoever deploys the system has to make that call; we cannot.
 """)
 code("""
-print("Metrics at the cost-based threshold, r =", model.R_REF, "(threshold chosen on CV, applied to test)")
+print("Metrics at the cost-based threshold, r =", model.R_REF, "(an illustrative value; threshold chosen on CV, applied to test)")
 o["at_ref"].round(3)
 """)
 
@@ -362,7 +380,7 @@ An analyst can check only the top *N* of the roughly 456 city-items each week. H
 each model put in front of them? The category rule gives tied scores, so we report the expected count under random
 tie-breaking.
 """)
-code("""o["budget"].round(3)""")
+code("""display(o["budget"].round(3)); o["budget_weekly"].round(3)""")
 
 md("""
 ### C.4 Equity weighting (preview of the M04 fairness audit)
@@ -398,9 +416,10 @@ md("""
   records with one effective quote (`single_quote = 1`) whose price changed this week and then stayed put. A single
   quote that jumps may be noise in one shop rather than a market move. That links to the H4 data-quality concern.
 * *Event timing (unverified).* The two earlier test weeks (2 Apr and 4 Jun 2026) have about twice the base rate of
-  the two August weeks. Each falls within about two weeks of an Eid holiday: Eid al-Fitr is expected around
-  20 March 2026 and Eid al-Adha around 27 May 2026. Post-festival price adjustment is **one possible explanation,
-  which we have not tested**.
+  the two August weeks. The 2 Apr week comes about 12 days after Eid-ul-Fitr (observed in Pakistan on 21 March
+  2026), and the 4 Jun week about a week after Eid-ul-Adha (27 May 2026). Post-festival price adjustment is **one
+  possible explanation, which we have not tested**. The dates alone are not evidence of a holiday effect, and some
+  abnormal moves are price falls, not rises.
 """)
 
 md("""

@@ -9,7 +9,11 @@ Likely questions for the 5-minute viva, with short answers in plain words. "NB" 
 One row is one city × food item × week *t*. `y = 1` if the price moves "abnormally" between week *t* and the next
 weekly release *t+1*. Abnormal means the absolute log change is bigger than that item's own 90th percentile of
 non-zero changes in the training weeks. The positive class is the abnormal move, because that is what a price
-monitor wants to catch. 7,095 labelled rows, 205 abnormal (2.9%).
+monitor wants to catch.
+- **Description:** with whole-period thresholds there are 7,095 labelled rows, 205 abnormal (2.9%). This is for
+  description only.
+- **Fitted sample:** the models use 4,560 training rows and 1,824 test rows (6,384 in total). Thresholds there are
+  fitted on training rows only, which leaves 5 items unlabelled instead of 4, and the purged week is removed.
 *NB 0.3; `make_labels`, `build_features`.*
 
 **2. Why the 90th percentile of non-zero changes and not of all changes?**
@@ -27,21 +31,28 @@ followed by gaps in PBS's published archive. That is a limit of the data source,
 The rows are a panel: the same city-item series recurs every week, and items in the same week share shocks. Random
 folds train on later weeks to predict earlier ones, which can never happen in real use, and they let the model learn
 week-specific shocks seen on both sides. We use forward chaining: train on weeks 1..k, validate on week k+1, for
-5 folds. We measured the difference: random stratified 5-fold gives AUC 0.710, forward chaining 0.637. The 0.07
-gap is the over-optimism.
+5 folds. We compared the two: random stratified 5-fold gives AUC 0.710, forward chaining 0.641. That gap points
+the way we expected. It is a comparison, not a clean measurement of leakage, because the two schemes also differ
+in training size and label fitting.
 *NB B.2 and B.6; `forward_chain_folds`, `random_kfold_auc`.*
 
 **5. The brief asks for stratified sampling. Did you ignore it?**
 No. Stratification exists to keep the rare class present in every part. We keep time order and achieve that goal
-differently. Every validation week has positives (16-26), and the test set has 54. Both logistic regression and
-the tree use `class_weight="balanced"`. A random stratified split would break time order, which matters more here.
+differently. Every validation week has positives (16-28), and the test set has 54. Logistic regression and the
+tree also use `class_weight="balanced"`. Class weights change what the model optimises; they are not the same as
+stratifying, which is why we check the positive counts. A random stratified split would break time order, which
+matters more here.
 *NB B.1; `make_fold_data` asserts each fold has positives.*
 
 **6. What does the purge rule do?**
 A training row at week *t* gets its label from week *t+1*. If *t+1* is a validation or test week, that label is
 built from evaluation-period prices, so we drop the row. In the final split, the last training week (26 Mar 2026)
 is followed by the first test week (2 Apr 2026), so its 541 rows are purged and the final model learns from 10
-weeks. Three of the five CV folds also lose their last training week.
+weeks. Four of the five CV folds also lose their last training week.
+**Outer boundary (fixed after review).** For the same reason, that week cannot be a CV *validation* week either:
+its labels come from a test-week price. Our first version used it as fold 5, so test-period prices shaped tuning
+and threshold choice. Codex's review caught this. CV now uses only the 10 development weeks whose *t+1* is before
+the test period, and `make_fold_data` asserts it.
 *NB B.1; `split_data`.*
 
 **7. Why are the label thresholds refitted in every fold?**
@@ -89,13 +100,15 @@ associations, not causes.
 
 **13. Why does KNN need scaling, and why did it do badly?**
 KNN uses distances, so a feature with a large range (like the within-city range in %) would dominate a 0/1 dummy.
-Min-max scaling puts every feature on 0-1, and the scaler is fitted on training rows only, inside the `Pipeline`.
+Min-max scaling puts every feature on 0-1 *for the training rows*; it is fitted on training rows only, inside
+the `Pipeline`, so test values can fall slightly outside 0-1.
 It still struggles because:
 - with 3% positives, most small neighbourhoods contain no abnormal row, so the vote is 0;
 - dummies count as much as real price changes, and irrelevant features add noise;
 - many rows are identical, which produces ties.
 
-AUC kept rising up to K = 201, the edge of the grid, where KNN is just a smoothed local base rate. Test AUC 0.599.
+AUC kept rising up to K = 201, the edge of the grid, where KNN is just a smoothed local base rate. Test AUC 0.561,
+and its CI includes 0.5.
 *NB B.4; `make_models`.*
 
 **14. How did you choose the decision threshold, and why not 0.5?**
@@ -106,31 +119,43 @@ applied it to the test set once.
 
 **15. What is r and who should decide it?**
 r is how many false alarms one missed abnormal move is worth. It is a value judgment, so we show r = 1, 5, 10, 20
-and 35. Flagging a row is worth it when p > 1/(1 + r), and with a 3% base rate an average row passes only when r is
-about 34 (the inverse base rate). Our results:
+and 35. Flagging a row is worth it when p > 1/(1 + r). For an average row (p = 2.96%), "flag everything" beats
+"flag nothing" exactly when r > (1 − p)/p ≈ 32.8. Our results, in these test weeks:
 - for r ≤ 10, flagging nothing is cheapest;
-- at r = 20, logistic regression and flagging nothing cost about the same;
-- at r = 35, logistic regression is cheapest.
+- at r = 20, logistic regression and flagging nothing are essentially tied (591.6 vs 592.1 per 1,000);
+- at r = 35, the category rule is cheapest.
+
+r = 20 is used in the confusion matrices only as an illustrative reference.
 
 A ministry or price committee should set r, not the analysts.
 *NB C.2; Table 14 of the report.*
 
 **16. Did any ML model beat the simple category rule?**
-Not convincingly. In CV, logistic regression is ahead on average (0.637 vs 0.596, 4 of 5 folds). On test, the rule
-is slightly ahead (0.708 vs 0.692), and the paired bootstrap difference CI (−0.074 to 0.041) includes 0. The
-practical lesson: most of the signal is "what kind of food is it". The ablation shows the same.
+Not convincingly. In CV, logistic regression is ahead on average (0.641 vs 0.617), but only in 3 of 5 folds. On
+test, the rule is slightly ahead (0.708 vs 0.692), and the paired bootstrap difference CI (−0.074 to 0.041)
+includes 0. On cost, the rule is also the cheapest policy at r = 35. The practical lesson: most of the signal is
+"what kind of food is it". The ablation shows the same.
 *NB C.1.*
 
 **17. Is H3 rejected?**
-Yes. The bootstrap 95% CI for test ROC-AUC is above 0.5 for all three ML models: logistic 0.636-0.746, tree
-0.576-0.650, KNN 0.529-0.665. In the permutation check, none of 200 shuffled-label models reached the real AUC.
-Caveat: rows in the same week are not independent, so these intervals are probably too narrow.
+Yes, for logistic regression in these test weeks, with a caveat.
+- **Bootstrap:** the row-level 95% CI for test ROC-AUC is above 0.5 for logistic regression (0.636-0.746) and the
+  tree (0.576-0.650), but not for KNN (0.487-0.636).
+- **Why that is not enough:** the bootstrap treats rows as independent, and rows in the same week share shocks, so
+  these intervals are too narrow.
+- **Per-week check:** scored week by week, logistic regression is above 0.5 in all 4 test weeks (0.54-0.75).
+
+Four weeks is evidence of a modest signal, not an established general result. The Week 14 holdout is the next
+test. The shuffled-label check is a sanity check on the pipeline, not a formal test of H3.
 *NB C.1 and B.7; `bootstrap_auc`.*
 
 **18. What does the shuffled-label test prove?**
 If we destroy the link between features and labels and still get AUC above 0.5, something outside the features
 must be leaking the answer. Over 200 shuffles, the mean test AUC is 0.503. A single shuffle varies a lot (the
 seed-42 one gave 0.583), because the test set has only 54 positives, which is why we repeat it.
+What it does *not* prove: that nothing leaks. It passed even while the CV boundary problem (Q6) was present,
+because that problem affected model selection, not the test labels. It is also not a formal p-value for H3. If
+quoted as a Monte Carlo p, use (0 + 1)/(200 + 1) ≈ 0.005, never 0.
 *NB B.7; `shuffled_label_test`.*
 
 **19. How did you extract feature importance?**
@@ -155,5 +180,10 @@ Every M03 script asserts that no week after 24 Sep 2026 is used.
 **Quick facts:**
 - train 4,560 rows / 135 positives; test 1,824 rows / 54 positives
 - base rate 2.96% in both
-- chosen settings: logistic C = 0.01; tree Gini, depth 2, leaf 60; KNN K = 201, uniform, Manhattan, all features
+- CV uses 10 development weeks, 5 folds
+- chosen settings: logistic C = 0.01; tree Gini, depth 2, leaf 60; KNN K = 201, distance-weighted, Manhattan, all
+  features
+- "PR-AUC" is sklearn's average precision, a step-wise estimate of the area under the PR curve
+- Eid-ul-Fitr was observed in Pakistan on 21 March 2026 and Eid-ul-Adha on 27 May 2026; any holiday link to the test
+  weeks is an untested hypothesis
 - every missed abnormal move at the r = 20 threshold had a flat or unobserved price at week *t*

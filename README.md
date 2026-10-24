@@ -38,13 +38,15 @@ sklearn `Pipeline`s; hyperparameters and cost thresholds come from cross-validat
 
 ```bash
 pip install -r requirements.txt
-python scripts/m03_models.py          # about 2 minutes; writes reports/m03/{m03_numbers.json,tables/,figures/}
+python scripts/m03_models.py          # about 1-2 minutes; writes reports/m03/{m03_numbers.json,tables/,figures/}
 python scripts/m03_make_notebook.py
 cd notebooks && jupyter nbconvert --to notebook --execute --inplace M03_baseline_models.ipynb && cd ..
 python scripts/m03_report.py          # needs reports/m02/M02_report.html; PDF via headless Microsoft Edge if present
 ```
 
-Outputs are byte-identical across runs (seed 42 throughout). Milestone 03 reads only `data/processed/m02/master_city_item_week.parquet`.
+Outputs are byte-identical across reruns in the same environment (seed 42 throughout); PNG bytes may differ across machines. Milestone 03
+reads only `data/processed/m02/master_city_item_week.parquet`. Tested with Python 3.12.3, pandas 3.0.5, numpy 2.5.2, scikit-learn 1.9.1,
+matplotlib 3.11.2 and nbformat 5.11.1 on Windows 10. The PDF step uses headless Microsoft Edge; without it, open the HTML and print to PDF.
 
 ## Milestone 02 deliverables (branch `milestone-02`)
 

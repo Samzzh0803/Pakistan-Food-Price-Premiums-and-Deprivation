@@ -37,10 +37,12 @@ are negatively rank-correlated with district deprivation. Milestone 03 asks whet
 using only what is known in week <i>t</i>, can we flag the city-item prices that will move abnormally by week <i>t</i>+1? Abnormal means a
 change above the item's own 90th percentile of non-zero changes, fitted on training weeks only. On 7,095 labelled rows
 (205 abnormal, 2.9%) we compare two naive benchmarks with logistic regression, a decision tree and KNN.
-We use a time-ordered split and forward-chaining cross-validation with purging. On the four held-out weeks, logistic regression reaches ROC-AUC
-0.692 [0.636, 0.746] against 0.5 for chance, so we reject H3's null. But a one-line rule that scores each item by its category's past abnormal rate does as
-well (0.708 [0.659, 0.753]), and precision stays near 5%. The models are useful as a <b>triage aid</b>, not
-an automatic trigger. A cost analysis shows alerts pay off only if a missed shock is judged to cost about 20 or more false alarms.</div>
+We use a time-ordered split and forward-chaining cross-validation that never uses a label from the test period. On the four held-out weeks,
+logistic regression reaches ROC-AUC 0.692 [0.636, 0.746] (row-level bootstrap), and it is above 0.5 in each test week. We reject H3's null for these
+weeks, while noting that four weeks cannot establish a general result. A one-line rule that scores each item by its category's past abnormal rate
+does as well (0.708 [0.659, 0.753]), and it is also the cheapest alerting policy in our cost analysis. Precision stays near
+5%. The models are at most a <b>triage aid</b>, not an automatic trigger. In these test weeks, alerts pay off only
+if a missed shock is judged to cost about 20 or more false alarms.</div>
 
 <h2>1. Project alignment and master dataset inventory</h2>
 <p><b>Team.</b> Both members are computer scientists. One owns acquisition, parsing and provenance; the other owns statistical framing,
@@ -797,7 +799,7 @@ which 205 are abnormal (2.9%). The models never see these whole-period threshold
 with a <code>has_</code> indicator. The model can then tell "no change" from "not observed" (the Milestone 02 rule: flag, don't impute).
 We deliberately do not add one dummy per item: with about 200 positives this would overfit, and it would swamp KNN's distances.</p>
 
-<div class="tbl "><p class="cap">Table 10. Model features and why each might matter. Reference levels: storable staple (category) and Punjab (province).</p><table class="dataframe">
+<div class="tbl small"><p class="cap">Table 10. Model features and why each might matter. Reference levels: storable staple (category) and Punjab (province).</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>feature</th>
@@ -928,7 +930,7 @@ its min-max scaler, like the logistic model's z-score scaler, sits inside an skl
       <td>Vote of the K nearest rows; min-max scaling fitted on training rows</td>
       <td>A different idea: similar city-item situations behave alike; no training step</td>
       <td>K ∈ {5, 15, 25, 51, 101, 201}; uniform/distance; Euclidean/Manhattan; all vs continuous features</td>
-      <td>n_neighbors=201, weights=uniform, metric=manhattan, features=all</td>
+      <td>n_neighbors=201, weights=distance, metric=manhattan, features=all</td>
     </tr>
   </tbody>
 </table></div>
@@ -942,47 +944,59 @@ is dropped. Here the last training week (2026-03-26) is followed by the first te
 candidate rows are purged, and the final models learn from 10 weeks. After purging and labelling, the training set has
 4,560 rows (135 abnormal, 2.96%) and the test set has 1,824 rows
 (54 abnormal, 2.96%): 71% / 29% by rows.
-The two base rates are nearly equal, so the test weeks are not unusually calm or volatile.</p>
+The two base rates are nearly equal, so the test weeks are not unusually calm or volatile. The fitted sample
+(6,384 rows) is smaller than the 7,095-row description in §5.1 for two reasons: the purged week is removed,
+and thresholds fitted on training rows alone leave 5 items without a label, against
+4 under whole-period thresholds.</p>
 <p><b>Why not a random stratified split?</b> The brief's example is a random stratified split. Our rows are a panel: the same 17 × 28
 city-item series recur every week, and neighbouring weeks share shocks. A random split would train on later weeks to predict earlier ones, which PBS could never do
 in practice. It also lets the model learn week-specific shocks that appear on both sides of the split. We keep time order. The purpose of stratification,
 keeping the rare class represented in every part, is met differently: every validation fold and the test set are checked to contain positives
-(16-26 per validation week; 54 in test), and the models use balanced class weights.
-§6.4 measures the cost of ignoring time order.</p>
+(16-28 per validation week; 54 in test), and logistic regression and the tree use balanced class weights. Class weights change what the model optimises; they are not a substitute for
+stratification, which is why the positive counts are checked. §6.4 compares random and time-ordered folds.</p>
 
 <h3>6.2 Forward-chaining cross-validation</h3>
-<p>Within the training weeks we use an expanding window (Fig. 6). Fold 1 trains on labelled weeks 1-6 and validates on week 7. Fold 2 trains on weeks 1-7
-and validates on week 8, and so on, giving 5 folds. Each fold rebuilds its own label thresholds, scaler and model from its training weeks and
-applies the purge rule (3 folds lose their last training week to it). Each validation week holds only
-16-26 abnormal moves, so fold-to-fold variance is large. We report the mean ± SD across folds and every
+<p><b>Outer boundary.</b> Cross-validation may only use labels that end before the test period. The last training week (2026-03-26) is
+labelled from the first test week, so it is excluded from CV as well as from final training. This leaves 10 development weeks
+(to 2025-12-18). An earlier version of our code used that week as a CV validation week, which let test-period prices shape its labels;
+an independent review caught this, and every result here comes from the corrected design. The code now asserts that every CV label, in training
+and validation, ends before the first test week.
+<b>Folds.</b> Within the development weeks we use an expanding window (Fig. 6). Fold 1 trains on labelled weeks 1-5 and validates on week 6. Fold 2 trains on weeks 1-6
+and validates on week 7, and so on, giving 5 folds. Each fold rebuilds its own label thresholds, scaler and model from its training weeks and
+applies the purge rule (4 folds lose their last training week to it). Each validation week holds only
+16-28 abnormal moves, so fold-to-fold variance is large. We report the mean ± SD across folds and every
 fold's AUC (Appendix Table A1).</p>
-<figure><img src="figures/fig15_split_design.png" style="width:86%"/><figcaption>Fig. 6. Forward-chaining folds and the final split, by labelled week t. Blue: training; orange: validation or test; grey ×: training week purged because its t+1 is an evaluation week.</figcaption></figure>
+<figure><img src="figures/fig15_split_design.png" style="width:70%"/><figcaption>Fig. 6. Forward-chaining folds and the final split, by labelled week t. Blue: training; orange: validation or test; grey ×: training week purged because its t+1 is an evaluation week.</figcaption></figure>
 
 <h3>6.3 Hyperparameter tuning</h3>
-<p>Each grid in Table 11 runs inside the five folds. Settings are compared by mean validation <b>ROC-AUC</b>, which does not depend on a threshold
+<p>Each grid in Table 11 runs inside the five folds; no test-period information enters this step. Settings are compared by mean validation <b>ROC-AUC</b>, which does not depend on a threshold
 and is not fooled by the majority class. When several settings are within one fold-SD of the best, we take the simplest: smallest C, smallest
 depth with the largest leaves, or largest K. With so few positives per fold, the difference between near-equal settings is mostly noise (Fig. 7).
-<b>Logistic regression:</b> C hardly matters. C = 0.01, the strongest regularisation, has the best mean (0.637 ± 0.098).
-<b>Decision tree:</b> depth 4 had the best mean (0.640 ± 0.056), but depth 2 is within one SD,
-so we keep the simpler tree (0.611 ± 0.095); a depth-2 tree is also four readable rules.
-<b>KNN:</b> AUC rises steadily with K and peaks at the grid's edge (n_neighbors=201, weights=uniform, metric=manhattan, features=all; 0.656 ± 0.133). Using the four continuous
-features alone is clearly worse (best 0.591), so the category dummies carry most of what KNN finds.</p>
+<b>Logistic regression:</b> C hardly matters. C = 0.01, the strongest regularisation, has the best mean (0.641 ± 0.102).
+<b>Decision tree:</b> depth 4 had the best mean (0.673 ± 0.052), but depth 2 is within one SD,
+so we keep the simpler tree (0.641 ± 0.117); a depth-2 tree is also four readable rules.
+<b>KNN:</b> AUC rises steadily with K and peaks at the grid's edge (n_neighbors=201, weights=distance, metric=manhattan, features=all; 0.657 ± 0.128). Using the four continuous
+features alone is clearly worse (best 0.607), so the category dummies carry most of what KNN finds.</p>
 <figure><img src="figures/fig16_tuning.png" style="width:100%"/><figcaption>Fig. 7. Tuning results: mean validation ROC-AUC over five forward-chaining folds for each setting (left panel shows ± 1 SD). The dotted line is chance (0.5).</figcaption></figure>
 
 <h3>6.4 Leakage checks</h3>
 <p><b>Random folds are over-optimistic.</b> For the chosen logistic model, ordinary shuffled <code>StratifiedKFold</code> (5 folds) on the training rows gives
-AUC 0.710 ± 0.038, against 0.637 for forward chaining: a gap
-of 0.073. That gap is the optimism a random split would have reported.
-<b>Shuffled labels give chance.</b> Refitting the final logistic model on permuted training labels and scoring the real test labels gives AUC
+AUC 0.710 ± 0.038, against 0.641 for forward chaining: a gap
+of 0.070. This is a comparison, not a controlled measurement of leakage: the two schemes also differ in training size, and the random folds
+reuse labels fitted on all training rows. But it points the way we expected: ignoring time order makes the model look better than it is.
+<b>Shuffled-label sanity check.</b> Refitting the final logistic model on permuted training labels and scoring the real test labels gives AUC
 0.583 for the seed-42 shuffle. Over 200 shuffles the mean is 0.503
-(5th-95th percentile 0.374-0.626), so nothing outside the features carries the label. No shuffle reached the
-real test AUC (share 0.00), which is also a permutation test of H3.
-<b>Asserts in the code:</b> no week after the cutoff is read; no evaluation week is in any training set; thresholds come from training rows; the
-purge is applied; the mean shuffled AUC is within 0.03 of 0.5.</p>
+(5th-95th percentile 0.374-0.626), and 0 of 200 reached the real test AUC.
+This is consistent with the pipeline behaving correctly, but it is a sanity check, not proof that nothing leaks (it could not have detected the
+CV boundary problem above). It is also not a formal test of H3, because rows in the same week are not exchangeable and tuning is not repeated
+under the null.
+<b>Asserts in the code:</b> no week after the cutoff is read; no evaluation week is in any training set; every CV label ends before the test period;
+thresholds come from training rows; the purge is applied; the mean shuffled AUC is within 0.03 of 0.5.</p>
 
 <h2>7. Results</h2>
-<p>Table 12 reports the test set, scored once with the settings chosen in cross-validation. Table 13 reports the same metrics as mean ± SD
-across the five folds. Threshold-based metrics use 0.5. <b>PR-AUC</b> matters because, with about 3% positives, ROC-AUC can look respectable
+<p>Table 12 reports the test set: one final evaluation of each model, with settings fixed in cross-validation. The diagnostics in §8 reuse
+these same test predictions; nothing on the test set was used to choose a model, setting or threshold. Table 13 reports the same metrics as mean ± SD
+across the five folds. Threshold-based metrics use 0.5. <b>PR-AUC</b> (computed as average precision, sklearn's step-wise estimate of the area under the PR curve) matters because, with about 3% positives, ROC-AUC can look respectable
 while precision stays tiny. A random model's PR-AUC equals the base rate (0.030 on test), so that is the bar to compare against.</p>
 
 <div class="tbl "><p class="cap">Table 12. Test-set metrics (4 weeks, 1,824 rows, 54 abnormal). Threshold 0.5 for accuracy to F1. ROC-AUC with a percentile bootstrap 95% CI (2,000 resamples of test rows, seed 42).</p><table class="dataframe">
@@ -1046,14 +1060,14 @@ while precision stays tiny. A random model's PR-AUC equals the base rate (0.030 
     </tr>
     <tr>
       <td>KNN</td>
-      <td>0.970</td>
+      <td>0.968</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>1.000</td>
+      <td>0.998</td>
       <td>0.000</td>
-      <td>0.599 [0.529, 0.665]</td>
+      <td>0.561 [0.487, 0.636]</td>
       <td>0.038</td>
-      <td>0</td>
+      <td>4</td>
     </tr>
   </tbody>
 </table></div>
@@ -1073,73 +1087,77 @@ while precision stays tiny. A random model's PR-AUC equals the base rate (0.030 
   <tbody>
     <tr>
       <td>Majority class</td>
-      <td>0.951 ± 0.010</td>
+      <td>0.946 ± 0.017</td>
       <td>0.000 ± 0.000</td>
       <td>0.000 ± 0.000</td>
       <td>1.000 ± 0.000</td>
       <td>0.000 ± 0.000</td>
       <td>0.500 ± 0.000</td>
-      <td>0.049 ± 0.010</td>
+      <td>0.054 ± 0.017</td>
     </tr>
     <tr>
       <td>Category base-rate rule</td>
-      <td>0.951 ± 0.010</td>
+      <td>0.946 ± 0.017</td>
       <td>0.000 ± 0.000</td>
       <td>0.000 ± 0.000</td>
       <td>1.000 ± 0.000</td>
       <td>0.000 ± 0.000</td>
-      <td>0.596 ± 0.085</td>
-      <td>0.062 ± 0.017</td>
+      <td>0.617 ± 0.107</td>
+      <td>0.079 ± 0.042</td>
     </tr>
     <tr>
       <td>Logistic regression</td>
-      <td>0.596 ± 0.065</td>
-      <td>0.072 ± 0.016</td>
-      <td>0.629 ± 0.222</td>
-      <td>0.595 ± 0.080</td>
-      <td>0.127 ± 0.029</td>
-      <td>0.637 ± 0.098</td>
-      <td>0.088 ± 0.026</td>
+      <td>0.622 ± 0.051</td>
+      <td>0.088 ± 0.044</td>
+      <td>0.628 ± 0.221</td>
+      <td>0.622 ± 0.061</td>
+      <td>0.152 ± 0.071</td>
+      <td>0.641 ± 0.102</td>
+      <td>0.093 ± 0.032</td>
     </tr>
     <tr>
       <td>Decision tree</td>
-      <td>0.678 ± 0.294</td>
-      <td>0.033 ± 0.032</td>
-      <td>0.388 ± 0.420</td>
-      <td>0.696 ± 0.334</td>
-      <td>0.061 ± 0.059</td>
-      <td>0.611 ± 0.095</td>
-      <td>0.072 ± 0.030</td>
+      <td>0.622 ± 0.253</td>
+      <td>0.066 ± 0.061</td>
+      <td>0.545 ± 0.384</td>
+      <td>0.628 ± 0.288</td>
+      <td>0.116 ± 0.100</td>
+      <td>0.641 ± 0.117</td>
+      <td>0.096 ± 0.058</td>
     </tr>
     <tr>
       <td>KNN</td>
-      <td>0.951 ± 0.010</td>
+      <td>0.944 ± 0.016</td>
       <td>0.000 ± 0.000</td>
       <td>0.000 ± 0.000</td>
-      <td>1.000 ± 0.000</td>
+      <td>0.998 ± 0.001</td>
       <td>0.000 ± 0.000</td>
-      <td>0.656 ± 0.133</td>
-      <td>0.086 ± 0.031</td>
+      <td>0.657 ± 0.128</td>
+      <td>0.107 ± 0.061</td>
     </tr>
   </tbody>
 </table></div>
 
-<figure><img src="figures/fig17_roc_pr.png" style="width:100%"/><figcaption>Fig. 8. ROC curves (left; AUC in brackets) and precision-recall curves (right; PR-AUC in brackets; y-axis cut at 0.2) on the test set. The dotted lines are chance: the diagonal, and the base rate.</figcaption></figure>
-<div class="hl"><p><b>H3 decision.</b> For logistic regression, the decision tree and KNN, the lower bound of the test ROC-AUC confidence interval is above 0.5
-(logistic 0.692 [0.636, 0.746]; tree 0.610 [0.576, 0.650]; KNN 0.599 [0.529, 0.665]). We <b>reject H0</b>: information available at week <i>t</i> ranks next-week abnormal moves
-better than chance. The permutation test agrees (§6.4). The signal is modest: test PR-AUC is 0.052 for logistic regression,
-under twice the base rate.</p></div>
+<figure><img src="figures/fig17_roc_pr.png" style="width:84%"/><figcaption>Fig. 8. ROC curves (left; AUC in brackets) and precision-recall curves (right; PR-AUC in brackets; y-axis cut at 0.2) on the test set. The dotted lines are chance: the diagonal, and the base rate.</figcaption></figure>
+<div class="hl"><p><b>H3 decision.</b> For logistic regression and the decision tree, the lower bound of the row-level bootstrap 95% CI for test
+ROC-AUC is above 0.5 (logistic 0.692 [0.636, 0.746]; tree 0.610 [0.576, 0.650]); for KNN it is not (0.561 [0.487, 0.636]). The bootstrap treats rows as independent,
+but rows in the same week share shocks, so these intervals are too narrow. As a check that respects weeks, we score each test week separately (Appendix
+Table A3): logistic regression is above 0.5 in all 4 weeks (range 0.542-0.748),
+the category rule in 3. We therefore <b>reject H0 for logistic regression in these test weeks</b>: information
+available at week <i>t</i> ranked next-week abnormal moves better than chance. With only four weeks this is evidence of a modest signal, not an
+established general result; the Week 14 holdout is the next test. Test PR-AUC is 0.052, under twice the base rate.</p></div>
 <p><b>Does any ML model beat the simple rule?</b> In cross-validation, logistic regression is ahead of the category rule on average
-(0.637 ± 0.098 vs 0.596 ± 0.085; ahead in 4 of 5 folds). On the test weeks, the category rule is
+(0.641 ± 0.102 vs 0.617 ± 0.107), but only in 3 of 5 folds. On the test weeks, the category rule is
 slightly ahead (0.708 vs 0.692). The paired bootstrap difference (logistic minus rule) is
 -0.015, 95% CI [-0.074, 0.041],
-so we cannot tell them apart. The depth-2 tree is significantly worse than the rule on test (difference CI
-[-0.154, -0.036]). KNN had the highest CV mean but also the largest SD, and it fell to
-0.599 on test. <b>The honest reading is that most of the usable signal is "what kind of food is it".</b> The ablation agrees.
-Logistic regression with only the three category dummies scores 0.596 in CV and 0.708 on test.
-The full feature set adds about 0.04 AUC in CV and nothing on test.</p>
-<p><b>Accuracy misleads.</b> The majority class is 97.0% accurate and catches nothing. The category rule and KNN never
-reach a score of 0.5, so at that threshold they flag nothing either, and their accuracy-to-F1 row looks the same as the majority class.
+so we cannot tell them apart. The depth-2 tree scores below the rule on test (row-bootstrap difference CI
+[-0.154, -0.036], with the same independence caveat). KNN had the highest CV mean
+but also the largest SD, and it fell to 0.561 on test. <b>The honest reading is that most of the usable signal is "what kind of food is it".</b> The ablation agrees.
+Logistic regression with only the three category dummies scores 0.617 in CV and 0.708 on test.
+The full feature set adds about 0.02 AUC in CV and nothing on test.</p>
+<p><b>Accuracy misleads.</b> The majority class is 97.0% accurate and catches nothing. The category rule never reaches
+a score of 0.5 and KNN does so for only 4 rows, so at that threshold they flag (almost) nothing, and their accuracy-to-F1 rows
+look like the majority class.
 Balanced class weights push logistic regression the other way: at 0.5 it flags 813 rows, with recall 76%
 but precision 5.0%. 0.5 is an arbitrary cut-off. §8 chooses thresholds from costs.</p>
 <p><b>Why KNN struggles</b> (Unit 11 limitations). With about 3% positives, most neighbourhoods of 5-25 rows contain no abnormal move at all, so the vote is 0
@@ -1155,7 +1173,8 @@ task is harder. The refined label is the one we defend.</p>
 <p>The alert is meant for a PBS analyst, or a district Price Control Committee or price magistrate deciding where to send inspectors or which
 items to watch next week.
 <ul>
-<li>A <b>false negative</b> (missed abnormal move) is a jump in tomatoes, onions, flour or ghee that nobody was warned about. No early stock release,
+<li>A <b>false negative</b> (missed abnormal move) is, at its most harmful, a jump in tomatoes, onions, flour or ghee that nobody was warned about
+(abnormal moves also include sharp falls, which matter to producers and traders but less to consumers). No early stock release,
 inspection or public notice happens, and households absorb the shock. Households in more deprived districts spend a larger share of income on food,
 so the harm falls hardest on those least able to absorb it (H5).</li>
 <li>A <b>false positive</b> (false alarm) is an inspection visit or watch-list entry that was not needed. It costs staff time and may cause friction
@@ -1164,10 +1183,10 @@ with traders. Repeated false alarms cause <i>alert fatigue</i>: if most alerts a
 <p><b>Cost matrix</b> (Provost and Fawcett, Ch. 7). cost(TP) = cost(TN) = 0, cost(FP) = 1 unit and cost(FN) = <i>r</i> units. We put the cost in one cell only,
 to avoid the double counting Provost and Fawcett warn about. We do not also credit a "benefit" for true positives.
 Flagging a row with probability <i>p</i> of being abnormal is worth it when <i>p</i>·<i>r</i> &gt; 1 − <i>p</i>, i.e. <i>p</i> &gt; 1/(1 + <i>r</i>).
-With a training base rate of 3.0%, an average row passes that test only when <i>r</i> exceeds about
-34 (the inverse base rate). That is where "flag everything" starts to look rational. <b><i>r</i> is a value judgment made by
+For an average row, <i>p</i> is the training base rate (2.96%), so "flag everything" beats "flag nothing" exactly when
+<i>r</i> &gt; (1 − <i>p</i>)/<i>p</i> = 32.8, close to the inverse base rate (33.8). <b><i>r</i> is a value judgment made by
 people, not something the data decides</b>, so we vary it over {1, 5, 10, 20, 35}. For each <i>r</i> and model, the threshold that minimises total cost is
-chosen on the pooled out-of-fold CV predictions and then applied to the test set once.</p>
+chosen on the pooled out-of-fold CV predictions (all from development weeks) and then applied to the test predictions.</p>
 
 <div class="tbl "><p class="cap">Table 14. Test cost per 1,000 city-item-weeks (in false-alarm units) and, in brackets, the share of abnormal moves caught, for each cost ratio r. Thresholds were chosen on CV predictions only.</p><table class="dataframe">
   <thead>
@@ -1186,22 +1205,22 @@ chosen on the pooled out-of-fold CV predictions and then applied to the test set
       <td>30 (0%)</td>
       <td>148 (0%)</td>
       <td>296 (0%)</td>
-      <td>747 (100%)</td>
-      <td>747 (100%)</td>
+      <td>592 (0%)</td>
+      <td>637 (76%)</td>
     </tr>
     <tr>
       <td>Logistic regression</td>
       <td>30 (0%)</td>
       <td>148 (0%)</td>
-      <td>340 (20%)</td>
-      <td>588 (83%)</td>
+      <td>430 (46%)</td>
+      <td>592 (83%)</td>
       <td>709 (94%)</td>
     </tr>
     <tr>
       <td>Decision tree</td>
       <td>30 (0%)</td>
       <td>148 (0%)</td>
-      <td>296 (0%)</td>
+      <td>364 (13%)</td>
       <td>747 (100%)</td>
       <td>805 (100%)</td>
     </tr>
@@ -1209,9 +1228,9 @@ chosen on the pooled out-of-fold CV predictions and then applied to the test set
       <td>KNN</td>
       <td>30 (0%)</td>
       <td>148 (0%)</td>
-      <td>296 (0%)</td>
-      <td>649 (70%)</td>
-      <td>834 (74%)</td>
+      <td>418 (20%)</td>
+      <td>711 (48%)</td>
+      <td>932 (69%)</td>
     </tr>
     <tr>
       <td>Flag nothing (= majority class)</td>
@@ -1232,23 +1251,24 @@ chosen on the pooled out-of-fold CV predictions and then applied to the test set
   </tbody>
 </table></div>
 
-<figure><img src="figures/fig19_costs.png" style="width:64%"/><figcaption>Fig. 9. Test cost per 1,000 city-item-weeks against the cost ratio r. Below r ≈ 10 the cheapest policy is to issue no alerts; logistic regression is the cheapest policy at r = 35.</figcaption></figure>
-<p><b>Reading the sensitivity.</b> For <i>r</i> ≤ 10 no model is confident enough to be worth acting on: the cheapest policy is to flag nothing. At
-<i>r</i> = 10, the threshold logistic regression learned in CV flags a few rows, and on test that costs slightly more than staying silent.
-At <i>r</i> = 20, logistic regression (588) and flagging nothing (592) cost about the same.
-At <i>r</i> = 35, logistic regression is the cheapest policy (709, against 747 for the category rule
-and 970 for flagging everything). <b>The model pays off only if a missed shock is judged to be worth roughly 20 or more
-unnecessary inspections.</b> Our recommended threshold therefore depends on <i>r</i>. We use <i>r</i> = 20 below as a reference: it is the smallest value
-in our grid at which every model's CV-chosen threshold raises any alerts. At that threshold logistic regression flags
-51% of test rows, catches 83% of abnormal moves, and has precision
+<figure><img src="figures/fig19_costs.png" style="width:64%"/><figcaption>Fig. 9. Test cost per 1,000 city-item-weeks against the cost ratio r. For r ≤ 10 the cheapest policy is to issue no alerts; at r = 35 the category rule is cheapest.</figcaption></figure>
+<p><b>Reading the sensitivity</b> (test weeks only). For <i>r</i> ≤ 10 the cheapest policy is to flag nothing. At <i>r</i> = 10 the three ML models'
+CV thresholds raise some alerts, and on test each costs more than staying silent. At <i>r</i> = 20, logistic regression
+(591.6) and flagging nothing (592.1) are essentially tied. At <i>r</i> = 35 the
+<b>category rule</b> is cheapest (637), ahead of logistic regression (709), flagging
+everything (970) and flagging nothing (1,036). So, in these test weeks, <b>no ML model beats
+the simple rule on cost, and alerting only pays off at all when a missed shock is judged to be worth roughly 20 or more unnecessary inspections.</b>
+These are the points we chose to try, not a measured break-even, and the recommended threshold depends on <i>r</i>. We use <i>r</i> = 20 below
+as an illustrative reference (a value judgment, not chosen from the data). At that threshold logistic regression flags
+52% of test rows, catches 83% of abnormal moves, and has precision
 4.8% (Appendix Table A2 has all models).</p>
 <p><b>Alert budget.</b> A decision-maker may think in terms of capacity rather than <i>r</i>: "we can check <i>N</i> city-items a week". Table 15 ranks each test
 week's 456 rows by score and takes the top <i>N</i>. With 50 checks a week, logistic regression puts
 11 of the 54 abnormal moves in front of an inspector (20%);
 the category rule, with random tie-breaking, puts 11.0 in front of them.
-Precision@<i>N</i> stays between 3% and 7%, against 3.0% for random checks.</p>
+Precision@<i>N</i> stays between 4% and 7%, against 3.0% for random checks.</p>
 
-<div class="tbl small"><p class="cap">Table 15. Alert budget on the test weeks: share of abnormal moves caught (recall) and share of checks that find one (precision) when only the top N rows per week are checked. Ties (category rule) are counted at their expected value.</p><table class="dataframe">
+<div class="tbl small"><p class="cap">Table 15. Alert budget, pooled over the four test weeks: share of abnormal moves caught (recall) and share of checks that find one (precision) when only the top N rows per week are checked. Ties (category rule) are counted at their expected value. Per-week results are in Appendix Table A4.</p><table class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>model</th>
@@ -1281,12 +1301,12 @@ Precision@<i>N</i> stays between 3% and 7%, against 3.0% for random checks.</p>
     </tr>
     <tr>
       <td>KNN</td>
-      <td>0.036</td>
-      <td>0.048</td>
-      <td>0.059</td>
-      <td>0.032</td>
+      <td>0.037</td>
+      <td>0.050</td>
       <td>0.111</td>
-      <td>0.030</td>
+      <td>0.060</td>
+      <td>0.148</td>
+      <td>0.040</td>
     </tr>
     <tr>
       <td>Logistic regression</td>
@@ -1301,17 +1321,17 @@ Precision@<i>N</i> stays between 3% and 7%, against 3.0% for random checks.</p>
 </table></div>
 
 <p><b>Equity weighting</b> (preview of the Milestone 04 fairness audit). If a missed shock counts 1, 1.5 or 2 times as much in low-, mid- and high-deprivation
-cities, the cost-minimising choices shift towards flagging. At <i>r</i> = 10 the logistic threshold falls to 0.59
-and recall rises to 46%, although on test flagging nothing is still cheapest. At <i>r</i> = 20 logistic regression
+cities, the cost-minimising choices shift towards flagging. At <i>r</i> = 10 the logistic threshold falls to 0.47
+and recall rises to 83%, although on test flagging nothing is still cheapest. At <i>r</i> = 35 logistic regression
 becomes the cheapest policy. Weighting by need changes who gets protected, and that is a decision for policy-makers, not for us.</p>
 
 <h3>8.2 Confusion matrices</h3>
 <p>Fig. 10 uses the Unit 10 layout: actual class in rows, predicted in columns, positive (abnormal) class first, with counts and row percentages. So the
-top-left cell over its row is recall, and the bottom-right over its row is specificity. The majority class has an empty first column. Logistic regression
+top-left cell over its row is recall, and the bottom-right over its row is specificity. The majority class and the category rule (at <i>r</i> = 20) have an empty first column. Logistic regression
 at 0.5 catches 41 of 54 abnormal moves at the price of
 772 false alarms. The <i>r</i> = 20 threshold trades a little more recall for more false alarms. The
 depth-2 tree at its <i>r</i> = 20 threshold flags every non-branded item, which is the category rule in disguise.</p>
-<figure><img src="figures/fig18_confusion.png" style="width:100%"/><figcaption>Fig. 10. Test-set confusion matrices: counts and row percentages. Rows are the actual class, columns the predicted class, abnormal first. "cost threshold" is the threshold minimising cost at r = 20 on CV predictions; its value is in brackets.</figcaption></figure>
+<figure><img src="figures/fig18_confusion.png" style="width:58%"/><figcaption>Fig. 10. Test-set confusion matrices: counts and row percentages. Rows are the actual class, columns the predicted class, abnormal first. "cost threshold" is the threshold minimising cost at r = 20 on CV predictions; its value is in brackets.</figcaption></figure>
 
 <h3>8.3 Where the errors fall, and edge cases</h3>
 <p>Table 16 breaks down the logistic model's errors at the <i>r</i> = 20 threshold. This is descriptive only; the formal test is H4 in Milestone 04, and many cells
@@ -1356,9 +1376,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>748</td>
       <td>41</td>
       <td>0.055</td>
-      <td>629</td>
+      <td>632</td>
       <td>0.122</td>
-      <td>0.839</td>
+      <td>0.843</td>
     </tr>
     <tr>
       <td>item category</td>
@@ -1366,9 +1386,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>668</td>
       <td>13</td>
       <td>0.019</td>
-      <td>308</td>
+      <td>312</td>
       <td>0.308</td>
-      <td>0.456</td>
+      <td>0.463</td>
     </tr>
     <tr>
       <td>city-size tercile</td>
@@ -1376,9 +1396,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>640</td>
       <td>18</td>
       <td>0.028</td>
-      <td>271</td>
+      <td>278</td>
       <td>0.056</td>
-      <td>0.408</td>
+      <td>0.420</td>
     </tr>
     <tr>
       <td>city-size tercile</td>
@@ -1416,9 +1436,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>644</td>
       <td>16</td>
       <td>0.025</td>
-      <td>247</td>
+      <td>248</td>
       <td>0.312</td>
-      <td>0.376</td>
+      <td>0.377</td>
     </tr>
     <tr>
       <td>deprivation tercile</td>
@@ -1426,9 +1446,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>532</td>
       <td>18</td>
       <td>0.034</td>
-      <td>241</td>
+      <td>247</td>
       <td>0.111</td>
-      <td>0.438</td>
+      <td>0.449</td>
     </tr>
     <tr>
       <td>test week</td>
@@ -1446,9 +1466,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>456</td>
       <td>18</td>
       <td>0.039</td>
-      <td>263</td>
+      <td>266</td>
       <td>0.111</td>
-      <td>0.564</td>
+      <td>0.571</td>
     </tr>
     <tr>
       <td>test week</td>
@@ -1456,9 +1476,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>456</td>
       <td>9</td>
       <td>0.020</td>
-      <td>260</td>
+      <td>262</td>
       <td>0.111</td>
-      <td>0.564</td>
+      <td>0.568</td>
     </tr>
     <tr>
       <td>test week</td>
@@ -1466,9 +1486,9 @@ By province, Islamabad's 2 abnormal moves were all missed, while Sindh's
       <td>456</td>
       <td>9</td>
       <td>0.020</td>
-      <td>207</td>
+      <td>209</td>
       <td>0.333</td>
-      <td>0.450</td>
+      <td>0.454</td>
     </tr>
   </tbody>
 </table></div>
@@ -1483,9 +1503,10 @@ equal (one effective quote), which changed this week and then did not move again
 market. That links model errors to the measurement-quality concern in H4.</li>
 <li><b>Timing.</b> The two earlier test weeks have about twice the base rate of the August weeks
 (4.0% and 4.0% against
-2.0% and 2.0%). Each early week falls within about two
-weeks after an Eid holiday: Eid al-Fitr was expected around 20 March 2026 and Eid al-Adha around 27 May 2026. Post-festival price adjustment is
-<i>one possible explanation that we have not tested</i>.</li>
+2.0% and 2.0%). The 2 April week comes about 12 days after
+Eid-ul-Fitr, observed in Pakistan on 21 March 2026, and the 4 June week about a week after Eid-ul-Adha, observed on 27 May 2026 (APP, 2026; Radio
+Pakistan, 2026). Post-festival price adjustment is <i>one possible explanation that we have not tested</i>; the dates alone are not evidence of a
+holiday effect, and some of these abnormal moves are falls rather than rises.</li>
 </ul></p>
 
 <div class="tbl small"><p class="cap">Table 17. The five most confident false negatives (lowest score among missed abnormal moves) and false positives (highest score among normal rows), logistic regression, r = 20 threshold. Changes are in log points.</p><table class="dataframe">
@@ -1636,7 +1657,7 @@ ORs rank features rather than describe a full category change. They are associat
 in the training rows), and the two share the credit (Unit 09). The <code>has_</code> flags are negative mostly because they mark <i>which weeks</i> had a
 published previous week, so they partly stand in for time period, not for a market effect.</p>
 <p><b>Decision tree.</b> The depth-2 tree splits first on branded/packaged, then on this week's change for other items, and on relative price for branded
-ones (Appendix Fig. A1). Its impurity importance is 0.58 for <code>cat_branded_packaged</code>,
+ones; the diagram is in the notebook (Part D.2) and <code>reports/m03/figures/fig21_tree.png</code>. Its impurity importance is 0.58 for <code>cat_branded_packaged</code>,
 0.29 for <code>abs_dlog</code> and 0.12 for <code>rel_price</code>. Its leaves read as rules (Table 19).
 The top rule is: <b>IF the item is not branded/packaged AND its price moved by more than about 1% this week, THEN the training abnormal rate is
 6.9%</b>, against 3.0% overall. Branded items whose price is at or above the national reference
@@ -1780,12 +1801,12 @@ against them.</p>
   </tbody>
 </table></div></div>
 
-<figure><img src="figures/fig20_importance.png" style="width:88%"/><figcaption>Fig. 11. Feature importance. Left: logistic regression coefficients per 1 SD (red raises the odds of an abnormal move next week, blue lowers them). Right: decision-tree impurity importance.</figcaption></figure>
+<figure><img src="figures/fig20_importance.png" style="width:76%"/><figcaption>Fig. 11. Feature importance. Left: logistic regression coefficients per 1 SD (red raises the odds of an abnormal move next week, blue lowers them). Right: decision-tree impurity importance.</figcaption></figure>
 <p><b>Initial policy takeaways (SDG 2.c).</b> These are hedged: they rest on four test weeks and modest signal.
 <ol>
 <li><b>Where to look.</b> Concentrate weekly monitoring on perishables, especially those whose price already moved this week. Branded and packaged
 goods almost never move abnormally.</li>
-<li><b>A triage aid, not a trigger.</b> With test AUC around 0.7 and precision around 5%, most alerts will be false. A model score can rank where an
+<li><b>At most a triage aid, not a trigger.</b> With test AUC around 0.7 and precision around 5%, most alerts will be false. A model score can rank where an
 inspector looks first; it should not trigger stock releases or penalties by itself.</li>
 <li><b>A simple rule already captures most of the signal.</b> "Watch perishables" matched the logistic model on the test weeks. Any data system PBS or a
 province builds should be benchmarked against that rule before it is trusted.</li>
@@ -1800,8 +1821,8 @@ silence is cheaper. That judgment, and whether to weight misses in deprived dist
 <ul>
 <li><b>Sample size.</b> Only 205 positives over 15 labelled weeks. The test set has 54
 positives in four weeks, so every test number has a wide interval.</li>
-<li><b>Intervals and the archive.</b> The bootstrap and permutation tests treat rows as independent, but rows in the same week share shocks, so the
-true uncertainty is larger. PBS archive gaps cost 40% of rows their recent history and limit how many weeks can be labelled.</li>
+<li><b>Intervals and the archive.</b> The bootstrap treats rows as independent, but rows in the same week share shocks, so the true uncertainty is
+larger; the per-week check uses only four weeks. Several diagnostics (costs, alert budget, error breakdown) reuse the same test predictions. PBS archive gaps cost 40% of rows their recent history and limit how many weeks can be labelled.</li>
 <li><b>Signal.</b> Class imbalance and modest signal. KNN is unsuitable for this data. Two tuned settings sit at the edge of their grids
 (C = 0.01, K = 201), which suggests the data favour very smooth models.</li>
 <li><b>Label.</b> The 90th-percentile threshold is a convention. A stricter or looser cut-off would change the base rate and the results (§7).</li>
@@ -1829,11 +1850,13 @@ Pakistan Bureau of Statistics. Pakistan Social and Living Standards Measurement 
 Pakistan Bureau of Statistics. 7th Population and Housing Census 2023 (Digital Census): Table 1, district results.<br/>
 Pakistan Bureau of Statistics. CPI (Urban) Group-wise Cumulative Indices, base 2015-16; Monthly Review on Price Indices, August and September 2026.<br/>
 Provost, F. and Fawcett, T. (2013). <i>Data Science for Business</i>. O'Reilly. Ch. 7 (expected value, cost-benefit matrix) and Ch. 8 (ROC, profit curves).<br/>
+Associated Press of Pakistan (2026, 19 March). Eid-ul-Fitr on Saturday as Shawwal moon not sighted. https://www.app.com.pk/national/eid-ul-fitr-on-saturday-as-shawwal-moon-not-sighted/<br/>
+Radio Pakistan (2026, 17 May). Moon sighted, Eid-ul-Adha to be celebrated on 27 May. https://radio.gov.pk/17-05-2026/moon-sighted-eid-ul-adha-to-be-celebrated-on-27-may<br/>
 Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. <i>Journal of Machine Learning Research</i>, 12, 2825-2830.<br/>
 Wickham, H. (2014). Tidy Data. <i>Journal of Statistical Software</i>, 59(10).<br/>
 Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statistician</i>, 27(1), 17-21.</p>
 
-<h2 class="pb">Appendix</h2>
+<h2>Appendix</h2>
 
 <div class="tbl small"><p class="cap">Table A1 (part 1). Forward-chaining folds: weeks, purged rows, and rows and positives after labelling. 'items w/o label' = items with fewer than five non-zero changes in that fold's training rows.</p><table class="dataframe">
   <thead>
@@ -1852,6 +1875,17 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
   <tbody>
     <tr>
       <td>1</td>
+      <td>2025-07-17 to 2025-10-30</td>
+      <td>2025-11-06</td>
+      <td>541</td>
+      <td>1416</td>
+      <td>56</td>
+      <td>354</td>
+      <td>28</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>2</td>
       <td>2025-07-17 to 2025-11-06</td>
       <td>2025-11-13</td>
       <td>541</td>
@@ -1862,7 +1896,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
       <td>10</td>
     </tr>
     <tr>
-      <td>2</td>
+      <td>3</td>
       <td>2025-07-17 to 2025-11-13</td>
       <td>2025-11-20</td>
       <td>541</td>
@@ -1873,7 +1907,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
       <td>9</td>
     </tr>
     <tr>
-      <td>3</td>
+      <td>4</td>
       <td>2025-07-17 to 2025-11-20</td>
       <td>2025-12-11</td>
       <td>0</td>
@@ -1884,7 +1918,7 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
       <td>8</td>
     </tr>
     <tr>
-      <td>4</td>
+      <td>5</td>
       <td>2025-07-17 to 2025-12-11</td>
       <td>2025-12-18</td>
       <td>541</td>
@@ -1893,17 +1927,6 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
       <td>405</td>
       <td>16</td>
       <td>8</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>2025-07-17 to 2025-12-18</td>
-      <td>2026-03-26</td>
-      <td>0</td>
-      <td>4560</td>
-      <td>135</td>
-      <td>456</td>
-      <td>23</td>
-      <td>5</td>
     </tr>
   </tbody>
 </table></div>
@@ -1929,35 +1952,35 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     </tr>
     <tr>
       <td>Category base-rate rule</td>
+      <td>0.740</td>
       <td>0.666</td>
       <td>0.448</td>
       <td>0.609</td>
       <td>0.624</td>
-      <td>0.633</td>
     </tr>
     <tr>
       <td>Logistic regression</td>
+      <td>0.724</td>
       <td>0.758</td>
       <td>0.510</td>
       <td>0.583</td>
       <td>0.630</td>
-      <td>0.705</td>
     </tr>
     <tr>
       <td>Decision tree</td>
+      <td>0.765</td>
       <td>0.742</td>
       <td>0.485</td>
       <td>0.568</td>
       <td>0.643</td>
-      <td>0.618</td>
     </tr>
     <tr>
       <td>KNN</td>
-      <td>0.773</td>
-      <td>0.436</td>
+      <td>0.730</td>
+      <td>0.807</td>
+      <td>0.466</td>
+      <td>0.624</td>
       <td>0.657</td>
-      <td>0.665</td>
-      <td>0.749</td>
     </tr>
   </tbody>
 </table></div>
@@ -1980,29 +2003,29 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
   <tbody>
     <tr>
       <td>Category base-rate rule</td>
-      <td>0.025</td>
-      <td>0.253</td>
-      <td>0.038</td>
+      <td>0.053</td>
+      <td>0.970</td>
+      <td>0.000</td>
+      <td>0.000</td>
       <td>1.000</td>
-      <td>0.231</td>
-      <td>0.073</td>
-      <td>54</td>
-      <td>1362</td>
+      <td>0.000</td>
       <td>0</td>
-      <td>408</td>
+      <td>0</td>
+      <td>54</td>
+      <td>1770</td>
     </tr>
     <tr>
       <td>Logistic regression</td>
-      <td>0.469</td>
-      <td>0.506</td>
+      <td>0.467</td>
+      <td>0.502</td>
       <td>0.048</td>
       <td>0.833</td>
-      <td>0.496</td>
-      <td>0.091</td>
+      <td>0.492</td>
+      <td>0.090</td>
       <td>45</td>
-      <td>892</td>
+      <td>899</td>
       <td>9</td>
-      <td>878</td>
+      <td>871</td>
     </tr>
     <tr>
       <td>Decision tree</td>
@@ -2019,18 +2042,130 @@ Anscombe, F. J. (1973). Graphs in Statistical Analysis. <i>The American Statisti
     </tr>
     <tr>
       <td>KNN</td>
-      <td>0.030</td>
-      <td>0.518</td>
-      <td>0.042</td>
-      <td>0.704</td>
-      <td>0.512</td>
-      <td>0.080</td>
-      <td>38</td>
-      <td>863</td>
-      <td>16</td>
-      <td>907</td>
+      <td>0.022</td>
+      <td>0.581</td>
+      <td>0.034</td>
+      <td>0.481</td>
+      <td>0.584</td>
+      <td>0.064</td>
+      <td>26</td>
+      <td>737</td>
+      <td>28</td>
+      <td>1033</td>
     </tr>
   </tbody>
 </table></div>
-<figure><img src="figures/fig21_tree.png" style="width:100%"/><figcaption>Fig. A1. The chosen decision tree (depth 2, Gini, minimum leaf 60). 'value' shows class-weighted counts [normal, abnormal] because the tree was fitted with balanced class weights; Table 19 gives the unweighted abnormal rates.</figcaption></figure>
+<div class="tbl small"><p class="cap">Table A3. Test ROC-AUC computed separately for each test week (the dependence check used in §7).</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>week</th>
+      <th>rows</th>
+      <th>positives</th>
+      <th>category rule</th>
+      <th>logistic</th>
+      <th>tree</th>
+      <th>KNN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2026-04-02</td>
+      <td>456</td>
+      <td>18</td>
+      <td>0.740</td>
+      <td>0.748</td>
+      <td>0.648</td>
+      <td>0.705</td>
+    </tr>
+    <tr>
+      <td>2026-06-04</td>
+      <td>456</td>
+      <td>18</td>
+      <td>0.785</td>
+      <td>0.736</td>
+      <td>0.616</td>
+      <td>0.559</td>
+    </tr>
+    <tr>
+      <td>2026-08-13</td>
+      <td>456</td>
+      <td>9</td>
+      <td>0.757</td>
+      <td>0.694</td>
+      <td>0.614</td>
+      <td>0.455</td>
+    </tr>
+    <tr>
+      <td>2026-08-20</td>
+      <td>456</td>
+      <td>9</td>
+      <td>0.449</td>
+      <td>0.542</td>
+      <td>0.512</td>
+      <td>0.406</td>
+    </tr>
+  </tbody>
+</table></div>
+<div class="tbl small"><p class="cap">Table A4. Alert budget per test week: abnormal moves caught (expected count under random tie-breaking) by the category rule and logistic regression. Abnormal moves per week: 2026-04-02 18, 2026-06-04 18, 2026-08-13 9, 2026-08-20 9.</p><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>model</th>
+      <th>checks per week</th>
+      <th>2026-04-02</th>
+      <th>2026-06-04</th>
+      <th>2026-08-13</th>
+      <th>2026-08-20</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>10</td>
+      <td>0.8</td>
+      <td>0.9</td>
+      <td>0.4</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>25</td>
+      <td>2.0</td>
+      <td>2.3</td>
+      <td>1.1</td>
+      <td>0.1</td>
+    </tr>
+    <tr>
+      <td>Category base-rate rule</td>
+      <td>50</td>
+      <td>4.0</td>
+      <td>4.5</td>
+      <td>2.1</td>
+      <td>0.3</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>10</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>25</td>
+      <td>4.0</td>
+      <td>2.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <td>Logistic regression</td>
+      <td>50</td>
+      <td>5.0</td>
+      <td>4.0</td>
+      <td>2.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table></div>
 </body></html>
