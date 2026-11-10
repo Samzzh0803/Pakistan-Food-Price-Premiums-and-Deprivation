@@ -1,0 +1,5 @@
+leaf,rule,train_rows,train_positives,abnormal_rate
+3,IF cat_branded_packaged <= 0.5 AND abs_dlog > 0.0101,798,55,0.0689223
+2,IF cat_branded_packaged <= 0.5 AND abs_dlog <= 0.0101,2742,75,0.0273523
+5,IF cat_branded_packaged > 0.5 AND rel_price <= -0.00741,287,5,0.0174216
+6,IF cat_branded_packaged > 0.5 AND rel_price > -0.00741,733,0,0

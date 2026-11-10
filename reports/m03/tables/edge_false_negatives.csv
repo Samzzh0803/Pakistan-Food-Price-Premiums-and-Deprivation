@@ -1,0 +1,10 @@
+city,item_short,item_category,week,score,dlog_next,threshold,abs_dlog,has_dlog,price_changed,abs_dlog_lag1,rel_price,within_city_range_pct,single_quote
+Quetta,Rice basmati broken,storable_staple,2026-08-20,0.271681,-0.0715139,0.0445323,0,1,0,0,0.285512,6.89822,0
+Quetta,Rice IRRI-6/9,storable_staple,2026-08-20,0.278024,-0.0607313,0.0579495,0,1,0,0,0.0940292,11.773,0
+Multan,Garlic,perishable,2026-04-02,0.32828,-0.218519,0.148765,0,1,0,0,-0.0791203,85.164,0
+Islamabad,Eggs (farm),perishable,2026-06-04,0.377236,-0.147759,0.0573267,0,0,0,0,0.0260591,4.11015,0
+Islamabad,Eggs (farm),perishable,2026-08-13,0.378252,-0.0962604,0.0573267,0,0,0,0,0.0258885,3.68121,0
+Bahawalpur,Pulse gram,storable_staple,2026-08-20,0.412083,0.159085,0.0689929,0,1,0,0,-0.222623,9.38438,0
+Peshawar,Bananas,perishable,2026-04-02,0.446918,-0.115656,0.110153,0,1,0,0,0.173514,12.3457,0
+Peshawar,Mutton,perishable,2026-04-02,0.455858,0.0615557,0.035055,0,1,0,0,-0.063668,18.7189,0
+Peshawar,Wheat flour 20kg,storable_staple,2026-06-04,0.457991,-0.0395117,0.0385833,0,0,0,0,0.113008,3.6739,0
