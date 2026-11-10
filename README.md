@@ -13,6 +13,24 @@ Pakistan's weekly Sensitive Price Indicator (SPI) is reported as one national fi
 
 Primary goal: SDG 2 (Targets 2.1 and 2.c). Secondary goal: SDG 10.
 
+## Repository layout
+
+```
+README.md, requirements.txt
+docs/        Milestone 01 proposal and the correction note for its 7-city panel
+pfp/         the Python package: config, Appendix-A parser, external sources, master build, EDA (eda.py), models (model.py)
+scripts/     one runnable script per step: m02_* and m03_*, plus the weekly collector for the new-data milestone
+notebooks/   executed notebooks (M02, M03)
+reports/
+  m02/       manuscript, numbers JSON, tables, figures
+  m03/       manuscripts, numbers JSON, tables, figures
+data/
+  raw/       every downloaded file, unchanged, with URLs and hashes (PBS weekly annexures, holdout)
+  external/  census, PSLM and CPI inputs, and the city-to-district crosswalk
+  reference/ item mapping
+  processed/m02/   master dataset and derived views
+```
+
 ## Milestone 03 deliverables (branch `milestone-03`)
 
 Baseline classifiers for H3: using only what is known in week *t*, will a city-item food price move abnormally by week *t+1*?
@@ -26,8 +44,6 @@ Baseline classifiers for H3: using only what is known in week *t*, will a city-i
 | Runner script | `scripts/m03_models.py` |
 | Every number quoted in the manuscript | `reports/m03/m03_numbers.json` |
 | Result tables and figures | `reports/m03/tables/`, `reports/m03/figures/` |
-| Viva preparation (likely questions, short answers, pointers into the code) | `reports/m03/VIVA_PREP.md` |
-| Independent review and our response | `reports/m03/CODEX_M03_REVIEW.md`, `reports/m03/REVIEW_RESPONSE.md` |
 
 Headline: on the four held-out weeks, logistic regression reaches ROC-AUC 0.69 (95% CI 0.64-0.75), so H3's null is rejected. A one-line
 "item category base rate" rule does as well (0.71). The models are a triage aid for inspectors, not an automatic trigger.
@@ -63,7 +79,7 @@ matplotlib 3.11.2 and nbformat 5.11.1 on Windows 10. The PDF step uses headless 
 | Derived views | `city_table`, `city_by_food_item_mean_rel_price`, `item_week_dispersion` in `data/processed/m02/` |
 | Model-ready food table (provenance dropped, 0/1 dummies for province and item category) | `data/processed/m02/model_ready_food.parquet` |
 | Parser acceptance checks, per week | `data/processed/m02/acceptance_checks_by_week.csv` |
-| Correction note (the panel has 17 cities, not 7) | `reports/CORRECTION_2026-10-04_appendix_a_17_cities.md` |
+| Correction note (the panel has 17 cities, not 7) | `docs/updates.md` |
 
 ## Reproduce
 
@@ -99,4 +115,4 @@ The city-to-district alignment rules (Karachi as several districts; Islamabad an
 
 ## Correction to Milestone 01
 
-Milestone 01 reported a 7-city panel. The earlier parser read only the first of the three tables stacked in Appendix-A. The files built from that parse are kept as an audit trail: `data/processed/pbs_weekly_panel.csv`, `data/verification/pbs_verified_sample.csv` and the summaries derived from it, and `reports/FINAL_DATA_SCOPE_CHECK.md`. **Do not reuse them.** `reports/CORRECTION_2026-10-04_appendix_a_17_cities.md` explains what was wrong and what replaces it.
+Milestone 01 reported a 7-city panel. The earlier parser read only the first of the three tables stacked in Appendix-A. `docs/updates.md` explains what was wrong and what replaces it. The audit scripts, reports and derived data built from that parse were removed from the working tree because nothing in Milestones 02 or 03 reads them; they remain in the git history.

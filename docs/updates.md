@@ -1,5 +1,7 @@
 # Correction, 4 October 2026: PBS SPI Appendix-A covers 17 cities, not 7
 
+*Note: the scripts, reports and data files named below (`scripts/final_data_scope_check.py`, `reports/FINAL_DATA_SCOPE_CHECK.md`, `data/verification/`, `data/processed/pbs_weekly_panel.csv`) were removed from the working tree in the repository cleanup. They remain in the git history.*
+
 ## What was wrong
 
 `scripts/final_data_scope_check.py` reads Appendix-A through `first_a_item_block()`, which stops after the first table. Appendix-A is three tables stacked in one sheet. All three share the same 51 item rows:
@@ -16,7 +18,7 @@ That one parsing error affected three artefacts:
 2. `data/verification/pbs_verified_sample.csv` (16,380 rows) has three rows for each (week, city, item) key. All three blocks were read, but the first block's seven city names were stamped on every block, so the second "Islamabad" row is really Multan and the third is Bannu. Some rows are national summary columns. Milestone 01 explained 16,380 as 5,460 records times MIN/AVG/MAX; that reading was a coincidence and is wrong. The summaries derived from this file under `data/verification/` are contaminated.
 3. `data/processed/pbs_weekly_panel.csv` holds one week only (357 rows, 7 cities), and its lag and volatility columns are empty.
 
-None of these files has been deleted. They stay as the audit trail. **Do not reuse them.**
+These files were later removed from the working tree (see the note at the top). **Do not reuse them** if you restore them from git history.
 
 ## What replaces them
 
